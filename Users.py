@@ -91,7 +91,7 @@ def get_all():
     return jsonify(
         {
             "code": 404,
-            "message": "There are no Users."
+            "message": "There are no Users currently."
         }
     ), 404
 
@@ -136,14 +136,15 @@ def create_user(email):
     try:
         db.session.add(user)
         db.session.commit()
-    except:
+    except Exception as e:
         return jsonify(
             {
                 "code": 500,
                 "data": {
                     "email": email
                 },
-                "message": "An error occurred creating the user."
+                "message": "An error occured while creating user",
+                "error": str(e),
             }
         ), 500
 
@@ -205,8 +206,9 @@ def delete_user(email):
         db.session.rollback()
         return jsonify({
             "code": 500,
+            "data": {"user_email": email},
             "message": "An error occurred while deleting the user.",
-            "error": str(e)
+            "error": str(e),
         }), 500
 
     return jsonify({
