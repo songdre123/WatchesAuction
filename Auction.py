@@ -6,6 +6,18 @@ app = Flask(__name__)  # initialize a flask application
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Users'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+'''
+SQL Set-Up code
+CREATE TABLE Auction (
+    auction_id INT AUTO_INCREMENT PRIMARY KEY,
+    auction_item VARCHAR(255) NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    start_price FLOAT NOT NULL,
+    current_price FLOAT NOT NULL
+);
+
+'''
 
 db = SQLAlchemy(app)
 
@@ -101,7 +113,7 @@ def create_auction(auction_id):
     auction = Auction(auction_id, **data)
 
     try:
-        db.session.add(user)
+        db.session.add(auction)
         db.session.commit()
     except:
         return jsonify(
@@ -126,7 +138,7 @@ def create_auction(auction_id):
 def edit_auction(auction_id):
     auction = db.session.query(Auction).filter_by(auction_id=auction_id).first()
 
-    if not user:
+    if not auction:
         return jsonify({
             "code": 404,
             "message": "Auction not found."
