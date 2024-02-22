@@ -1,0 +1,201 @@
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)  # initialize a flask application
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Users'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
+db = SQLAlchemy(app)
+
+class User(db.Model):
+    __tablename__ = 'Users'
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    phone_number = db.Column(db.String(20))
+    first_name = db.Column(db.String(50))
+    last_name = db.Column(db.String(50))
+    gender = db.Column(db.String(1))
+    address = db.Column(db.String(255))
+    account_type = db.Column(db.String(50), nullable=False)
+    profile_picture = db.Column(db.String(255))
+    registration_date = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
+    account_status = db.Column(db.Integer, default=1)
+
+    def __init__(self, email, password, account_type, phone_number=None, first_name=None, last_name=None, date_of_birth=None, gender=None, address=None, profile_picture=None, account_status=1):
+        self.email = email
+        self.password = password
+        self.account_type = account_type
+        self.phone_number = phone_number
+        self.first_name = first_name
+        self.last_name = last_name
+        self.gender = gender
+        self.address = address
+        self.profile_picture = profile_picture
+        self.account_status = account_status
+
+    def json(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "password": self.password,
+            "phone_number": self.phone_number,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "gender": self.gender,
+            "address": self.address,
+            "account_type": self.account_type,
+            "profile_picture": self.profile_picture,
+            "registration_date": self.registration_date.strftime('%Y-%m-%d %H:%M:%S'),
+            "account_status": self.account_status
+        }
+
+
+
+# get all users
+@app.route('/user')
+def get_all():
+    Users = db.session.scalars(db.select(User)).all()
+
+    if len(Users):
+        return jsonify(
+            {
+                "code": 200,
+                "data": {
+                    "users": [user.json() for user in Users]
+                }
+            }
+        )
+    return jsonify(
+        {
+            "code": 404,
+            "message": "There are no Users."
+        }
+    ), 404
+
+
+# get specific user
+@app.route('/user/<string:email>')
+def find_by_email(email):
+    user = db.session.scalars(
+        db.select(User).filter_by(email=email).limit(1)).first()
+    if user:
+        return jsonify(
+            {
+                "code": 200,
+                "data": user.json()
+            }
+        )
+    return jsonify(
+        {
+            "code": 404,
+            "message": "User does not exist."
+        }
+    ), 404
+
+
+# create user
+@app.route('/user/<string:email>', methods=['POST'])
+def create_user(email):
+    if (db.session.scalars(db.select(User).filter_by(email=email).limit(1)).first()):
+        return jsonify(
+            {
+                "code": 400,
+                "data": {
+                    "email": email
+                },
+                "message": "Email already in use."
+            }
+        ), 400
+
+    data = request.get_json()
+    user = User(email, **data)
+
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except:
+        return jsonify(
+            {
+                "code": 500,
+                "data": {
+                    "email": email
+                },
+                "message": "An error occurred creating the user."
+            }
+        ), 500
+
+    return jsonify(
+        {
+            "code": 201,
+            "data": user.json()
+        }
+    ), 201
+
+#edit user data
+@app.route('/user/<string:email>', methods=['PUT'])
+def edit_user(email):
+    user = db.session.query(User).filter_by(email=email).first()
+
+    if not user:
+        return jsonify({
+            "code": 404,
+            "message": "User not found."
+        }), 404
+
+    data = request.get_json()
+    
+    # Update user attributes based on the provided data
+    for key, value in data.items():
+        setattr(user, key, value)
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "code": 500,
+            "message": "An error occurred while updating the user.",
+            "error": str(e)
+        }), 500
+
+    return jsonify({
+        "code": 200,
+        "data": user.json(),
+        "message": "User updated successfully."
+    }), 200
+
+#delete user
+@app.route('/user/<string:email>', methods=['DELETE'])
+def delete_user(email):
+    user = db.session.query(User).filter_by(email=email).first()
+
+    if not user:
+        return jsonify({
+            "code": 404,
+            "message": "User not found."
+        }), 404
+
+    try:
+        db.session.delete(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "code": 500,
+            "message": "An error occurred while deleting the user.",
+            "error": str(e)
+        }), 500
+
+    return jsonify({
+        "code": 200,
+        "message": "User deleted successfully."
+    }), 200
+
+
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True)
