@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import hashlib
 
 app = Flask(__name__)  # initialize a flask application
 
@@ -7,7 +8,22 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localh
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 '''
-SQL Set-Up code
+API Endpoints:
+1. GET /user - Get all users
+2. GET /user/<string:email> - Get a specific user
+3. POST /user/<string:email> - Create a user
+4. PUT /user/<string:email> - Edit a user
+5. DELETE /user/<string:email> - Delete a user
+6. POST /user/login/<string:email> - Check user password
+
+PORT: 5000
+DATABASE: Users
+TABLE: Users
+SQL Credentials: root:root
+SQL Port: 3306
+
+
+SQL Database creation code:
 CREATE TABLE Users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
@@ -22,8 +38,18 @@ CREATE TABLE Users (
     registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     account_status INT DEFAULT 1
 );
-
 '''
+
+
+
+def hash_password(password):
+    # Hash the password using SHA-256
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    return hashed_password
+
+def check_password(password, hashed_password):
+    # Hash the provided password and check if it matches the stored hashed password
+    return hashed_password == hashlib.sha256(password.encode()).hexdigest()
 
 
 db = SQLAlchemy(app)
@@ -72,6 +98,9 @@ class User(db.Model):
             "account_status": self.account_status
         }
 
+    def getPasswordHash(self):
+        return self.password
+
 
 
 # get all users
@@ -115,6 +144,36 @@ def find_by_email(email):
         }
     ), 404
 
+# check user password
+@app.route('/user/login/<string:email>', methods=['POST'])
+def login(email):
+    user = db.session.scalars(
+        db.select(User).filter_by(email=email).limit(1)).first()
+    if user:
+        data = request.get_json()
+        password = data['password']
+        if check_password(password,user.getPasswordHash()):
+            return jsonify(
+                {
+                    "code": 200,
+                    "message": "User authenticated.",
+                    "data": user.json()
+                }
+            )
+        else:
+            return jsonify(
+                {
+                    "code": 401,
+                    "message": "Incorrect password."
+                }
+            ), 401
+    return jsonify(
+        {
+            "code": 404,
+            "message": "User does not exist."
+        }
+    ), 404
+
 
 # create user
 @app.route('/user/<string:email>', methods=['POST'])
@@ -131,6 +190,7 @@ def create_user(email):
         ), 400
 
     data = request.get_json()
+    data['password'] = hash_password(data['password'])
     user = User(email, **data)
 
     try:
