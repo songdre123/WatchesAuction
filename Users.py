@@ -6,6 +6,25 @@ app = Flask(__name__)  # initialize a flask application
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Users'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+'''
+SQL Set-Up code
+CREATE TABLE Users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(20),
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    gender CHAR(1),
+    address VARCHAR(255),
+    account_type VARCHAR(50) NOT NULL,
+    profile_picture VARCHAR(255),
+    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    account_status INT DEFAULT 1
+);
+
+'''
+
 
 db = SQLAlchemy(app)
 
