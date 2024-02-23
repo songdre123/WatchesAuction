@@ -55,7 +55,11 @@ class Auction(db.Model):
             "current_price": self.current_price
         }
 
-
+def store_winner(auction_id, auction_winner_id):
+    auction = db.session.query(Auction).filter_by(auction_id=auction_id).first()
+    auction.auction_winner_id = auction_winner_id
+    auction.auction_status = 0
+    db.session.commit()
 
 # get all auctions
 @app.route('/auction')
