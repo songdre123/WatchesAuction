@@ -115,14 +115,15 @@ def create_auction(auction_id):
     try:
         db.session.add(auction)
         db.session.commit()
-    except:
+    except Exception as e:
         return jsonify(
             {
                 "code": 500,
                 "data": {
                     "auction_id": auction_id
                 },
-                "message": "An error occurred creating the auction."
+                "message": "An error occurred creating the auction.",
+                "error": str(e),
             }
         ), 500
 
@@ -156,6 +157,7 @@ def edit_auction(auction_id):
         db.session.rollback()
         return jsonify({
             "code": 500,
+            "data": {"auction_id": auction_id},
             "message": "An error occurred while updating the auction.",
             "error": str(e)
         }), 500
@@ -184,6 +186,7 @@ def delete_auction(auction_id):
         db.session.rollback()
         return jsonify({
             "code": 500,
+            "data": {"auction_id": auction_id},
             "message": "An error occurred while deleting the auction.",
             "error": str(e)
         }), 500
