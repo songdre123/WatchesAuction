@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 app = Flask(__name__)  # initialize a flask application
 
@@ -15,6 +16,8 @@ CREATE TABLE Auction (
     end_time TIMESTAMP NOT NULL,
     start_price FLOAT NOT NULL,
     current_price FLOAT NOT NULL
+    auction_winner_id INT,
+    auction_status INT DEFAULT 1
 );
 
 '''
@@ -30,6 +33,8 @@ class Auction(db.Model):
     end_time = db.Column(db.TIMESTAMP)
     start_price = db.Column(db.Float)
     current_price = db.Column(db.Float)
+    auction_winner_id = db.Column(db.Integer)
+    auction_status = db.Column(db.Integer, default=1)
 
 
     def __init__(self, auction_id,auction_item, start_time, end_time, start_price, current_price):
@@ -111,7 +116,36 @@ def create_auction(auction_id):
 
     data = request.get_json()
     auction = Auction(auction_id, **data)
-
+    if auction.start_time > auction.end_time:
+        return jsonify(
+            {
+                "code": 400,
+                "data": {
+                    "auction_id": auction_id
+                },
+                "message": "Start time is after end time."
+            }
+        ), 400
+    if auction.start_price < 0:
+        return jsonify(
+            {
+                "code": 400,
+                "data": {
+                    "auction_id": auction_id
+                },
+                "message": "Start price cannot be negative."
+            }
+        ), 400
+    if auction.start_time < datetime.now():
+        return jsonify(
+            {
+                "code": 400,
+                "data": {
+                    "auction_id": auction_id
+                },
+                "message": "Start time must be later than the current time."
+            }
+        ), 400
     try:
         db.session.add(auction)
         db.session.commit()
@@ -143,6 +177,11 @@ def edit_auction(auction_id):
             "code": 404,
             "message": "Auction not found."
         }), 404
+    if auction.auction_status == 0:
+        return jsonify({
+            "code": 400,
+            "message": "Auction is closed."
+        }), 400
 
     data = request.get_json()
     
