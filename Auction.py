@@ -18,6 +18,10 @@ CREATE TABLE Auction (
     current_price FLOAT NOT NULL
     auction_winner_id INT,
     auction_status INT DEFAULT 1
+    watch_condition VARCHAR(255) NOT NULL,
+    watch_brand VARCHAR(255) NOT NULL,
+    watch_box_present BOOLEAN NOT NULL,
+    watch_papers_present BOOLEAN NOT NULL,
 );
 
 '''
@@ -35,15 +39,26 @@ class Auction(db.Model):
     current_price = db.Column(db.Float)
     auction_winner_id = db.Column(db.Integer)
     auction_status = db.Column(db.Integer, default=1)
+    watch_condition = db.Column(db.String(255))
+    watch_brand = db.Column(db.String(255))
+    watch_box_present = db.Column(db.Boolean)
+    watch_papers_present = db.Column(db.Boolean)
 
 
-    def __init__(self, auction_id,auction_item, start_time, end_time, start_price, current_price):
+
+    def __init__(self, auction_id,auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_condition, watch_brand, watch_box_present, watch_papers_present):
         self.auction_id = auction_id
         self.auction_item = auction_item
         self.start_time = start_time
         self.end_time = end_time
         self.start_price = start_price
         self.current_price = current_price
+        self.auction_winner_id = auction_winner_id
+        self.auction_status = auction_status
+        self.watch_condition = watch_condition
+        self.watch_brand = watch_brand
+        self.watch_box_present = watch_box_present
+        self.watch_papers_present = watch_papers_present
 
     def json(self):
         return {
@@ -52,7 +67,14 @@ class Auction(db.Model):
             "start_time": self.start_time.strftime('%Y-%m-%d %H:%M:%S'),
             "end_time": self.end_time.strftime('%Y-%m-%d %H:%M:%S'),
             "start_price": self.start_price,
-            "current_price": self.current_price
+            "current_price": self.current_price,
+            "auction_winner_id": self.auction_winner_id,
+            "auction_status": self.auction_status,
+            "watch_condition": self.watch_condition,
+            "watch_brand": self.watch_brand,
+            "watch_box_present": self.watch_box_present,
+            "watch_papers_present": self.watch_papers_present
+
         }
 
 def store_winner(auction_id, auction_winner_id):
