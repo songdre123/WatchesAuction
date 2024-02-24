@@ -68,7 +68,7 @@ notification_header={
 }
 
 notification_body={
-    "outbid":"has been outbidded by someone else in the auction. Do log into Watch Auction to bid for a higher price. You noose u lose bitch ", 
+    "outbid":"your item has been outbidded by someone else in the auction. Do log into Watch Auction to bid for a higher price. You noose u lose bitch ", 
     "winandpayremind":"uh uh u win liao but then horh u need to pay la. uh uh O$P$. no money no talk. one hand money, one hand your goods",
     "payremind":"eh i tell u to pay right, why still havent pay later zavier come find u arh",
     "paysucess":"very very good u have successfull make the payment. but u jus to schedule the meeting. ",
