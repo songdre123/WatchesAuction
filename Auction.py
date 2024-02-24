@@ -260,6 +260,46 @@ def delete_auction(auction_id):
         "code": 200,
         "message": "Auction deleted successfully."
     }), 200
+#function that closes auction when the passed time is greater than the end time
+def close_auction():
+    auctions = db.session.query(Auction).filter(Auction.end_time < datetime.now()).all()
+    for auction in auctions:
+        auction.auction_status = 0
+        db.session.commit()
+        #store_winner(auction.auction_id, auction.auction_winner_id)
+    return jsonify({
+        "code": 200,
+        "message": "Auction closed successfully."
+    }), 200
+def open_auction():
+    auctions = db.session.query(Auction).filter(Auction.start_time < datetime.now()).all()
+    for auction in auctions:
+        auction.auction_status = 1
+        db.session.commit()
+    return jsonify({
+        "code": 200,
+        "message": "Auction opened successfully."
+    }), 200
+#run the close auction function every 5 minutes
+@app.route('/close_auction', methods=['POST'])
+def close_auction():
+    close_auction()
+    return jsonify({
+        "code": 200,
+        "message": "Auction closed successfully."
+    }), 200
+#run the open auction function every 5 minutes
+@app.route('/open_auction', methods=['POST'])
+def open_auction():
+    open_auction()
+    return jsonify({
+        "code": 200,
+        "message": "Auction opened successfully."
+    }), 200
+
+
+
+
 
 
 
