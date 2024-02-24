@@ -78,7 +78,7 @@ def create_queues(channel):
 def create_notification_queue(channel):
     print('amqp_setup:create_notification_queue')
     e_queue_name = 'Notification'
-    channel.queue_declare(queue=e_queue_name, durable=True, routing_key="notification" ) # 'durable' makes the queue survive broker restarts
+    channel.queue_declare(queue=e_queue_name, durable=True ) # 'durable' makes the queue survive broker restarts
     #bind Error queue
     channel.queue_bind(exchange=exchangename, queue=e_queue_name)
         # bind the queue to the exchange via the key
