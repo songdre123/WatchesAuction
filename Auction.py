@@ -4,7 +4,7 @@ from datetime import datetime
 
 app = Flask(__name__)  # initialize a flask application
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Users'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Auction'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 '''
@@ -106,10 +106,10 @@ def get_all():
 
 
 # get specific auction
-@app.route('/auction/<string:auction_id>')
+@app.route('/auction/<int:auction_id>')
 def find_by_auction_id(auction_id):
     auction = db.session.scalars(
-        db.select(auction).filter_by(auction_id=auction_id).limit(1)
+        db.select(Auction).filter_by(auction_id=auction_id).limit(1)
     ).first()
     if auction:
         return jsonify(
@@ -175,14 +175,15 @@ def create_auction(auction_id):
     try:
         db.session.add(auction)
         db.session.commit()
-    except:
+    except Exception as e:
         return jsonify(
             {
                 "code": 500,
                 "data": {
                     "auction_id": auction_id
                 },
-                "message": "An error occurred creating the auction."
+                "message": "An error occurred creating the auction.",
+                "error": str(e),
             }
         ), 500
 
@@ -221,6 +222,7 @@ def edit_auction(auction_id):
         db.session.rollback()
         return jsonify({
             "code": 500,
+            "data": {"auction_id": auction_id},
             "message": "An error occurred while updating the auction.",
             "error": str(e)
         }), 500
@@ -249,6 +251,7 @@ def delete_auction(auction_id):
         db.session.rollback()
         return jsonify({
             "code": 500,
+            "data": {"auction_id": auction_id},
             "message": "An error occurred while deleting the auction.",
             "error": str(e)
         }), 500
