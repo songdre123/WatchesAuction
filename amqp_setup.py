@@ -1,11 +1,22 @@
+"""
+this file will be amended in the future if there is more use cases for ampq
+for now is just notification - kaijie
+
+exchange-
+1) notification_direct
+
+queue-
+1) Notification
+"""
+
 import time
 import pika
 from os import environ
 
 hostname = "localhost" # default hostname
 port = 5672            # default port
-exchangename = "order_topic" # exchange name
-exchangetype = "topic" # - use a 'topic' exchange to enable interaction direct fanout
+exchangename = "notification_direct" # exchange name
+exchangetype = "direct" # - use a 'topic' exchange to enable interaction direct fanout
 
 # Instead of hardcoding the values, we can also get them from the environ as shown below
 # hostname = environ.get('hostname') #localhost
@@ -60,25 +71,16 @@ def create_channel(connection):
 #function to create queues
 def create_queues(channel):
     print('amqp_setup:create queues')
-    create_error_queue(channel)
-    create_activity_log_queue(channel)
+    create_notification_queue(channel)
 
-# function to create Activity_Log queue  mj
-def create_activity_log_queue(channel):
-    print('amqp_setup:create_activity_log_queue')
-    a_queue_name = 'Activity_Log'
-    channel.queue_declare(queue=a_queue_name, durable=True) # 'durable' makes the queue survive broker restarts
-    channel.queue_bind(exchange=exchangename, queue=a_queue_name, routing_key='#')
-        # bind the queue to the exchange via the key
-        # 'routing_key=#' => any routing_key would be matched
-    
+
 # function to create Error queue
-def create_error_queue(channel):
-    print('amqp_setup:create_error_queue')
-    e_queue_name = 'Error'
-    channel.queue_declare(queue=e_queue_name, durable=True) # 'durable' makes the queue survive broker restarts
+def create_notification_queue(channel):
+    print('amqp_setup:create_notification_queue')
+    e_queue_name = 'Notification'
+    channel.queue_declare(queue=e_queue_name, durable=True, routing_key="notification" ) # 'durable' makes the queue survive broker restarts
     #bind Error queue
-    channel.queue_bind(exchange=exchangename, queue=e_queue_name, routing_key='*.error')
+    channel.queue_bind(exchange=exchangename, queue=e_queue_name)
         # bind the queue to the exchange via the key
         # any routing_key with two words and ending with '.error' will be matched
 
