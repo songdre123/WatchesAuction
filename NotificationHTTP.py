@@ -28,7 +28,7 @@ CREATE TABLE Notification(
     id INT AUTO_INCREMENT PRIMARY KEY,
     recipient_id INT NOT NULL,
     auction_id INT,
-    notification_type VARCHAR(50) NOT NULL COMMENT '(outbid, winandpayremind, payremind, paysucess,rollbackandpayremind)',
+    notification_type VARCHAR(50) NOT NULL COMMENT '(outbid, winandpayremind, paysucess,rollbackandpayremind)',
     time_sent TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_unread INT DEFAULT 1
 );
@@ -36,8 +36,7 @@ CREATE TABLE Notification(
 scenario when user will receive the notification 
 1) outbid- when someone out bidded the customer (highest bid changed). send to previous person with highest bid 
 2) winandpayremind/rollbackandpayremind- when the person win the bid and it will tell the user to pay 
-3) payremind- notify user to pay 
-4) paysucess-notify user when payment is successful 
+3) paysucess-notify user when payment is successful 
 '''
 ########## initiate flask ##########
 app = Flask(__name__)  # initialize a flask application
@@ -62,7 +61,6 @@ mail=Mail(app)
 notification_header={
     "outbid":"Out bidded on Watch Auction online platform", 
     "winandpayremind":"Watch Auction online platform",
-    "payremind":"Reminder to pay for your item",
     "paysucess":"Payment success on Watch Auction online platform",
     "rollbackandpayremind":"Watch Auction online platform"
 }
@@ -70,9 +68,19 @@ notification_header={
 notification_body={
     "outbid":"your item has been outbidded by someone else in the auction. Do log into Watch Auction to bid for a higher price. You noose u lose bitch ", 
     "winandpayremind":"uh uh u win liao but then horh u need to pay la. uh uh O$P$. no money no talk. one hand money, one hand your goods",
-    "payremind":"eh i tell u to pay right, why still havent pay later zavier come find u arh",
     "paysucess":"very very good u have successfull make the payment. but u jus to schedule the meeting. ",
     "rollbackandpayremind":"hello even since u have lost the auction but the previous person zao liao. so now u the win la. okay enough talk O$P$"
+}
+
+
+notification_body_real={
+    "outbid":"The item that you have recently bidded for has been outbidded by an annoymous bidder. Do log into our Watch Auction Online Platform to place a higher bid. \n \n Thank you and good luck on your bid \n \n Best Regards, \n Watch Auction", 
+
+    "winandpayremind":"Congratulation on winning the bid! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.\n \n Thank you for dealing with Watch Auction Online platform. \n \n Best Regards, \n Watch Auction",
+
+    "paysucess":"We have sucessfully receive your payment for the item. Do log into our Watch Auction Online Platform to schedule a timing for the collection of the watch! \n \n Thank you for dealing with Watch Auction Online platform. \n \n Best Regards, \n Watch Auction",
+
+    "rollbackandpayremind":"Congratulation on winning the bid! As the highest bidder has given up the offer, the item will be offered to you! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.\n \n Thank you for dealing with Watch Auction Online platform. \n \n Best Regards, \n Watch Auction"
 }
 
 
@@ -202,7 +210,39 @@ def check_user_and_auction(userID,auctionID):
         return True
     return False
 
+"""
+{
+    "recipient": {
+        "code": 200,
+        "data": {
+            "account_status": 1,
+            "account_type": "customer",
+            "address": "123 Street,City",
+            "email": "kaijie.wang.2022@smu.edu.sg",
+            "first_name": "Kaijie",
+            "gender": "M",
+            "id": 1,
+            "last_name": "Wang",
+            "password": "password",
+            "phone_number": "1234567890",
+            "profile_picture": "https://example.com/profile.jpg",
+            "registration_date": "2024-02-24 10:19:27"
+            }
+        },
+        "auction": {
+            "code": 200,
+            "data": {
+                "auction_id": 1,
+                "auction_item": "Watch",
+                "current_price": 120.0,
+                "end_time": "2024-02-23 12:00:00",
+                "start_price": 100.0,
+                "start_time": "2024-02-23 10:00:00"
+                }
+            },
+        "type": "outbid"
 
+    }"""
 #POST /notification/sendEmail - sending a email to the receipient regarding update on his bid
 @app.route('/notification/sendEmail', methods=['POST'])
 def sendEmail():
@@ -213,7 +253,7 @@ def sendEmail():
     sender_email = "watchauctiononlineplatform@outlook.com"
     recipient_email =  email_info["recipient"]["data"]["email"]
     # print(recipient_email)
-    subject = notification_header[email_info["type"]]
+    subject = notification_header[email_info["type"]]+"for item: "+email_info["auction"]["data"]["auction_item"]
     print(subject)
     message = notification_body[email_info["type"]]
     print(message)

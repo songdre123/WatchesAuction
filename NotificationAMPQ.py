@@ -78,7 +78,7 @@ def processNotif(notif):
     
         #find the item name 
     aution_id=notif["recipient_id"]
-    specify_auction_url= f"{user_url}/{aution_id}"
+    specify_auction_url= f"{auction_url}/{aution_id}"
     auction=invoke_http(specify_auction_url,method="GET")
 
     email_info={
