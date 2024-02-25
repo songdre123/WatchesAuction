@@ -8,6 +8,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localh
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 '''
+#auction closed = 0
+#auction open = 1
+
+
 SQL Set-Up code
 CREATE TABLE Auction (
     auction_id INT AUTO_INCREMENT PRIMARY KEY,
