@@ -1,6 +1,3 @@
-from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
-
 from invokes import invoke_http
 import amqp_connection
 import json
@@ -11,28 +8,18 @@ from invokes import invoke_http
 '''
 Functions (RabbitMQ)
 1) receiveNotification- RabbitMQ consumer
-1) callback(channel, method, properties, body)-function to call when there is a message published to notification
-2) processNotif(recipient_id,auction_id,notification_type ) - process the notification received from the callback function 
-3) customiseNotif(email, aution_item, notification_type) - send the notification through email 
+2) callback(channel, method, properties, body)-function to call when there is a message published to notification
+3) processNotif(recipient_id,auction_id,notification_type ) - process the notification received from the callback function 
 
 
-scenario when user will receive the notification 
-1) when someone out bidded the customer (highest bid changed). send to previous person with highest bid 
-2) when the person win the bid and it will tell the user to pay 
-3) notify user to pay 
-4) notify user when payment is successful 
+
+scenario when user will receive the notification (notification Type)
+1) outbid- when someone out bidded the customer (highest bid changed). send to previous person with highest bid 
+2) winandpayremind/rollbackandpayremind- when the person win the bid and it will tell the user to pay 
+3) payremind- notify user to pay 
+4) paysucess-notify user when payment is successful 
 
 '''
-########## different notification ##########
-notification_type={
-    "outbid":"has been outbidded by someone else in the auction. Do log into Watch Auction to bid for a higher price. You noose u lose bitch ", 
-    "winandpayremind":"uh uh u win liao but then horh u need to pay la. uh uh O$P$. no money no talk. 一手交钱，一手交货",
-    "payremind":"eh i tell u to pay right, why still havent pay later zavier come find u arh",
-    "paysucess":"very very good u have successfull make the payment. but u jus to schedule the meeting. ",
-    "rollbackandpayremind":"hello even since u have lost the auction but the previous person zao liao. so now u the win la. okay enough talk O$P$"
-}
-
-
 ########## URL ##########
 user_url="http://localhost:5000/user"
 auction_url="http://localhost:5001/auction"
@@ -42,6 +29,7 @@ notification_url="http://localhost:5004/notification"
 ########## For RabbitMQ ##########
 e_queue_name = 'Notification'
 
+#1) receiveNotification- RabbitMQ consumer
 def receiveNotification(channel):
     try:
         # set up a consumer and start to wait for coming messages
@@ -65,47 +53,45 @@ body json-
     notification_type: notif type (string)  <- must correspond to database shown above
 }
 """
+#2) callback(channel, method, properties, body)-function to call when there is a message published to notification
 #this function create a log in notification database and send the email to user regarding specific message
 def callback(channel, method, properties, body): 
     notif = json.loads(body) # notif will be in json format like the one in the docstring
-    print("--JSON:", notif)
+    # print("--JSON:", notif)
 
     #log the notification into data
     notification_response=invoke_http("http://localhost:5004/notification/createNotification", method="POST",json=notif)
     if notification_response["code"] not in range(200,300):
+        print(notification_response)
         print("unable to add into database")
         return
     
     #process to send the notiification to that email  
+    processNotif(notif)
+
+#3) processNotif(recipient_id,auction_id,notification_type ) - process the notification received from the callback function 
+def processNotif(notif):
         #get the specify user email
     recipient_id=notif["recipient_id"]
     specify_user_url= f"{user_url}/{recipient_id}"
     user=invoke_http(specify_user_url,method="GET")
     
-
         #find the item name 
     aution_id=notif["recipient_id"]
-    specify_auction_url= f"{user_url}/{aution_id}"
+    specify_auction_url= f"{auction_url}/{aution_id}"
     auction=invoke_http(specify_auction_url,method="GET")
 
-        #find notification type
-    notif_type=notification_response["data"]["notification_type"]
-    
-    #proceed to send out the email
-    is_send=processNotif(user,auction,notif_type)
-    # print()
+    email_info={
+        "recipient":user,
+        "auction":auction,
+        "type":notif["notification_type"]
+    }
 
-
-def processNotif(user,auction,notif_type):
-    recipient_email=user["data"]["email"]
-    auction_name=auction["data"]["auction_item"]
-    notification_message=notification_type[notif_type]
-
-
-
-
-
-
+    print("information:", email_info )
+    #send user email and the notification body 
+    invoke_http("http://localhost:5004/notification/sendEmail",method='POST', json=email_info)
+    print("email has been sent")
+  
 
 if __name__ == "__main__": # execute this program only if it is run as a script (not by 'import')    
     print("Notification microservice: Getting Connection")
