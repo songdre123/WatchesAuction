@@ -11,6 +11,8 @@ const vuetify = createVuetify({
   directives,
 })
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { fas as all } from '@fortawesome/free-solid-svg-icons' // Adjust this import based on your specific needs
