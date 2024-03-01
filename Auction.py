@@ -37,6 +37,9 @@ CREATE TABLE Auction (
     watch_brand VARCHAR(255) NOT NULL,
     watch_box_present BOOLEAN NOT NULL,
     watch_papers_present BOOLEAN NOT NULL,
+    watch_image1 VARCHAR(255) NOT NULL,
+    watch_image2 VARCHAR(255) NOT NULL,
+    watch_image3 VARCHAR(255) NOT NULL
 );
 
 '''
@@ -58,12 +61,15 @@ class Auction(db.Model):
     watch_brand = db.Column(db.String(255))
     watch_box_present = db.Column(db.Boolean)
     watch_papers_present = db.Column(db.Boolean)
+    watch_image1 = db.Column(db.String(255))
+    watch_image2 = db.Column(db.String(255))
+    watch_image3 = db.Column(db.String(255))
+
 
 
 
     def __init__(self, auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_condition, watch_brand, watch_box_present, watch_papers_present):
 
-        self.auction_id = auction_id
         self.auction_item = auction_item
         self.start_time = start_time
         self.end_time = end_time
@@ -75,6 +81,7 @@ class Auction(db.Model):
         self.watch_brand = watch_brand
         self.watch_box_present = watch_box_present
         self.watch_papers_present = watch_papers_present
+        
 
     def json(self):
         return {
@@ -89,7 +96,11 @@ class Auction(db.Model):
             "watch_condition": self.watch_condition,
             "watch_brand": self.watch_brand,
             "watch_box_present": self.watch_box_present,
-            "watch_papers_present": self.watch_papers_present
+            "watch_papers_present": self.watch_papers_present,
+            "watch_image1": self.watch_image1,
+            "watch_image2": self.watch_image2,
+            "watch_image3": self.watch_image3
+
 
         }
 
