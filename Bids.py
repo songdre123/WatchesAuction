@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
-from Auction import Auction
-from Users import User
 from datetime import datetime
 
 app = Flask(__name__)
@@ -35,11 +33,11 @@ class Bids(db.Model):
     bid_amount = db.Column(db.Float, nullable=False)
     auction_id = db.Column(
         db.Integer,
-        db.ForeignKey("Auction.auction_id", ondelete="CASCADE"),
+        primary_key=True,
         nullable=False,
     )
     user_id = db.Column(
-        db.Integer, db.ForeignKey("User.id", ondelete="CASCADE"), nullable=False
+        db.Integer, primary_key=True, nullable=False
     )
     bid_time = db.Column(db.TIMESTAMP, nullable=False)
 

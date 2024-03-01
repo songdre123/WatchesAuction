@@ -42,8 +42,21 @@
         Timely Watches
       </h4>
     </v-app-bar-title>
-    <v-badge v-if="notificationCount > 0" :content="notificationCount">
-      <v-btn density="compact" icon="mdi-bell-outline"></v-btn>
+    <v-badge v-if="notifications.length > 0" :content="notifications.length">
+      <v-menu :location="start">
+        <template v-slot:activator="{props}">
+          <v-btn density="compact" v-bind=props icon="mdi-bell-outline"></v-btn>
+        </template>
+
+        <V-list>
+          <v-list-item v-for="(alert, idx) in notifications" :key="idx">
+            <v-list-item-subtitle>
+              {{ alert }}
+            </v-list-item-subtitle>
+          </v-list-item>
+        </V-list>
+
+      </v-menu>
     </v-badge>
 
     <v-btn v-else density="compact" icon="mdi-bell-outline"></v-btn>
@@ -55,17 +68,22 @@
 <script>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiWatch } from '@mdi/js';
+import { VList } from 'vuetify/lib/components/index.mjs';
 
 export default {
 	name: "my-cool-component",
 	components: {
-		SvgIcon
-	},
+    SvgIcon,
+    VList
+},
 	data() {
 		return {
   path1: mdiWatch,
   drawer: null,
-  notificationCount: 2,
+  notifications: [
+    'Your bid at Auction Ref: 1593478229v has beeen replaced',
+    'Your won Auction Ref: 10383902829v',
+  ]
 		}
 	},
 }
