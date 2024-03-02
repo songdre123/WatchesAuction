@@ -15,6 +15,9 @@ import { registerPlugins } from '@/plugins'
 
 const app = createApp(App)
 
+window.global = window;
+
+
 registerPlugins(app)
 
 app.mount('#app')

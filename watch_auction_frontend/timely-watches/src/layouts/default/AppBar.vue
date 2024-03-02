@@ -15,6 +15,7 @@
             prepend-icon="mdi-account"
             title="Account"
             value="account"
+            to="/account"
           ></v-list-item>
           <v-list-item
             prepend-icon="mdi-gavel"
@@ -37,10 +38,12 @@
   <v-app-bar :elevation="2" :height="100">
     <v-btn @click.stop="drawer = !drawer" density="compact" icon="mdi-menu"></v-btn>
     <v-app-bar-title class="topbar">
-      <h4 class="header">
-        <svg-icon type="mdi" :path="path1"></svg-icon>
-        Timely Watches
-      </h4>
+      <router-link to="/home">
+        <h4 class="header">
+          <svg-icon type="mdi" :path="path1"></svg-icon>
+          Timely Watches
+        </h4>
+      </router-link>
     </v-app-bar-title>
     <v-badge v-if="notifications.length > 0" :content="notifications.length">
       <v-menu :location="start">
