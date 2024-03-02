@@ -21,6 +21,17 @@ const routes = [
       },
     ],
   },
+  {
+    path: '/account',
+    component: () => import('@/layouts/default/Default.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Account',
+        component: () => import('@/views/Account.vue'),
+      },
+    ],
+  }
 ]
 
 const router = createRouter({
