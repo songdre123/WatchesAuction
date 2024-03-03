@@ -7,16 +7,16 @@
             cover>
         </v-img>
         <v-card-title class="title">
-            Rolex Watch
+            {{ title }}
         </v-card-title>
         <v-card-subtitle class="content">
-            <b>Ref</b>: 156940390z
+            <b>Ref</b>: {{ referenceNo }}
         </v-card-subtitle>
         <v-card-text class="content">
-            Date: 24/03 16:00 GMT
+            Date: {{ date }}
         </v-card-text>
         <v-card-text class="content">
-            Opening: $80000 SGD
+            Opening: ${{ minBid }} SGD
         </v-card-text>
 
         <v-overlay :model-value="isHovering" class="align-center justify-center" contained>
@@ -28,9 +28,9 @@
 </template>
 
 <script>
-    // export default {
-    //     props: ['img_src', 'card_titles', '']
-    // }
+    export default {
+        props: ['title', 'referenceNo', 'date', 'minBid']
+    }
 </script>
 
 <style scoped>

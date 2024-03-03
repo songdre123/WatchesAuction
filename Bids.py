@@ -9,44 +9,38 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("BidsURL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 """
-SQL Set-Up code
-CREATE TABLE Bids (
-    bid_id INT AUTO_INCREMENT PRIMARY KEY,
-    bid_amount FLOAT NOT NULL,
-    auction_id INT,
-    user_id INT,
-    bid_time TIMESTAMP NOT NULL,
-    FOREIGN KEY (auction_id) REFERENCES Auction(auction_id),
-    FOREIGN KEY (user_id) REFERENCES Users(id)
-);
+API Endpoints:
+1. GET /bid - Get all bids
+2. GET /bid/all/<int:auction_id> - Get all bids from a specific auction
+3. GET /bid/highest/<int:auction_id> - Get highest bid from a specific auction
+4. POST /bid/<int:bid_id> - Create a bid
+5. PUT /bid/<int:bid_id> - Edit a bid
+6. DELETE /bid/<int:bid_id> - Delete a user
 
+PORT: 5002
+DATABASE: bids
+TABLE: Bids
+SQL Credentials: root:password
+SQL Port: 3306
 """
-
 
 db = SQLAlchemy(app)
 
 
 class Bids(db.Model):
-    __tablename__ = "Bid"
+    __tablename__ = "Bids"
 
     bid_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     bid_amount = db.Column(db.Float, nullable=False)
-    auction_id = db.Column(
-        db.Integer,
-        primary_key=True,
-        nullable=False,
-    )
-    user_id = db.Column(
-        db.Integer, primary_key=True, nullable=False
-    )
+    auction_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, nullable=False)
     bid_time = db.Column(db.TIMESTAMP, nullable=False)
 
-    def __init__(self, bid_id, bid_amount, auction_id, user_id, bid_time):
-        self.bid_id = (bid_id,)
-        self.bid_amount = (bid_amount,)
-        self.auction_id = (auction_id,)
-        self.user_id = (user_id,)
-        self.bid_time = (bid_time,)
+    def __init__(self, bid_amount, auction_id, user_id, bid_time):
+        self.bid_amount = bid_amount
+        self.auction_id = auction_id
+        self.user_id = user_id
+        self.bid_time = bid_time
 
     def json(self):
         return {
@@ -61,9 +55,11 @@ class Bids(db.Model):
 # get all bids
 @app.route("/bid")
 def get_all_bids():
-    Bids = db.session.scalars(db.select(Bids)).all()
-    if len(Bids):
-        return jsonify({"code": 200, "data": {"bids": [bid.json() for bid in Bids]}})
+    bids_data = Bids.query.all()
+    if len(bids_data):
+        return jsonify(
+            {"code": 200, "data": {"bids": [bid.json() for bid in bids_data]}}
+        )
     return jsonify({"code": 404, "message": "There are no Bids"}), 404
 
 
@@ -87,11 +83,10 @@ def create_bid(bid_id):
 
     # Create a new Bid object and add it to the database session
     new_bid = Bids(
-        bid_id=bid_id,
         bid_amount=bid_amount,
         auction_id=auction_id,
         user_id=user_id,
-        bid_time=bid_time,
+        bid_time=bid_time,  # not necessary since bid_time will be auto based on the current datetime
     )
     db.session.add(new_bid)
 
@@ -217,7 +212,7 @@ def delete_bid(bid_id):
 
 
 # get highest bid by auction_id, filter by earliest timestamp if there are more than one row for highest bid
-@app.route("/bid/<int:auction_id>")
+@app.route("/bid/highest/<int:auction_id>")
 def get_highest_bid(auction_id):
 
     highest_bid_amount = (
@@ -277,3 +272,36 @@ def get_highest_bid(auction_id):
             jsonify({"code": 500, "message": f"An error occurred: {str(e)}"}),
             500,
         )
+
+
+@app.route("/bid/all/<int:auction_id>")
+def get_all_bids_from_auction(auction_id):
+
+    bids_from_auction = Bids.query.filter_by(auction_id=auction_id).all()
+
+    # Check if any bids were found for the specified auction ID
+    if bids_from_auction:
+        # If bids were found, return them in the response
+        bids_data = [
+            {
+                "bid_id": bid.bid_id,
+                "bid_amount": bid.bid_amount,
+                "auction_id": bid.auction_id,
+                "user_id": bid.user_id,
+                "bid_time": bid.bid_time,
+            }
+            for bid in bids_from_auction
+        ]
+        return jsonify({"code": 200, "data": bids_data})
+    else:
+        # If no bids were found, return a 404 response
+        return (
+            jsonify(
+                {"code": 404, "message": "No bids found for the specified auction ID"}
+            ),
+            404,
+        )
+
+if __name__ == "__main__":
+    print("This is flask for " + os.path.basename(__file__) + ": manage orders ...")
+    app.run(host="0.0.0.0", port=5002, debug=True)

@@ -26,11 +26,14 @@
             title="Bids"
             value="bids"
           ></v-list-item>
+
+          <router-link to="/">
           <v-list-item
             prepend-icon="mdi-door"
             title="Logout"
             value="logout"
           ></v-list-item>
+          </router-link>
         </v-list>
 
     </v-navigation-drawer>

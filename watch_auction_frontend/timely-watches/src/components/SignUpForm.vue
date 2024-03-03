@@ -1,5 +1,20 @@
 <template>
   <form @submit.prevent="handleSubmit">
+
+    <div class="header-form">
+      <h1>Login</h1>
+    </div>
+
+    <div class="name-fields">
+      <label>First Name:</label>
+      <input type="text" v-model="firstName" required />
+
+    <div class="horizontal-space"></div>
+      
+      <label>Last Name:</label>
+      <input type="text" v-model="lastName" required />
+    </div>
+
     <label>Email:</label>
     <input type="email" v-model="email" required />
 
@@ -7,15 +22,12 @@
     <input type="password" v-model="password" required />
     <div v-if="passwordError" class="error">{{ passwordError }}</div>
 
+    <label>Phone Number:</label>
+    <input type="text" v-model="phoneNumber" required pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="e.g., 94204837" />
+
     <label>Account Type:</label>
     <v-select v-model="accountType" :items="accountTypes">
     </v-select>
-
-    <label>Skills:</label>
-    <input type="text" v-model="tempSkill" @keyup.enter="addSkill"/>
-    <div v-for="skill in skills" :key="skill" class="pill" @click="removeSkill(skill)">
-      {{ skill }}
-    </div>
 
     <div class="terms">
       <input type="checkbox" v-model="terms" required />
@@ -24,7 +36,7 @@
 
     <div class="submit">
       <router-link to="/Home">
-        <v-btn size="small" color="primary" @click="handleSubmit">Create an account</v-btn>
+        <v-btn size="small" class="pill" @click="handleSubmit">Create an account</v-btn>
       </router-link>
     </div>
   </form>
@@ -40,24 +52,10 @@ export default {
       accountTypes: ['Buyer', 'Seller'],
       terms: false,
       names: [],
-      tempSkill: '',
-      skills: [],
       passwordError: ""
     }
   },
   methods: {
-    addSkill(e) {
-      if (e.key === 'Enter') {
-        const newSkill = this.tempSkill.trim()
-        if (newSkill && !this.skills.includes(newSkill)) {
-          this.skills.push(newSkill);
-        }
-        this.tempSkill = ""
-      }
-    },
-    removeSkill(skill) {
-      this.skills = this.skills.filter((s) => {return skill !== s})
-    },
     handleSubmit() {
       // validate password
       this.passwordError = this.password.length > 5 ? 
@@ -74,6 +72,15 @@ export default {
 
 <style scoped>
 
+@font-face {
+  font-family: Riviera Nights Light;
+  src: url(@/styles/rivieraNights/RivieraNights-Light.otf);
+}
+
+@font-face {
+  font-family: Riviera Nights Bold;
+  src: url(@/styles/rivieraNights/RivieraNights-Bold.otf)
+}
 form {
   min-width: 500px;
   margin: 30px auto;
@@ -81,6 +88,7 @@ form {
   text-align: left;
   padding: 20px;
   border-radius: 10px;
+  font-family: Riviera Nights Light;
 }
 
 label {
@@ -111,6 +119,11 @@ input[type="checkbox"] {
   top: 2px;
 }
 
+.header-form {
+  font-family: Riviera Nights Bold, sans-serif;
+  margin-bottom: 10px;
+}
+
 .pill {
   display: inline-block;
   margin: 20px 10px 0 0;
@@ -134,6 +147,18 @@ input[type="checkbox"] {
   font-size: 0.8em;
   font-weight: bold;
 }
+
+.name-fields {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.horizontal-space {
+  width: 10px; /* Adjust the width according to your preference */
+}
+
+
 
 
 </style>

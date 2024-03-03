@@ -9,6 +9,7 @@
     "lint": "eslint . --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.525.0",
     "@mdi/font": "7.0.96",
     "bootstrap": "^5.3.0",
     "core-js": "^3.29.0",
