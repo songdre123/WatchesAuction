@@ -277,13 +277,17 @@ def sendEmail():
     subject = notification_header+email_info["auction"]["data"]["auction_item"]
 
     #content for email body 
+    schedule=""
+    if "schedule" in email_info:
+        schedule=email_info["schedule"]
     email_content = {
         "subheader": subheader[email_info["type"]],
         "auctionItem": email_info["auction"]["data"]["auction_item"],
         "briefMessage": briefMessage[email_info["type"]],
         "bodyMessage": notification_body[email_info["type"]],
         "signOff": signOff,
-        "sender":sender
+        "sender":sender,
+        "schedule":schedule
     }
     # print(email_content)
 
