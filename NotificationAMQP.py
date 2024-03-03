@@ -12,12 +12,11 @@ Functions (RabbitMQ)
 3) processNotif(recipient_id,auction_id,notification_type ) - process the notification received from the callback function 
 
 
-
 scenario when user will receive the notification (notification Type)
 1) outbid- when someone out bidded the customer (highest bid changed). send to previous person with highest bid 
 2) winandpayremind/rollbackandpayremind- when the person win the bid and it will tell the user to pay 
-3) payremind- notify user to pay 
-4) paysucess-notify user when payment is successful 
+3) paysucess-notify user when payment is successful 
+4) schedulesuccess - notifiy user about successful schedule of collection time
 
 '''
 ########## URL ##########

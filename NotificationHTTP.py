@@ -5,9 +5,10 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from invokes import invoke_http
-
+#pip3 install flask flask-mail
 from mailbox import Message
-
+from jinja2 import Environment, FileSystemLoader
+import os
 
 '''
 API Endpoints:
@@ -28,7 +29,7 @@ CREATE TABLE Notification(
     id INT AUTO_INCREMENT PRIMARY KEY,
     recipient_id INT NOT NULL,
     auction_id INT,
-    notification_type VARCHAR(50) NOT NULL COMMENT '(outbid, winandpayremind, paysucess,rollbackandpayremind)',
+    notification_type VARCHAR(50) NOT NULL COMMENT '(outbid, winandpayremind, paysucess,rollbackandpayremind, schedulesuccess)',
     time_sent TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_unread INT DEFAULT 1
 );
@@ -37,6 +38,7 @@ scenario when user will receive the notification
 1) outbid- when someone out bidded the customer (highest bid changed). send to previous person with highest bid 
 2) winandpayremind/rollbackandpayremind- when the person win the bid and it will tell the user to pay 
 3) paysucess-notify user when payment is successful 
+4) schedulesuccess - notifiy user about successful schedule of collection time
 '''
 ########## initiate flask ##########
 app = Flask(__name__)  # initialize a flask application
@@ -58,31 +60,39 @@ app.config['MAIL_USE_SSL']= True
 mail=Mail(app)
 
 ########## notification header ##########
-notification_header={
-    "outbid":"Out bidded on Watch Auction online platform", 
-    "winandpayremind":"Watch Auction online platform",
-    "paysucess":"Payment success on Watch Auction online platform",
-    "rollbackandpayremind":"Watch Auction online platform"
+notification_header="Notification for item: "
+
+subheader={
+    "outbid":"Oh No! Hurry!", 
+    "winandpayremind":"Congratulations!",
+    "paysucess":"Payment success!",
+    "rollbackandpayremind":"Congratulations!",
+    "schedulesuccess":"Schedule success!"
+}
+
+briefMessage={
+    "outbid":"Out bidded for item: ", 
+    "winandpayremind":"Congratulations on winning the item: ",
+    "paysucess":"Payment success for the item: ",
+    "rollbackandpayremind":"Congratulations on winning the item: ",
+    "schedulesuccess":"You have schedule a time slot to collect the item: "
 }
 
 notification_body={
-    "outbid":"your item has been outbidded by someone else in the auction. Do log into Watch Auction to bid for a higher price. You noose u lose bitch ", 
-    "winandpayremind":"uh uh u win liao but then horh u need to pay la. uh uh O$P$. no money no talk. one hand money, one hand your goods",
-    "paysucess":"very very good u have successfull make the payment. but u jus to schedule the meeting. ",
-    "rollbackandpayremind":"hello even since u have lost the auction but the previous person zao liao. so now u the win la. okay enough talk O$P$"
+    "outbid":"The item that you have recently bidded for has been outbidded by an annoymous bidder. Do log into our Watch Auction Online Platform to place a higher bid.", 
+
+    "winandpayremind":"Congratulation on winning the bid! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.",
+
+    "paysucess":"We have sucessfully receive your payment for the item. Do log into our Watch Auction Online Platform to schedule a timing for the collection of the watch! ",
+
+    "rollbackandpayremind":"Congratulation on winning the bid! As the highest bidder has given up the offer, the item will be offered to you! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.",
+
+    "schedulesuccess":"Thank you for using "
+
 }
 
-
-notification_body_real={
-    "outbid":"The item that you have recently bidded for has been outbidded by an annoymous bidder. Do log into our Watch Auction Online Platform to place a higher bid. \n \n Thank you and good luck on your bid \n \n Best Regards, \n Watch Auction", 
-
-    "winandpayremind":"Congratulation on winning the bid! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.\n \n Thank you for dealing with Watch Auction Online platform. \n \n Best Regards, \n Watch Auction",
-
-    "paysucess":"We have sucessfully receive your payment for the item. Do log into our Watch Auction Online Platform to schedule a timing for the collection of the watch! \n \n Thank you for dealing with Watch Auction Online platform. \n \n Best Regards, \n Watch Auction",
-
-    "rollbackandpayremind":"Congratulation on winning the bid! As the highest bidder has given up the offer, the item will be offered to you! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.\n \n Thank you for dealing with Watch Auction Online platform. \n \n Best Regards, \n Watch Auction"
-}
-
+signOff="Best Regards, "
+sender="Watch Auction"
 
 #database
 class Notification(db.Model):
@@ -248,16 +258,44 @@ def check_user_and_auction(userID,auctionID):
 def sendEmail():
     email_info = request.get_json()
     # print(email_info)
+    #check if both recipient and auction are valid
+    recipient_code=email_info["recipient"]["code"]
+    auction_code=email_info["auction"]["code"]
+
+    if recipient_code not in range(200,300) or auction_code not in range(200,300):
+        return jsonify({
+            "code":404,
+            "data":{},
+            "message": "either user or auction does not exist.",
+            "error": "not found",
+        }),400
     
     #creating the body of notification/email
     sender_email = "watchauctiononlineplatform@outlook.com"
     recipient_email =  email_info["recipient"]["data"]["email"]
     # print(recipient_email)
-    subject = notification_header[email_info["type"]]+"for item: "+email_info["auction"]["data"]["auction_item"]
-    print(subject)
-    message = notification_body[email_info["type"]]
-    print(message)
+    subject = notification_header+email_info["auction"]["data"]["auction_item"]
 
+    #content for email body 
+    email_content = {
+        "subheader": subheader[email_info["type"]],
+        "auctionItem": email_info["auction"]["data"]["auction_item"],
+        "briefMessage": briefMessage[email_info["type"]],
+        "bodyMessage": notification_body[email_info["type"]],
+        "signOff": signOff,
+        "sender":sender
+    }
+    # print(email_content)
+
+    ##config and render the email template 
+    # Configure Jinja2
+    env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
+
+    # Get the template
+    template = env.get_template('confirmEmailTemplate.html')
+
+    # Render the template with content
+    html_content = template.render(**email_content)
 
     # Set up the SMTP server
     smtp_server = 'smtp-mail.outlook.com'
@@ -266,11 +304,11 @@ def sendEmail():
     password = 'password@0000'  # Update with your Outlook password
 
     # Create message
-    msg = MIMEMultipart()
+    msg = MIMEMultipart('alternative')
     msg['From'] = sender_email
     msg['To'] = recipient_email
     msg['Subject'] = subject
-    msg.attach(MIMEText(message, 'plain'))
+    msg.attach(MIMEText(html_content, 'html'))
 
     # Connect to SMTP server and send email
     try:
@@ -282,6 +320,7 @@ def sendEmail():
         print("message has been sent successfully")
         return "message has been sent successfully"
     except Exception as e:
+        print("Error in sending email")
         return 'Error: ' + str(e)
     
     
