@@ -31,6 +31,17 @@ const routes = [
         component: () => import('@/views/Account.vue'),
       },
     ],
+  },
+  {
+    path: '/listing',
+    component: () => import('@/layouts/default/Default.vue'),
+    children: [
+      {
+        path: '',
+        name: 'Listing',
+        component: () => import('@/views/Listing.vue'),
+      },
+    ],
   }
 ]
 

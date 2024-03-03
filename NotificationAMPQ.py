@@ -13,7 +13,7 @@ from mailbox import Message
 API Endpoints:
 1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
 2. POST /notification/createNotification - create notification in the database  
-3. POST /notification/sendEmail - sending a email to the receipient regarding update on his bid
+3. POST /notification/sendEmail - sending a email to tnhe receipient regarding update on his bid
 
 
 PORT: 5004

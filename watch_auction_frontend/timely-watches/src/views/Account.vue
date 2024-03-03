@@ -1,10 +1,59 @@
+<style scoped>
+.profile-picture {
+  border-radius: 50%;
+}
+</style>
+
+
 <template>
     <!-- Include profile picture and allow user to upload image -->
 
+    <v-container>
+    <v-row align="center" justify="center">
+      <!-- allign cols to the center -->
+      <v-col cols="12" align="center">
+
+        <h1>Profile Picture</h1>
+        
+        <v-img
+        v-if="image_url"
+        :src="image_url"
+        class="profile-picture"
+        width="200"
+        height="200"
+        contain
+        ></v-img>
+        <v-img
+        v-else
+        src="https://via.placeholder.com/200"
+        class="profile-picture"
+        width="200"
+        height="200"
+        contain
+        ></v-img>
+
     
+        <v-file-input
+        v-model="file"
+        label="Select an image"
+        @change="onFileChange"
+        ></v-file-input>
+        <v-btn @click="uploadToS3">Upload</v-btn>
+        <!-- show filename below -->
+        <v-row v-if="file">
+        <v-col>
+            <p>File: {{ file.name }}</p>
+        </v-col>
+        </v-row>
+
+        
+      </v-col>
+    </v-row>
+  </v-container>
+  
     <v-container>
         <v-row align="center" justify="center">
-            <v-col cols="12">
+            <v-col cols="12" align="center">
                 <h1>Account Settings</h1>
             </v-col>
             <v-col cols="12">
@@ -31,31 +80,6 @@
         </v-row>
     </v-container>
 
-    <v-container>
-    <v-row align="center" justify="center">
-      <v-col cols="12">
-        <h1>Profile Picture</h1>
-        
-        <v-img
-          v-if="image_url"
-          :src="image_url"
-          width="200"
-          height="200"
-          contain
-        ></v-img>
-
-    
-
-        <v-file-input
-          v-model="file"
-          label="Upload Profile Picture"
-          prepend-icon="mdi-camera"
-          accept="image/*"
-        ></v-file-input>
-        <button @click="uploadToS3">Upload</button>
-      </v-col>
-    </v-row>
-  </v-container>
 
 
 </template>
@@ -106,7 +130,7 @@ methods: {
             console.log('Error uploading image:', err);
         } else {
             console.log('Image uploaded successfully to S3. URL:', data.Location);
-            this.image_url = data.Location;
+            this.image_url = data.Location + '?' + new Date().getTime();
         }
         });
     };
