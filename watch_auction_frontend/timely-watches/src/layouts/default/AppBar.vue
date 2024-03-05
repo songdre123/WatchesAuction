@@ -2,7 +2,7 @@
 <!-- eslint-disable no-multiple-template-root -->
 <template>
   <div>
-    <v-navigation-drawer v-model="drawer" temporary color="black">
+    <v-navigation-drawer v-model="drawer" temporary color="amber-lighten-4">
       <v-list-item
           prepend-avatar="https://randomuser.me/api/portraits/men/78.jpg"
           title="John Leider"
@@ -37,7 +37,7 @@
         </v-list>
 
     </v-navigation-drawer>
-  <v-app-bar :elevation="2" :height="100">
+  <v-app-bar :elevation="2" :height="100" color="amber-lighten-5">
     <v-btn @click.stop="drawer = !drawer" density="compact" icon="mdi-menu"></v-btn>
     <v-app-bar-title class="topbar">
       <h4 class="header">

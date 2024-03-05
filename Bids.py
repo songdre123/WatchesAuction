@@ -2,11 +2,22 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
+from flasgger import Swagger
 
 app = Flask(__name__)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("BidsURL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+app.config["SWAGGER"] = {
+    "title": "Bids microservice API",
+    "version": 1.0,
+    "openapi": "3.0.2",
+    "description": "Allows create, retrieve, update, and delete bids \n Get highest bid and get bids of a specific auction",
+}
+
+
+swagger = Swagger(app)
 
 """
 API Endpoints:
@@ -55,6 +66,16 @@ class Bids(db.Model):
 # get all bids
 @app.route("/bid")
 def get_all_bids():
+    """
+    Get all bids
+    ---
+    responses:
+        200:
+            description: Return all bids
+        404:
+            description: No bids
+
+    """
     bids_data = Bids.query.all()
     if len(bids_data):
         return jsonify(
@@ -66,6 +87,46 @@ def get_all_bids():
 # create a bid
 @app.route("/bid/<int:bid_id>", methods=["POST"])
 def create_bid(bid_id):
+    """
+    Create a new bid with the given bid ID
+
+    ---
+    parameters:
+        - name: bid_id
+          in: path
+          description: ID of the bid to create
+          required: true
+          schema:
+              type: integer
+    requestBody:
+        required: true
+        content:
+            application/json:
+                schema:
+                    type: object
+                    properties:
+                        bid_amount:
+                            type: number
+                            format: float
+                            description: Amount of the bid
+                            example: 100.0
+                        auction_id:
+                            type: integer
+                            description: ID of the auction associated with the bid
+                            example: 123
+                        user_id:
+                            type: integer
+                            description: ID of the user placing the bid
+                            example: 456
+    responses:
+        201:
+            description: Bid created successfully
+        400:
+            description: Bid has already been placed or bad request
+        500:
+            description: Internal server error
+            
+    """
     if db.session.scalars(db.select(Bids).filter_by(bid_id=bid_id).limit(1)).first():
         return jsonify(
             {
@@ -121,6 +182,33 @@ def create_bid(bid_id):
 # edit bid
 @app.route("/bid/<int:bid_id>", methods=["PUT"])
 def edit_bid(bid_id):
+    """
+    Edit an existing bid with the given bid ID
+
+    ---
+    parameters:
+        - name: bid_id
+          in: path
+          description: ID of the bid to edit
+          required: true
+          schema:
+              type: integer
+    requestBody:
+        required: true
+        content:
+            application/json:
+                schema:
+                    type: object
+                    description: Updated bid data
+    responses:
+        200:
+            description: Bid updated successfully
+        404:
+            description: Bid not found
+        500:
+            description: Internal server error
+            
+    """
     bid = db.session.query(Bids).filter_by(bid_id=bid_id).first()
 
     # When bid cannot be found
@@ -170,6 +258,25 @@ def edit_bid(bid_id):
 # delete bid
 @app.route("/bid/<int:bid_id>", methods=["DELETE"])
 def delete_bid(bid_id):
+    """
+    Delete a bid with the given bid ID
+
+    ---
+    parameters:
+        - name: bid_id
+          in: path
+          description: ID of the bid to delete
+          required: true
+          schema:
+              type: integer
+    responses:
+        200:
+            description: Bid deleted successfully
+        404:
+            description: Bid not found
+        500:
+            description: Internal server error
+    """
     bid = db.session.query(Bids).filter_by(bid_id=bid_id).first()
 
     if not bid:
@@ -214,6 +321,26 @@ def delete_bid(bid_id):
 # get highest bid by auction_id, filter by earliest timestamp if there are more than one row for highest bid
 @app.route("/bid/highest/<int:auction_id>")
 def get_highest_bid(auction_id):
+    """
+    Get the highest bid for a specific auction ID
+
+    ---
+    parameters:
+        - name: auction_id
+          in: path
+          description: ID of the auction to get the highest bid for
+          required: true
+          schema:
+              type: integer
+    responses:
+        200:
+            description: Highest bid found
+        404:
+            description: No bids found for the specified auction ID
+        500:
+            description: Internal server error
+
+    """
 
     highest_bid_amount = (
         db.session.query(db.func.max(Bids.bid_amount))
@@ -276,6 +403,25 @@ def get_highest_bid(auction_id):
 
 @app.route("/bid/all/<int:auction_id>")
 def get_all_bids_from_auction(auction_id):
+    """
+    Get all bids from a specific auction ID
+
+    ---
+    parameters:
+        - name: auction_id
+          in: path
+          description: ID of the auction to get all bids from
+          required: true
+          schema:
+              type: integer
+    responses:
+        200:
+            description: Bids found for the specified auction ID
+            
+        404:
+            description: No bids found for the specified auction ID
+
+    """
 
     bids_from_auction = Bids.query.filter_by(auction_id=auction_id).all()
 
@@ -301,6 +447,7 @@ def get_all_bids_from_auction(auction_id):
             ),
             404,
         )
+
 
 if __name__ == "__main__":
     print("This is flask for " + os.path.basename(__file__) + ": manage orders ...")
