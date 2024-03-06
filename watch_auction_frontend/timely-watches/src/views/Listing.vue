@@ -1,15 +1,36 @@
 <template>
   <div class="listing">
     <h1>Auction Listing</h1>
-    
   </div>
+
+
+  <v-container style="margin-top: 20px;">
+    <v-row>
+      <v-col cols="12" md="6" v-for="auction in auctions" :key="auction.id">
+        <v-card>
+          <v-img
+            :src="auction.image"
+            height="200"
+          ></v-img>
+          <v-card-title>{{ auction.name }}</v-card-title>
+          <v-card-subtitle>{{ auction.description }}</v-card-subtitle>
+          <v-card-text>
+            <p>Current bid: {{ auction.currentBid }}</p>
+            <p>Ends at: {{ auction.endsAt }}</p>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn @click="placeBid(auction.id)">Place bid</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 export default {
   data() {
     return {
-      auctions: [] // Array to store the auction data
     };
   },
   mounted() {
