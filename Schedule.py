@@ -7,7 +7,7 @@ from flasgger import Swagger
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/book'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/schedule'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SWAGGER"] = {
     "title": "Schedule microservice API",
@@ -25,10 +25,12 @@ swagger = Swagger(app)
 4. DELETE /schedule/delete/<int:auction_id> - Delete schedule by auction ID
 5. GET /schedule/<int:auction_id> - Get schedule for a specific auction ID
 6. GET /schedule/user/<int:user_id> - Get all schedules for a specific user ID
-7. GET /schedule/time - Get all schedules in a time range, use query params of (start_time=YYYY-MM-DD%20HH:MM:SS&end_time=YYYY-MM-DD%20HH:MM:SS)
+7. GET /schedule/time - Get all schedules in a time range, use query params of (start_time=YYYY-MM-DDTHH:MM:SS.SSS&end_time=YYYY-MM-DDTHH:MM:SS.SSS)
 
 -- SQL Database creation code for Schedule
 
+CREATE DATABASE IF NOT EXISTS Schedule;
+USE Schedule;
 CREATE TABLE Schedule (
     auction_id INT PRIMARY KEY,
     user_id INT,
@@ -40,6 +42,7 @@ db = SQLAlchemy(app)
 
 class Schedule(db.Model):
     __tablename__ = 'Schedule'
+    __table_args__ = {'schema': 'Schedule'}
 
     auction_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
@@ -54,12 +57,12 @@ class Schedule(db.Model):
         return {
             'auction_id': self.auction_id,
             'user_id': self.user_id,
-            'collection_time': self.collection_time.strftime('%Y-%m-%d %H:%M:%S') if self.collection_time else None
+            'collection_time': self.collection_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] if self.collection_time else None
         }
 
-# Create tables
-# with app.app_context():
-#     db.create_all()
+# Create tables (including the 'Schedule' table in the 'Schedule' schema)
+with app.app_context():
+    db.create_all()
 
 # Get all schedules
 @app.route('/schedule', methods=['GET'])
@@ -153,9 +156,16 @@ def edit_schedule(auction_id):
         required: true
         content:
             application/json:
-                schma:
+                schema:
                     type: object
-                    description: updated schedule data
+                    properties:
+                        collection_time:
+                            type: string
+                            format: date-time
+                            description: The scheduled time for collection
+                        user_id:
+                            type: integer
+                            description: The ID of the user
     responses:
       200:
         description: Schedule updated successfully
@@ -320,29 +330,31 @@ def get_schedules_within_time_range():
       - name: start_time
         in: query
         type: string
+        format: date-time
         required: true
-        description: The start time of the time range (format: '%Y-%m-%d %H:%M:%S')
+        description: The start time of the time range YYYY-MM-DDTHH:MM:SS.SSS
       - name: end_time
         in: query
         type: string
+        format: date-time
         required: true
-        description: The end time of the time range (format: '%Y-%m-%d %H:%M:%S')
+        description: The end time of the time range YYYY-MM-DDTHH:MM:SS.SSS
     responses:
       200:
         description: Returns a list of schedules within the specified time range
       400:
-        description: Invalid date format. Please use the format '%Y-%m-%d %H:%M:%S'
+        description: Invalid date format. Please use the format 'YYYY-MM-DDTHH:MM:SS.SSS'
     """
     start_time_str = request.args.get('start_time')
     end_time_str = request.args.get('end_time')
 
     try:
-        start_time = datetime.strptime(start_time_str, '%Y-%m-%d %H:%M:%S')
-        end_time = datetime.strptime(end_time_str, '%Y-%m-%d %H:%M:%S')
+        start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M:%S.%f')
+        end_time = datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M:%S.%f')
     except ValueError:
         return jsonify({
             "code": 400,
-            "message": "Invalid date format. Please use the format '%Y-%m-%d %H:%M:%S'",
+            "message": "Invalid date format. Please use the format 'YYYY-MM-DDTHH:MM:SS.SSS'",
         }), 400
 
     schedules = db.session.query(Schedule).filter(
