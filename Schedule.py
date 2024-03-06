@@ -2,12 +2,27 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_cors import CORS  # Add this import
+<<<<<<< Updated upstream
+=======
+from flasgger import Swagger
+
+>>>>>>> Stashed changes
 
 app = Flask(__name__)
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/book'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+<<<<<<< Updated upstream
 
+=======
+app.config["SWAGGER"] = {
+    "title": "Schedule microservice API",
+    "version": 1.0,
+    "openapi": "3.0.2",
+    "description": "Allows create, retrieve, update, and delete schedule \n Gets schedule for specific auction, user \n Gets all schedules in specific time range,"
+}
+swagger = Swagger(app)
+>>>>>>> Stashed changes
 
 """
 -- API Endpoints
@@ -56,6 +71,20 @@ class Schedule(db.Model):
 # Get all schedules
 @app.route('/schedule', methods=['GET'])
 def get_schedule():
+<<<<<<< Updated upstream
+=======
+
+    """Get all schedules
+        ---
+        tags:
+          - Schedule
+        responses:
+          200:
+            description: Returns a list of all schedules
+
+    """
+
+>>>>>>> Stashed changes
     schedules = db.session.query(Schedule).all()
     schedule_list = [schedule.json() for schedule in schedules]
     return jsonify(schedule_list)
@@ -63,6 +92,27 @@ def get_schedule():
 # Create a new schedule
 @app.route('/schedule/create/<int:auction_id>', methods=['POST'])
 def create_schedule(auction_id):
+<<<<<<< Updated upstream
+=======
+    """Create a new schedule
+        ---
+        tags:
+          - Schedule
+        parameters:
+          - name: auction_id
+            in: path
+            type: integer
+            required: true
+            description: The ID of the auction for which to create a schedule
+        responses:
+          201:
+            description: Schedule created successfully
+
+          400:
+            description: Schedule with the given auction ID already exists
+        """
+
+>>>>>>> Stashed changes
     existing_schedule = Schedule.query.filter_by(auction_id=auction_id).first()
 
     if existing_schedule:
@@ -102,6 +152,36 @@ def create_schedule(auction_id):
 # Edit schedule based on auction ID
 @app.route('/schedule/edit/<int:auction_id>', methods=['PUT'])
 def edit_schedule(auction_id):
+<<<<<<< Updated upstream
+=======
+    """Edit schedule based on auction ID
+    ---
+    tags:
+      - Schedule
+    parameters:
+      - name: auction_id
+        in: path
+        type: integer
+        required: true
+        description: The ID of the auction for which to edit the schedule
+    requestBody: 
+        required: true
+        content:
+            application/json:
+                schma:
+                    type: object
+                    description: updated schedule data
+    responses:
+      200:
+        description: Schedule updated successfully
+      400:
+        description: No data provided for update
+      404:
+        description: No schedule found with the given auction ID
+      500:
+        description: An error occurred while updating the schedule
+    """
+>>>>>>> Stashed changes
     schedule = db.session.query(Schedule).filter_by(auction_id=auction_id).first()
 
     if not schedule:
@@ -141,6 +221,25 @@ def edit_schedule(auction_id):
 # Get schedule for a specific auction ID
 @app.route('/schedule/<int:auction_id>', methods=['GET'])
 def get_schedule_for_auction(auction_id):
+<<<<<<< Updated upstream
+=======
+    """Get schedule for a specific auction ID
+    ---
+    tags:
+      - Schedule
+    parameters:
+      - name: auction_id
+        in: path
+        type: integer
+        required: true
+        description: The ID of the auction for which to get the schedule
+    responses:
+      200:
+        description: Returns the schedule for the given auction ID
+      404:
+        description: No schedule found for the given auction ID
+    """
+>>>>>>> Stashed changes
     schedules = db.session.query(Schedule).filter_by(auction_id=auction_id).all()
 
     if not schedules:
@@ -155,6 +254,27 @@ def get_schedule_for_auction(auction_id):
 # Delete schedule by auction ID
 @app.route('/schedule/delete/<int:auction_id>', methods=['DELETE'])
 def delete_schedule(auction_id):
+<<<<<<< Updated upstream
+=======
+    """Delete schedule by auction ID
+    ---
+    tags:
+      - Schedule
+    parameters:
+      - name: auction_id
+        in: path
+        type: integer
+        required: true
+        description: The ID of the auction for which to delete the schedule
+    responses:
+      200:
+        description: Schedule deleted successfully
+      404:
+        description: No schedule found with the given auction ID to delete
+      500:
+        description: An error occurred while deleting the schedule
+    """
+>>>>>>> Stashed changes
     schedule = db.session.query(Schedule).filter_by(auction_id=auction_id).first()
 
     if not schedule:
@@ -184,6 +304,25 @@ def delete_schedule(auction_id):
 # Get all schedules for a specific user ID
 @app.route('/schedule/user/<int:user_id>', methods=['GET'])
 def get_schedules_for_user(user_id):
+<<<<<<< Updated upstream
+=======
+    """Get all schedules for a specific user ID
+    ---
+    tags:
+      - Schedule
+    parameters:
+      - name: user_id
+        in: path
+        type: integer
+        required: true
+        description: The ID of the user for which to get the schedules
+    responses:
+      200:
+        description: Returns a list of schedules for the given user ID
+      404:
+        description: No schedules found for the given user ID
+    """
+>>>>>>> Stashed changes
     schedules = db.session.query(Schedule).filter_by(user_id=user_id).all()
 
     if not schedules:
@@ -198,6 +337,30 @@ def get_schedules_for_user(user_id):
 # Get all schedules in specific time range
 @app.route('/schedule/time', methods=['GET'])
 def get_schedules_within_time_range():
+<<<<<<< Updated upstream
+=======
+     """Get all schedules in a specific time range
+    ---
+    tags:
+      - Schedule
+    parameters:
+      - name: start_time
+        in: query
+        type: string
+        required: true
+         description: The start time of the time range (format: '%Y-%m-%d %H:%M:%S')
+      - name: end_time
+        in: query
+        type: string
+        required: true
+        description: The end time of the time range (format: '%Y-%m-%d %H:%M:%S')
+    responses:
+      200:
+        description: Returns a list of schedules within the specified time range
+      400:
+        description: Invalid date format. Please use the format '%Y-%m-%d %H:%M:%S'
+    """
+>>>>>>> Stashed changes
     start_time_str = request.args.get('start_time')
     end_time_str = request.args.get('end_time')
 
