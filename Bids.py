@@ -1,8 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
-from Auction import Auction
-from Users import User
 from datetime import datetime
 
 app = Flask(__name__)
@@ -27,6 +25,7 @@ CREATE TABLE Bids (
 
 db = SQLAlchemy(app)
 
+
 class Bids(db.Model):
     __tablename__ = "Bid"
 
@@ -34,11 +33,11 @@ class Bids(db.Model):
     bid_amount = db.Column(db.Float, nullable=False)
     auction_id = db.Column(
         db.Integer,
-        db.ForeignKey("Auction.auction_id", ondelete="CASCADE"),
+        primary_key=True,
         nullable=False,
     )
     user_id = db.Column(
-        db.Integer, db.ForeignKey("User.id", ondelete="CASCADE"), nullable=False
+        db.Integer, primary_key=True, nullable=False
     )
     bid_time = db.Column(db.TIMESTAMP, nullable=False)
 
@@ -65,7 +64,7 @@ def get_all_bids():
     Bids = db.session.scalars(db.select(Bids)).all()
     if len(Bids):
         return jsonify({"code": 200, "data": {"bids": [bid.json() for bid in Bids]}})
-    return jsonify({"code": 400, "message": "There are no Bids currently"}), 404
+    return jsonify({"code": 404, "message": "There are no Bids"}), 404
 
 
 # create a bid
@@ -117,11 +116,12 @@ def create_bid(bid_id):
                     "code": 500,
                     "data": {"bid_id": bid_id},
                     "message": "An error occured while creating bid",
-                    "error": str(e)
+                    "error": str(e),
                 }
             ),
             500,
         )
+
 
 # edit bid
 @app.route("/bid/<int:bid_id>", methods=["PUT"])
@@ -130,10 +130,15 @@ def edit_bid(bid_id):
 
     # When bid cannot be found
     if not bid:
-        return jsonify({
-            "code": 404,
-            "message": "Bid not found",
-        }), 404
+        return (
+            jsonify(
+                {
+                    "code": 404,
+                    "message": "Bid not found",
+                }
+            ),
+            404,
+        )
 
     data = request.get_json()
 
@@ -155,14 +160,20 @@ def edit_bid(bid_id):
             ),
             500,
         )
-    return jsonify({
-        "code": 200,
-        "data": bid.json(),
-        "message": "Bid updated successfully",
-    }), 200
+    return (
+        jsonify(
+            {
+                "code": 200,
+                "data": bid.json(),
+                "message": "Bid updated successfully",
+            }
+        ),
+        200,
+    )
+
 
 # delete bid
-@app.route('/bid/<int:bid_id>', methods=['DELETE'])
+@app.route("/bid/<int:bid_id>", methods=["DELETE"])
 def delete_bid(bid_id):
     bid = db.session.query(Bids).filter_by(bid_id=bid_id).first()
 
