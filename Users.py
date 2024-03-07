@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
-
 from flasgger import Swagger
+from db_config import set_database_uri
 
 app = Flask(__name__)  # initialize a flask application
 
@@ -15,7 +15,9 @@ app.config['SWAGGER'] = {
 }
 swagger = Swagger(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Users'
+path = "Users"
+set_database_uri(app, path)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 '''

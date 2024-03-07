@@ -3,12 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 from flasgger import Swagger
+from db_config import set_database_uri
 
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "mysql+mysqlconnector://root:password@localhost:3306/bids"
-)
+path = "Bids"
+set_database_uri(app, path)
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 app.config["SWAGGER"] = {

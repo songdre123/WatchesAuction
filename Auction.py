@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from db_config import set_database_uri
 
 from flasgger import Swagger
 
@@ -9,7 +10,8 @@ from flasgger import Swagger
 
 app = Flask(__name__)  # initialize a flask application
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost:3306/Auction'
+path = "Auction"
+set_database_uri(app, path)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
