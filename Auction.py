@@ -28,7 +28,7 @@ CREATE TABLE Auction (
     auction_id INT AUTO_INCREMENT PRIMARY KEY,
     auction_item VARCHAR(255) NOT NULL,
     start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NULL,
     start_price FLOAT NOT NULL,
     current_price FLOAT NOT NULL
     auction_winner_id INT,
@@ -68,7 +68,7 @@ class Auction(db.Model):
 
 
 
-    def __init__(self, auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_condition, watch_brand, watch_box_present, watch_papers_present):
+    def __init__(self, auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3):
 
         self.auction_item = auction_item
         self.start_time = start_time
@@ -81,6 +81,9 @@ class Auction(db.Model):
         self.watch_brand = watch_brand
         self.watch_box_present = watch_box_present
         self.watch_papers_present = watch_papers_present
+        self.watch_image1 = watch_image1
+        self.watch_image2 = watch_image2
+        self.watch_image3 = watch_image3
         
 
     def json(self):
@@ -154,24 +157,16 @@ def find_by_auction_id(auction_id):
 
 
 # create auction
-@app.route('/auction/<int:auction_id>', methods=['POST'])
-def create_auction(auction_id):
+@app.route('/auction', methods=['POST'])
+def create_auction():
     #when creating auction, i can still be creating the same item even though item already exist(2 items but different id no.(?)). TLDR i think there no point checking for id of auction. coz its auto increment in sql. when creating, seller wont ask to put id of auction
-    if (db.session.scalars(db.select(Auction).filter_by(auction_id=auction_id).limit(1)).first()):
-        return jsonify(
-            {
-                "code": 400,
-                "data": {
-                    "auction_id": auction_id
-                },
-                "message": "Auction ID is already in use."
-            }
-        ), 400
 
     data = request.get_json()
     #auction_id is auto increment. dont need to include. if done this way, user will need to provide auction id but they wont know. id is for us
-    auction = Auction(auction_id, **data)
-    if auction.start_time > auction.end_time:
+    auction = Auction(**data)
+    start_time = datetime.strptime(auction.start_time, '%Y-%m-%d %H:%M:%S')
+    end_time = datetime.strptime(auction.end_time, '%Y-%m-%d %H:%M:%S')
+    if start_time > end_time:
         return jsonify(
             {
                 "code": 400,
@@ -191,7 +186,7 @@ def create_auction(auction_id):
                 "message": "Start price cannot be negative."
             }
         ), 400
-    if auction.start_time < datetime.now():
+    if start_time < datetime.now():
         return jsonify(
             {
                 "code": 400,
