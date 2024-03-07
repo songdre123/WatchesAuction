@@ -3,11 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_cors import CORS  # Add this import
 from flasgger import Swagger
-
+from configparser import ConfigParser
 
 app = Flask(__name__)
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root@localhost:3306/schedule'
+
+config = ConfigParser()
+config.read('config.ini')
+app.config['SQLALCHEMY_DATABASE_URI'] = config.get('database', 'db_uri')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SWAGGER"] = {
     "title": "Schedule microservice API",
