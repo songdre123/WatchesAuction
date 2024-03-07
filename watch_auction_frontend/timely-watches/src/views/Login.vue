@@ -14,7 +14,6 @@
 
 <script setup>
     import SignUpForm from '@/components/SignUpForm.vue';
-    import SvgIcon from '@jamescoyle/vue-icon';
     import { mdiWatch } from '@mdi/js';
 </script>
 
