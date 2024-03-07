@@ -12,15 +12,15 @@ const routes = [
     component: () => import("@/layouts/default/Default.vue"),
     children: [
       {
-        path: "account", // Removed the leading slash
-        name: "Account",
-        component: () => import("@/views/Account.vue"),
-      },
-      {
         path: "", // Empty path for the Home route
         name: "Home",
         component: () =>
           import(/* webpackChunkName: "home" */ "@/views/AuctionHome.vue"),
+      },
+      {
+        path: "account", // Removed the leading slash
+        name: "Account",
+        component: () => import("@/views/Account.vue"),
       },
     ],
   },

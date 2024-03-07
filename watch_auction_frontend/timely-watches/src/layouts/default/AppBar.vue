@@ -11,23 +11,35 @@
       <v-divider></v-divider>
 
       <v-list density="compact" nav>
+        <router-link class="router-link" to="/home">
           <v-list-item
-            prepend-icon="mdi-account"
-            title="Account"
-            value="account"
-          ></v-list-item>
+          prepend-icon="mdi-home"
+          title="All Auctions"
+          value="home">
+          </v-list-item>
+        </router-link>
+
           <v-list-item
             prepend-icon="mdi-gavel"
-            title="Auction"
+            title="My Auctions"
             value="auction"
           ></v-list-item>
+
           <v-list-item
             prepend-icon="mdi-cash-multiple"
-            title="Bids"
+            title="My Bids"
             value="bids"
           ></v-list-item>
 
-          <router-link to="/">
+          <router-link class="router-link" to="/home/account">
+            <v-list-item
+              prepend-icon="mdi-account"
+              title="Account"
+              value="account"
+            ></v-list-item>
+          </router-link>
+
+          <router-link class="router-link" to="/">
           <v-list-item
             prepend-icon="mdi-door"
             title="Logout"
@@ -71,13 +83,11 @@
 <script>
 import SvgIcon from '@jamescoyle/vue-icon';
 import { mdiWatch } from '@mdi/js';
-import { VList } from 'vuetify/lib/components/index.mjs';
 
 export default {
 	name: "my-cool-component",
 	components: {
     SvgIcon,
-    VList
 },
 	data() {
 		return {
@@ -107,6 +117,11 @@ export default {
 
 .header {
   font-family: Riviera Nights, sans-serif;
+}
+
+.router-link {
+  text-decoration: none;
+  color: black;
 }
 
 </style>

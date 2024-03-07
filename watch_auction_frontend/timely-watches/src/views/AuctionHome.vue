@@ -6,7 +6,13 @@
     </v-tabs>
       <v-row align="center" justify="center">
         <v-col v-for="(watch, index) in watches[tab]" :key="index" cols="4">
-          <WatchCard v-if="watch" :title="watch['title']" :referenceNo="watch['Ref']" :date="watch['Date']" :minBid="watch['MinBid']"/>
+          <WatchCard
+            v-if="watch"
+            :title="watch['title']"
+            :referenceNo="watch['Ref']"
+            :date="watch['Date']"
+            :minBid="watch['MinBid']"
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -143,6 +149,14 @@
     }
       }
     },
+    methods: {
+      handleTabChange(tab) {
+      this.tab = tab;
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize')); // Trigger resize event to update Vuetify layout
+      }, 300);
+    }
+    },
     computed: {
     watchLength() {
       return this.watches[this.tab] ? this.watches[this.tab].length : 0
@@ -153,3 +167,4 @@
     },
 }
 </script>
+

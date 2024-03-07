@@ -7,27 +7,42 @@
 
     <div class="name-fields">
       <label>First Name:</label>
-      <input type="text" v-model="firstName" required />
+      <input type="text" v-model="firstName" />
 
     <div class="horizontal-space"></div>
       
       <label>Last Name:</label>
-      <input type="text" v-model="lastName" required />
+      <input type="text" v-model="lastName" />
     </div>
 
     <label>Email:</label>
     <input type="email" v-model="email" required />
 
+    <span>
     <label>Password:</label>
-    <input type="password" v-model="password" required />
+     <v-btn size="xs" class="password-toggle" @click="togglePasswordVisibility">
+      {{ showPassword ? 'Hide' : 'Show' }} Password
+    </v-btn>
+    </span>
+    <input :type="showPassword ? 'text' : 'password'" v-model="password" required />
     <div v-if="passwordError" class="error">{{ passwordError }}</div>
 
     <label>Phone Number:</label>
     <input type="text" v-model="phoneNumber" required pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="e.g., 94204837" />
 
     <label>Account Type:</label>
-    <v-select v-model="accountType" :items="accountTypes">
+    <v-select v-model="accountType" :items="accountTypes" required>
     </v-select>
+
+    <label>Profile Picture:</label>
+    <v-file-input
+    :rules="rules"
+    accept="image/png, image/jpeg, image/bmp, image/jpg"
+    label="Profile Photo"
+    placeholder="Choose profile photo"
+    prepend-icon="mdi-camera"
+    loading="true"
+    ></v-file-input>
 
     <div class="terms">
       <input type="checkbox" v-model="terms" required />
@@ -35,7 +50,7 @@
     </div>
 
     <div class="submit">
-      <router-link to="/Home">
+      <router-link to="/home">
         <v-btn size="small" class="pill" @click="handleSubmit">Create an account</v-btn>
       </router-link>
     </div>
@@ -48,11 +63,23 @@ export default {
     return {
       email: "",
       password: "",
+      showPassword: false,
       accountType: "",
       accountTypes: ['Buyer', 'Seller'],
       terms: false,
       names: [],
-      passwordError: ""
+      passwordError: "",
+      fileRules: [
+      value => {
+        const acceptedFormats = ['image/png', 'image/jpeg', 'image/bmp', 'image/jpg'];
+        const allowedSize = 2000000; // 2MB in bytes
+        const file = value && value.length ? value[0] : null;
+        if (!file) return 'Please select a file.';
+        if (!acceptedFormats.includes(file.type)) return 'Only image formats (PNG, JPEG, BMP, JPG) are allowed.';
+        if (file.size > allowedSize) return 'Profile picture size should be less than 2 MB!';
+        return true;
+      },
+    ],
     }
   },
   methods: {
@@ -64,7 +91,10 @@ export default {
       if (!this.passwordError) {
         console.log('Logged In')
       }
-    }
+    },
+    togglePasswordVisibility() {
+      this.showPassword = !this.showPassword;
+    },
   }
 
 }
@@ -84,7 +114,7 @@ export default {
 form {
   min-width: 500px;
   margin: 30px auto;
-  background: lightgoldenrodyellow;
+  background: white;
   text-align: left;
   padding: 20px;
   border-radius: 10px;
@@ -122,6 +152,11 @@ input[type="checkbox"] {
 .header-form {
   font-family: Riviera Nights Bold, sans-serif;
   margin-bottom: 10px;
+}
+
+.password-toggle {
+  font-size: 12px;
+  margin-left: 350px;
 }
 
 .pill {
