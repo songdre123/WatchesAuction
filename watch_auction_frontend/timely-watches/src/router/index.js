@@ -16,6 +16,14 @@ const routes = [
         name: "Home",
         component: () =>
           import(/* webpackChunkName: "home" */ "@/views/AuctionHome.vue"),
+        children: [
+          {
+            path: ":id",
+            name: "AuctionDetails",
+            component: () => import("@/views/AuctionDetails.vue"),
+            props: true,
+          },
+        ],
       },
       {
         path: "account", // Removed the leading slash
