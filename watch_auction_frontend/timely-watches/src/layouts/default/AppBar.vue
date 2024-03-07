@@ -81,17 +81,10 @@
 </template>
 
 <script>
-import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiWatch } from '@mdi/js';
 
 export default {
-	name: "my-cool-component",
-	components: {
-    SvgIcon,
-},
 	data() {
 		return {
-  path1: mdiWatch,
   drawer: null,
   notifications: [
     'Your bid at Auction Ref: 1593478229v has beeen replaced',

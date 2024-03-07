@@ -3,7 +3,6 @@
     <v-app class="background">
         <v-layout class="layout">
         <h1 class="header">
-            <svg-icon type="mdi" :path="path"></svg-icon>
             Timely Watches
         </h1>
         <!-- <v-divider class="divider" color="black" length="300px"></v-divider> -->
@@ -14,16 +13,11 @@
 
 <script setup>
     import SignUpForm from '@/components/SignUpForm.vue';
-    import { mdiWatch } from '@mdi/js';
 </script>
 
 <script>
 export default {
-    data() {
-        return {
-            path: mdiWatch
-        }   
-    },
+
 }
 </script>
 
