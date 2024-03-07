@@ -1,3 +1,9 @@
+<style scoped>
+.img-container {
+  padding: 0 0px; /* Adjust as needed */
+}
+</style>
+
 <template>
     <v-container>
         <v-row align="center" justify="center">
@@ -5,15 +11,18 @@
                 <v-row>
                 <v-form>
                     <h2 class="text">Pictures</h2>
-                    <div v-for="(file, index) in image_urls" :key="index">
+                    <v-row>
+                    <v-row>
+                    <v-col cols="4" class="img-container" v-for="(file, index) in image_urls" :key="index">
                         <v-img
-                            v-if="image_urls[index]"
-                            :src="image_urls[index]"
-                            width="200"
-                            height="200"
-                            contain
+                            v-if="file"
+                            :src="file"
+                            width="250" 
+                            height="250"
                         ></v-img>
-                    </div>
+                    </v-col>
+                    </v-row>
+                    </v-row>
                     <v-file-input
                     class="mt-4"
                     prepend-icon="mdi-camera"
@@ -80,14 +89,28 @@
                             required
                             ></v-select>
                         </v-col>
-                        <v-col cols="6">
-                            <v-text-field label="Minimum Bid" required></v-text-field>
+                        <v-col cols="12">
+                            <!-- enter min bid amount -->
+                            <v-text-field label="Minimum Bid" required
+                            v-model="Minimum_bid"
+                            type="number"
+                            ></v-text-field>
                         </v-col>
                         <v-col cols="6">
-                            <v-text-field label="Start date and time" required></v-text-field>
+                            <v-text-field label="Start date and time" required
+                            onchange="CovertToTimestampfromStringStart(this.value)"
+                            >
+                            </v-text-field>
                         </v-col>
                         <v-col cols="6">
-                            <v-text-field label="End date and time" required></v-text-field>
+                            <v-text-field label="End date and time" required
+                            v-model="End_date"
+                            onchange="CovertToTimestampfromStringEnd(this.value)"
+                            >
+                        </v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-subheader>Enter date and times in YYYY/MM/DD/HH/MM</v-subheader>
                         </v-col>
                         <v-col cols="12">
                             <v-btn color="amber">Create</v-btn>
@@ -130,6 +153,8 @@ export default {
   },
   methods: {
     onFileChange(e) {
+        this.files = [];
+        this.image_urls = [];
   const newFiles = Array.from(e.target.files);
   for (let i = 0; i < newFiles.length; i++) {
     if (this.files.length < 4) {
@@ -143,8 +168,23 @@ export default {
     }
   }
 },
-CovertToTimestampfromString(date) {
-    return new Date(date).getTime() / 1000;
+CovertToTimestampfromStringStart(date) {
+  let year = date.substring(0, 4);
+  let month = date.substring(5, 7);
+  let day = date.substring(8, 10);
+  let hour = date.substring(11, 13);
+  let minute = date.substring(14, 16);
+
+  this.Start_date = new Date(year, month - 1, day, hour, minute).getTime();
+},
+CovertToTimestampfromStringEnd(date) {
+let year = date.substring(0, 4);
+  let month = date.substring(5, 7);
+  let day = date.substring(8, 10);
+  let hour = date.substring(11, 13);
+  let minute = date.substring(14, 16);
+
+  this.End_date = new Date(year, month - 1, day, hour, minute).getTime();
 }
 ,
     uploadToS3() {
