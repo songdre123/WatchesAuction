@@ -267,8 +267,8 @@ def check_user_and_auction(userID, auctionID):
             },
         "type": "outbid"
 
-    }"""
-
+    }
+"""
 
 # POST /notification/sendEmail - sending a email to the receipient regarding update on his bid
 @app.route("/notification/sendEmail", methods=["POST"])
@@ -321,3 +321,4 @@ if (
     __name__ == "__main__"
 ):  # execute this program only if it is run as a script (not by 'import')
     app.run(port=5004, debug=True)
+"""
