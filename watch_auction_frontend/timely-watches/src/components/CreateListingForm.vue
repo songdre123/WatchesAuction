@@ -1,7 +1,12 @@
-<style scoped>
+<style>
 .img-container {
   padding: 0 0px; /* Adjust as needed */
 }
+.my-table td, .my-table th {
+  border: 1px solid #000; /* Add lines */
+  padding: 10px; /* Add spacing */
+}
+
 </style>
 
 <template>
@@ -39,6 +44,32 @@
                     <!-- Show filename below -->
                 </v-form>
             </v-row>
+
+            <v-row>
+                <v-col cols="12">
+                    <h4>Suggested Prices</h4>
+                </v-col>                
+            </v-row>
+            <v-row>
+                <v-simple-table  class="my-table">
+                    <template v-slot:default>
+                        <thead>
+                            <tr>
+                                <th class="text-left">Average</th>
+                                <th class="text-left">Mix</th>
+                                <th class="text-left">Max</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{avg_price}}</td>
+                                <td>{{min_price}}</td>
+                                <td>{{max_price}}</td>
+                            </tr>
+                        </tbody>
+                    </template>
+                </v-simple-table>
+            </v-row>
             </v-col>
 
 
@@ -53,17 +84,21 @@
                         </v-col>
                         <v-col cols="6">
                             <v-text-field label="Reference Number" required
-                            v-model="Reference_number"
+                            v-model="reference_number"
                             ></v-text-field>
                         </v-col>
                         <v-col cols="6">
-                            <v-text-field label="Brand" required
-                            v-model="Brand"
-                            ></v-text-field>
+                            <v-select
+                            :items="['Rolex', 'Patek Philippe', 'Audemars Piguet']"
+                            label="Brand"
+                            v-model="brand"
+                            required
+                            >
+                            </v-select>
                         </v-col>
                         <v-col cols="6">
                             <v-text-field label="Year" required
-                            v-model="Year"
+                            v-model="year"
                             ></v-text-field>
                         </v-col>
                         <v-col cols="6">
@@ -131,6 +166,7 @@
 <script>
 
 import AWS from 'aws-sdk';
+import axios from 'axios';
 
 export default {
   data() {
@@ -138,18 +174,28 @@ export default {
         files: [],
         image_urls: [],
         Watch_name: null,
-        Reference_number: null,
-        Brand: null,
-        Year: null,
+        reference_number: null,
+        brand: null,
+        year: null,
         Description: null,
         Minimum_bid: null,
         Start_date: null,
         End_date: null,
         Watch_box: null,
         Watch_papers: null,
-        Watch_condition: "New"
+        Watch_condition: "New",
+        manufacturer_id: null,
+        min_price: null,
+        max_price: null,
+        avg_price: null,
+        
     
     };
+  },
+  watch: {
+    reference_number: 'CheckSelection',
+    brand: 'CheckSelection',
+    year: 'CheckSelection',
   },
   methods: {
     onFileChange(e) {
@@ -167,6 +213,42 @@ export default {
       break;
     }
   }
+},
+
+async GetSuggestedPrices() {
+  // get suggested prices from the backend
+  // use the watch name, reference number, brand, year, and condition
+  // to get the suggested prices
+  // then update the table
+  if(this.brand=="Rolex"){
+    this.manufacturer_id= "221";
+  }
+    else if(this.brand=="Patek Philippe"){
+        this.manufacturer_id= "18";
+    }
+    else if(this.brand=="Audemars Piguet"){
+        this.manufacturer_id= "223";
+    }
+console.log(this.do);
+ await axios.get('http://127.0.0.1:5000/scrape', {
+    params: {
+    "ref_number": this.reference_number,
+    "manufacturer_id": this.manufacturer_id,
+    "year": this.year,
+    }
+  })
+    .then((response) => {
+        console.log(response);
+        console.log("response");
+        this.items = response.data;
+        this.avg_price = response.data.average_price;
+        this.min_price = response.data.lowest_price;
+        this.max_price = response.data.highest_price;
+}
+    )
+    .catch((error) => {
+        console.log(error);
+    });
 },
 CovertToTimestampfromStringStart(date) {
   let year = date.substring(0, 4);
@@ -186,6 +268,14 @@ let year = date.substring(0, 4);
 
   this.End_date = new Date(year, month - 1, day, hour, minute).getTime();
 }
+,
+CheckSelection() {
+        console.log(this.reference_number);
+        if (this.reference_number && this.brand && this.year) {
+            this.GetSuggestedPrices();
+    }
+}
+
 ,
     uploadToS3() {
         // if number of files is more than 3, alert the user
