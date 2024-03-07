@@ -2,14 +2,14 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-from flassger import Swagger
+from flasgger import Swagger
 
 
 
 
 app = Flask(__name__)  # initialize a flask application
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Auction'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost:3306/Auction'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -49,9 +49,9 @@ CREATE TABLE Auction (
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NULL,
     start_price FLOAT NOT NULL,
-    current_price FLOAT NOT NULL
+    current_price FLOAT NOT NULL,
     auction_winner_id INT,
-    auction_status INT DEFAULT 1
+    auction_status INT DEFAULT 1,
     watch_condition VARCHAR(255) NOT NULL,
     watch_brand VARCHAR(255) NOT NULL,
     watch_box_present BOOLEAN NOT NULL,
@@ -190,7 +190,7 @@ def create_auction():
             {
                 "code": 400,
                 "data": {
-                    "auction_id": auction_id
+                    
                 },
                 "message": "Start time is after end time."
             }
