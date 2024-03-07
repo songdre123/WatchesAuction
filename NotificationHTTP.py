@@ -9,6 +9,7 @@ from invokes import invoke_http
 from mailbox import Message
 from jinja2 import Environment, FileSystemLoader
 import os
+from flasgger import Swagger
 
 '''
 API Endpoints:
@@ -48,6 +49,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 password="password@0000"
 db = SQLAlchemy(app)
+
+########## initiate swagger ##########
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'Notification microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows create and retrieve of notification. Additionally, it sends email to the user.'
+}
+swagger = Swagger(app)
 
 ########## declaring mail ##########
 
@@ -131,6 +142,25 @@ notification_url="http://localhost:5004/notification"
 #1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
 @app.route('/notification/<string:email>')
 def find_notification_by_email(email):
+    """
+    Get all notification by user email
+    ---
+    parameters:
+        -   name: email
+            in: path
+            type: string
+            required: true
+            description: The user's email
+    responses:
+        200:
+            description: retrieve all the notification that user has using the email passed in
+        404:
+            description: There is no such user. User does not exist
+        404-2:
+            description: There is no such notification for this user.
+
+    """
+
     #get customer details
     specify_user_url = f"{user_url}/{email}"
     response=invoke_http(specify_user_url,method="GET")
@@ -174,6 +204,36 @@ def find_notification_by_email(email):
 #2. POST /notification/createNotification - create notification in the database 
 @app.route('/notification/createNotification', methods=['POST'])
 def create_notification():
+    """
+    Create a notification into the database
+    ---
+    requestBody:
+        description: notification creation detail
+        required: true
+        content:
+            application/json:
+                schema:
+                    properties:
+                        recipient_id: 
+                            type: integer
+                            description: recipient_id
+                        auction_id: 
+                            type: integer
+                            description: auction_id
+                        notification_type: 
+                            type: string
+                            description: notification_type
+
+    responses:
+        201:
+            description: notification created for user
+        404:
+            description: either user or auction does not exist
+        500:
+            description: Internal server error. An error occurred add new notification to database
+
+    """
+
     new_notif = request.get_json()
 
     #check if user and auction exist
@@ -256,6 +316,80 @@ def check_user_and_auction(userID,auctionID):
 #POST /notification/sendEmail - sending a email to the receipient regarding update on his bid
 @app.route('/notification/sendEmail', methods=['POST'])
 def sendEmail():
+    """
+    Create a notification and send it to the user. the notification will be based on the notification type passed in the request body
+    ---
+    requestBody:
+        description: notification creation detail
+        required: true
+        content:
+            application/json:
+                schema:
+                    properties:
+                        recipient:
+                            type: object
+                            properties:
+                                code:
+                                    type: integer
+                                data:
+                                    type: object
+                                    properties:
+                                        account_status:
+                                            type: integer
+                                        account_type:
+                                            type: string
+                                        address:
+                                            type: string
+                                        email:
+                                            type: string
+                                        first_name:
+                                            type: string
+                                        gender:
+                                            type: string
+                                        id:
+                                            type: integer
+                                        last_name:
+                                            type: string
+                                        password:
+                                            type: string
+                                        phone_number:
+                                            type: string
+                                        profile_picture:
+                                            type: string
+                                        registration_date:
+                                            type: string
+                                            format: date-time
+                        auction:
+                            type: object
+                            properties:
+                                code:
+                                    type: integer
+                                data:
+                                    type: object
+                                    properties:
+                                        auction_id:
+                                            type: integer
+                                        auction_item:
+                                            type: string
+                                        current_price:
+                                            type: number
+                                        end_time:
+                                            type: string
+                                            format: date-time
+                                        start_price:
+                                            type: number
+                                        start_time:
+                                            type: string
+                                            format: date-time
+                        type:
+                            type: string
+                        
+
+    responses:
+        404:
+            description: either user or auction does not exist
+
+    """
     email_info = request.get_json()
     # print(email_info)
     #check if both recipient and auction are valid
