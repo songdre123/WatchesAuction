@@ -5,19 +5,21 @@
  */
 
 // Components
-import App from './App.vue'
+import App from "./App.vue";
+
+
 
 // Composables
-import { createApp } from 'vue'
+import { createApp } from "vue";
 
 // Plugins
-import { registerPlugins } from '@/plugins'
-
-const app = createApp(App)
-
-window.global = window;
+import { registerPlugins } from "@/plugins";
 
 
-registerPlugins(app)
+// Load environment variables from .env file
 
-app.mount('#app')
+const app = createApp(App);
+
+registerPlugins(app);
+
+app.mount("#app");

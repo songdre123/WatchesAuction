@@ -9,17 +9,15 @@ CREATE TABLE IF NOT EXISTS `Bids` (
     bid_amount FLOAT NOT NULL,
     auction_id INT,
     user_id INT,
-    bid_time TIMESTAMP NOT NULL,
-    FOREIGN KEY (auction_id) REFERENCES Auction(auction_id),
-    FOREIGN KEY (user_id) REFERENCES Users(id)
+    bid_time TIMESTAMP NOT NULL
 );
 
 -- Insert sample data into the Bids table
 INSERT INTO Bids (bid_amount, auction_id, user_id, bid_time)
 VALUES 
-    (100.0, 1, 1495768, 28383, '2023-12-01 10:00:00'),
-    (150.0, 1, 2432348, 38492, '2023-12-01 10:15:00'),
-    (200.0, 2, 1493839, 40593,'2023-12-02 09:30:00'),
-    (180.0, 2, 3301938, 60293, '2023-12-02 09:45:00');
+    (100.00, 1, 1, '2024-03-01 10:00:00'), -- Example bid for auction 1 by user 1 at a specific time
+    (150.00, 2, 2, '2024-03-01 11:00:00'), -- Example bid for auction 2 by user 2 at a specific time
+    (200.00, 1, 3, '2024-03-01 12:00:00'); -- Example bid for auction 1 by user 3 at a specific time
+
 
 

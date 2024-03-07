@@ -1,53 +1,34 @@
 // Composables
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   {
-    path: '/',
-    name: 'Login',
-    component: () => import('@/views/Login.vue'),
+    path: "/",
+    name: "Login",
+    component: () => import("@/views/Login.vue"),
   },
   {
-    path: '/Home',
-    component: () => import('@/layouts/default/Default.vue'),
+    path: "/home",
+    component: () => import("@/layouts/default/Default.vue"),
     children: [
       {
-        path: '',
-        name: 'Home',
-        // route level code-splitting
-        // this generates a separate chunk (about.[hash].js) for this route
-        // which is lazy-loaded when the route is visited.
-        component: () => import(/* webpackChunkName: "home" */ '@/views/AuctionHome.vue'),
+        path: "", // Empty path for the Home route
+        name: "Home",
+        component: () =>
+          import(/* webpackChunkName: "home" */ "@/views/AuctionHome.vue"),
+      },
+      {
+        path: "account", // Removed the leading slash
+        name: "Account",
+        component: () => import("@/views/Account.vue"),
       },
     ],
   },
-  {
-    path: '/account',
-    component: () => import('@/layouts/default/Default.vue'),
-    children: [
-      {
-        path: '',
-        name: 'Account',
-        component: () => import('@/views/Account.vue'),
-      },
-    ],
-  },
-  {
-    path: '/listing',
-    component: () => import('@/layouts/default/Default.vue'),
-    children: [
-      {
-        path: '',
-        name: 'Listing',
-        component: () => import('@/views/Listing.vue'),
-      },
-    ],
-  }
-]
+];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
-})
+});
 
-export default router
+export default router;
