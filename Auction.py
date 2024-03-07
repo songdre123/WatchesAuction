@@ -404,6 +404,68 @@ def open_auction():
         "message": "Auction opened successfully."
     }), 200
 
+#get all open auctions
+@app.route('/open_auctions', methods=['GET'])
+def get_open_auctions():
+    """
+    Get all Open Auctions
+    ---
+    responses:
+        200:
+            description: Return all Open Auctions
+        404:
+            description: There are no open auctions
+    """
+    auctions = db.session.query(Auction).filter_by(auction_status=1).all()
+
+    if len(auctions):
+        return jsonify(
+            {
+                "code": 200,
+                "data": {
+                    "auctions": [auction.json() for auction in auctions]
+                }
+            }
+        )
+    return jsonify(
+        {
+            "code": 404,
+            "message": "There are no open auctions."
+        }
+    ), 404
+
+#get all closed auctions
+@app.route('/closed_auctions', methods=['GET'])
+def get_closed_auctions():
+    """
+    Get all Closed Auctions
+    ---
+    responses:
+        200:
+            description: Return all Closed Auctions
+        404:
+            description: There are no closed auctions
+    """
+    auctions = db.session.query(Auction).filter_by(auction_status=0).all()
+
+    if len(auctions):
+        return jsonify(
+            {
+                "code": 200,
+                "data": {
+                    "auctions": [auction.json() for auction in auctions]
+                }
+            }
+        )
+    return jsonify(
+        {
+            "code": 404,
+            "message": "There are no closed auctions."
+        }
+    ), 404
+
+
+
 
 
 
