@@ -154,6 +154,11 @@ def find_by_email(email):
     """
     Get a specifc user by email
     ---
+    parameters:
+        -   in: email of user
+            name: email
+            required: true
+
     responses:
         200:
             description: Return user information with matching email
@@ -183,6 +188,11 @@ def find_by_id(user_id):
     """
     Get user by ID
     ---
+    parameters:
+        -   in: id of user
+            name: id
+            required: true
+
     responses:
         200:
             description: Returns user information with matching ID
@@ -210,15 +220,44 @@ def find_by_id(user_id):
 @app.route('/user/login/<string:email>', methods=['POST'])
 def login(email):
     """
-    Check log in credentials
+    Check user credentials
+
     ---
+    parameters:
+        - name: email
+          in: path
+          description: Email of the user
+          required: true
+          schema:
+              type: string
+    requestBody:
+        required: true
+        content:
+            application/json:
+                schema:
+                    type: object
+                    properties:
+                        bid_amount:
+                            type: number
+                            format: float
+                            description: Amount of the bid
+                            example: 100.0
+                        auction_id:
+                            type: integer
+                            description: ID of the auction associated with the bid
+                            example: 123
+                        user_id:
+                            type: integer
+                            description: ID of the user placing the bid
+                            example: 456
     responses:
-        200:
-            description: User authenticated
-        401:
-            description: Incorrect password
-        404:
-            description: User does not exist
+        201:
+            description: Bid created successfully
+        400:
+            description: Bid has already been placed or bad request
+        500:
+            description: Internal server error
+            
     """
 
     user = db.session.scalars(
