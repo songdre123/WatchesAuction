@@ -9,33 +9,51 @@ import json
 app = Flask(__name__)
 
 connection = amqp_connection.create_connection() 
-channel = connection.channel()  
-
 
 def check_auctions():
   # Check if the datetime matches the current time
   # If it does, call the process() function
   print("Checking auctions at: ", datetime.now())
-  auctions = invoke_http("http://localhost:5001/auction", "get") #? maybe only get all auctions that are from today onwards to reduce complexity?
+  auctions = invoke_http("http://localhost:5001/auction", "get") #? maybe only get all auctions that have a certin status then split the below up so that it doesnt need to process all auctions
   five_seconds_ago = datetime.now() - timedelta(seconds=5)
-  #! how many rollbacks are we handling? how to keep track of rollbacks?
-  #! what is the rollback duration? (1Hr?)
-  rollback_time = datetime.now() - timedelta(hours=1)
-  five_seconds_ago_rollback = rollback_time - timedelta(seconds=5)
-  for auction in auctions['data']['auctions']:
-    end_time = datetime.strptime(auction['end_time'], '%Y-%m-%d %H:%M:%S')
-    if end_time <= five_seconds_ago:
-    # if end_time <= five_seconds_ago and datetime.now() >= end_time:
-      # check the above if statement to ensure that it checks the 5 second window
-      # case where auction has ended
-      process(auction)
-    elif end_time <= five_seconds_ago_rollback and rollback_time >= end_time:
-      #! check if payment made so there is no need to rollback is there a variable for this?
-      
 
-      # if payment not made, rollback the auction
-      auction_id = auction['auction_id']
-      #find next highest bidder from this auction
+  for auction in auctions['data']['auctions']:
+
+    #?convert time into readable format
+    end_time = datetime.strptime(auction['end_time'], '%Y-%m-%d %H:%M:%S')
+    start_time = datetime.strptime(auction['start_time'], '%Y-%m-%d %H:%M:%S')
+
+    #? if auction started then change status from 0 to 1
+    if start_time <= five_seconds_ago and datetime.now() >= start_time:
+      #? send put request to change status of auction from 0 to 1 to show that auction has started
+      if auction['status'] == 0:
+        auction['status'] = 1
+        update_status = invoke_http("http://localhost:5001/auction", "put", json=auction.json())
+
+        #? error handling for the put request
+        if update_status['code'] != 200:
+          email_seller("auctionstartfail")
+        else:
+          email_seller("auctionstarted")
+
+    #? if auction ended then change status from 1 to 2 and process the top bidder (switch the if statements)
+    elif end_time <= five_seconds_ago:
+    # elif end_time <= five_seconds_ago and datetime.now() >= end_time:
+      #? send put request to change status of auction from 1 to 2 to show that auction has ended
+      if auction['status'] == 1:
+        #? process the top bidder of the auctionl
+        process(auction)
+        auction['status'] = 2
+        update_status = invoke_http("http://localhost:5001/auction", "put", json=auction.json())
+
+        #? error handling for the put request
+        if update_status['code'] != 200:
+          email_seller("auctionendfail")
+        else:
+          email_seller("auctionended") #! maybe can send the seller a list of all the bids that was received for this auction?
+        # if payment not made, rollback the auction
+        auction_id = auction['auction_id']
+        #find next highest bidder from this auction
     else:
       # case where auction is still ongoing
       pass 
@@ -44,7 +62,6 @@ def check_auctions():
 
 def process(auction):
   exchangename = "notification_direct" 
-  seller_id = 1  #! REPLACE with the actual seller id
 
   # check if there is a winner
   if auction['auction_winner_id'] != None:
@@ -60,13 +77,19 @@ def process(auction):
   else:
     print(auction['auction_id'], "has no winner")
     # call AMQP to send a message to the seller
-    message = {
-      "recipient_id": seller_id,
-      "auction_id": auction['auction_id'],
-      "notification_type": "informseller" #! REPLACE with the actual notification type
-    }
-    message = json.dumps(message)
-    channel.basic_publish(exchange=exchangename, body=message, properties=pika.BasicProperties(delivery_mode = 2),routing_key="Notification")
+    email_seller("nowinner")
+
+
+def email_seller(notification_type):
+  exchangename = "notification_direct" 
+  seller_id = 1  #! REPLACE with the actual seller id
+  message = {
+    "recipient_id": seller_id,
+    "auction_id": auction['auction_id'],
+    "notification_type": notification_type #! REPLACE with the actual notification type
+  }
+  message = json.dumps(message)
+  channel.basic_publish(exchange=exchangename, body=message, properties=pika.BasicProperties(delivery_mode = 2),routing_key="Notification")
 
 if __name__ == '__main__':
   scheduler = BackgroundScheduler()
