@@ -5,10 +5,26 @@ from datetime import datetime
 from flassger import Swagger
 
 
+
+
 app = Flask(__name__)  # initialize a flask application
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Auction'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'Book microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows create, retrieve, update, and delete of books'
+}
+swagger = Swagger(app)
+
+
+
+
 #should test database see if this work. coz i tried and they say need configure mySQL strict mode. i configure the following then it works. if it works for you then its okay
 """
 #the query below remove no zero date and make sure that auction can take in not null dates
