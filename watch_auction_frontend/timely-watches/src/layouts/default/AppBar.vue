@@ -2,7 +2,7 @@
 <!-- eslint-disable no-multiple-template-root -->
 <template>
   <div>
-    <v-navigation-drawer v-model="drawer" temporary color="black">
+    <v-navigation-drawer v-model="drawer" temporary color="amber-lighten-4">
       <v-list-item
           prepend-avatar="https://randomuser.me/api/portraits/men/78.jpg"
           title="John Leider"
@@ -11,31 +11,45 @@
       <v-divider></v-divider>
 
       <v-list density="compact" nav>
+        <router-link class="router-link" to="/home">
           <v-list-item
-            prepend-icon="mdi-account"
-            title="Account"
-            value="account"
-            to="/account"
-          ></v-list-item>
+          prepend-icon="mdi-home"
+          title="All Auctions"
+          value="home">
+          </v-list-item>
+        </router-link>
+
           <v-list-item
             prepend-icon="mdi-gavel"
-            title="Auction"
+            title="My Auctions"
             value="auction"
           ></v-list-item>
+
           <v-list-item
             prepend-icon="mdi-cash-multiple"
-            title="Bids"
+            title="My Bids"
             value="bids"
           ></v-list-item>
+
+          <router-link class="router-link" to="/home/account">
+            <v-list-item
+              prepend-icon="mdi-account"
+              title="Account"
+              value="account"
+            ></v-list-item>
+          </router-link>
+
+          <router-link class="router-link" to="/">
           <v-list-item
             prepend-icon="mdi-door"
             title="Logout"
             value="logout"
           ></v-list-item>
+          </router-link>
         </v-list>
 
     </v-navigation-drawer>
-  <v-app-bar :elevation="2" :height="100">
+  <v-app-bar :elevation="2" :height="100" color="amber-lighten-5">
     <v-btn @click.stop="drawer = !drawer" density="compact" icon="mdi-menu"></v-btn>
     <v-app-bar-title class="topbar">
       <router-link to="/home">
@@ -69,19 +83,10 @@
 </template>
 
 <script>
-import SvgIcon from '@jamescoyle/vue-icon';
-import { mdiWatch } from '@mdi/js';
-import { VList } from 'vuetify/lib/components/index.mjs';
 
 export default {
-	name: "my-cool-component",
-	components: {
-    SvgIcon,
-    VList
-},
 	data() {
 		return {
-  path1: mdiWatch,
   drawer: null,
   notifications: [
     'Your bid at Auction Ref: 1593478229v has beeen replaced',
@@ -107,6 +112,11 @@ export default {
 
 .header {
   font-family: Riviera Nights, sans-serif;
+}
+
+.router-link {
+  text-decoration: none;
+  color: black;
 }
 
 </style>

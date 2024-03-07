@@ -9,20 +9,26 @@
     "lint": "eslint . --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@jamescoyle/vue-icon": "^0.1.2",
+    "@aws-amplify/auth": "^6.0.18",
+    "@aws-amplify/core": "^6.0.18",
+    "@aws-sdk/client-s3": "^3.525.0",
     "@mdi/font": "7.0.96",
-    "@mdi/js": "^7.4.47",
     "aws-sdk": "^2.1569.0",
+    "axios": "^1.6.7",
     "bootstrap": "^5.3.0",
     "core-js": "^3.29.0",
     "pinia": "^2.0.0",
     "roboto-fontface": "*",
+    "typescript": "^5.3.3",
+    "uuid": "^9.0.1",
     "vue": "^3.2.0",
     "vue-router": "^4.0.0",
     "vuetify": "^3.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
+    "dotenv": "^16.4.5",
+    "dotenv-webpack": "^8.0.1",
     "eslint": "^8.37.0",
     "eslint-plugin-vue": "^9.3.0",
     "sass": "^1.60.0",
