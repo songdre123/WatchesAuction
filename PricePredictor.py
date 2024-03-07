@@ -23,11 +23,21 @@ app.config['SWAGGER'] = {
 }
 swagger = Swagger(app)
   
-def scrape_chrono24(ref_number, ref_number_extra, manufacturer_id, year, currency="SGD"):
+def scrape_chrono24(ref_number, manufacturer_id, year, currency="SGD"):
     options = Options()
     options.add_argument('--headless')  # Set Chrome to run in headless mode
     driver = webdriver.Chrome(options=options)
 
+    ref_number_extra = None
+    
+    if manufacturer_id == "221":
+      ref_number_extra = 24221
+    elif manufacturer_id == "18":
+      ref_number_extra = 2418
+    elif manufacturer_id == "194":
+      ref_number_extra = 24194
+      
+    
     # Chrono24 Website URL
     chrono24_url = f"https://www.chrono24.sg/search/index.htm?currencyId={currency}&dosearch=true&manufacturerIds={manufacturer_id}&maxAgeInDays=0&pageSize=60&redirectToSearchIndex=true&referenceNumber={ref_number}%{ref_number_extra}&resultview=list&searchexplain=1&sortorder=0&usedOrNew=used&year={year}&specials=103"
 
@@ -137,15 +147,16 @@ def scrape():
         description: Internal server error
     """
     ref_number = request.args.get('ref_number')
-    ref_number_extra = request.args.get('ref_number_extra')
+    # ref_number_extra = request.args.get('ref_number_extra')
     manufacturer_id = request.args.get('manufacturer_id')
     year = request.args.get('year')
-
-    if not (ref_number and ref_number_extra and manufacturer_id and year):
-        return jsonify({'error': 'Please provide all parameters: ref_number, ref_number_extra, manufacturer_id, year'})
-
+    
+    # ref_number_extra = None
+      
+    if not (ref_number and manufacturer_id and year):
+        return jsonify({'error': 'Please provide all parameters: ref_number, manufacturer_id, year'})
     try:
-        result = scrape_chrono24(ref_number, ref_number_extra, manufacturer_id, year)
+        result = scrape_chrono24(ref_number, manufacturer_id, year)
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)})
