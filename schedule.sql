@@ -4,5 +4,5 @@ USE Schedule;
 CREATE TABLE Schedule (
     auction_id INT PRIMARY KEY,
     user_id INT,
-    collection_time TIMESTAMP
+    collection_time TIMESTAMP NULL
 );
