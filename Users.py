@@ -2,7 +2,18 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
 
+from flasgger import Swagger
+
 app = Flask(__name__)  # initialize a flask application
+
+# Swagger UI configuration
+app.config['SWAGGER'] = {
+    'title': 'User microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows interaction with the Users microservice'
+}
+swagger = Swagger(app)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Users'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -106,6 +117,16 @@ class User(db.Model):
 # get all users
 @app.route('/user')
 def get_all():
+    """
+    Get all users
+    ---
+    responses:
+        200:
+            description: Return all books
+        404:
+            description: No users
+    """
+
     Users = db.session.scalars(db.select(User)).all()
 
     if len(Users):
@@ -128,6 +149,16 @@ def get_all():
 # get specific user by email
 @app.route('/user/<string:email>')
 def find_by_email(email):
+    """
+    Get a specifc user by email
+    ---
+    responses:
+        200:
+            description: Return user information with matching email
+        404:
+            description: No user exists that currently uses that email
+    """
+
     user = db.session.scalars(
         db.select(User).filter_by(email=email).limit(1)).first()
     if user:
@@ -147,6 +178,16 @@ def find_by_email(email):
 # get specific user by id
 @app.route('/user/<int:user_id>')
 def find_by_id(user_id):
+    """
+    Get user by ID
+    ---
+    responses:
+        200:
+            description: Returns user information with matching ID
+        404:
+            description: No user exists with that ID
+    """
+
     user = db.session.scalars(
         db.select(User).filter_by(id=user_id).limit(1)).first()
     if user:
@@ -166,6 +207,18 @@ def find_by_id(user_id):
 # check user password
 @app.route('/user/login/<string:email>', methods=['POST'])
 def login(email):
+    """
+    Check log in credentials
+    ---
+    responses:
+        200:
+            description: User authenticated
+        401:
+            description: Incorrect password
+        404:
+            description: User does not exist
+    """
+
     user = db.session.scalars(
         db.select(User).filter_by(email=email).limit(1)).first()
     if user:
@@ -197,6 +250,18 @@ def login(email):
 # create user
 @app.route('/user/<string:email>', methods=['POST'])
 def create_user(email):
+    """
+    Create user
+    ---
+    responses:
+        201:
+            description: User created
+        400:
+            description: Email is already in use
+        500:
+            description: An error occurred while creating user
+    """
+
     if (db.session.scalars(db.select(User).filter_by(email=email).limit(1)).first()):
         return jsonify(
             {
@@ -237,6 +302,18 @@ def create_user(email):
 #edit user data
 @app.route('/user/<string:email>', methods=['PUT'])
 def edit_user(email):
+    """
+    Edit user data
+    ---
+    responses:
+        200:
+            description: User updated successfully
+        404:
+            description: User does not exist
+        500:
+            description: An error occurred while updating the user
+    """
+
     user = db.session.query(User).filter_by(email=email).first()
 
     if not user:
@@ -270,6 +347,18 @@ def edit_user(email):
 #delete user
 @app.route('/user/<string:email>', methods=['DELETE'])
 def delete_user(email):
+    """
+    Delete User
+    ---
+    responses:
+        200:
+            description: User deleted successfully
+        404:
+            description: User does not exist
+        500:
+            description: An error occurred while deleting the user
+    """
+
     user = db.session.query(User).filter_by(email=email).first()
 
     if not user:
