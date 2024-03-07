@@ -8,35 +8,40 @@ from invokes import invoke_http
 
 from mailbox import Message
 
+'''
 
-"""
-API Endpoints:
-1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
-2. POST /notification/createNotification - create notification in the database  
-3. POST /notification/sendEmail - sending a email to tnhe receipient regarding update on his bid
-
-
-PORT: 5004
-DATABASE: Notification
-TABLE: notification
-SQL Credentials: root:root
-SQL Port: 3306
-
-
-SQL Database creation code:
-CREATE TABLE Notification(
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    recipient_id INT NOT NULL,
-    auction_id INT,
-    notification_type VARCHAR(50) NOT NULL COMMENT '(outbid, winandpayremind, paysucess,rollbackandpayremind)',
-    time_sent TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_unread INT DEFAULT 1
-);
-
-scenario when user will receive the notification 
+scenario when user will receive the notification (notification Type)
 1) outbid- when someone out bidded the customer (highest bid changed). send to previous person with highest bid 
 2) winandpayremind/rollbackandpayremind- when the person win the bid and it will tell the user to pay 
 3) paysucess-notify user when payment is successful 
+4) schedulesuccess - notifiy user about successful schedule of collection time
+
+'''
+########## URL ##########
+user_url="http://localhost:5000/user"
+auction_url="http://localhost:5001/auction"
+notification_url="http://localhost:5004/notification"
+
+
+########## For RabbitMQ ##########
+e_queue_name = 'Notification'
+
+#1) receiveNotification- RabbitMQ consumer
+def receiveNotification(channel):
+    try:
+        # set up a consumer and start to wait for coming messages
+        channel.basic_consume(queue=e_queue_name, on_message_callback=callback, auto_ack=True)
+        print('Notification microservice: Consuming from queue:', e_queue_name)
+        channel.start_consuming() # an implicit loop waiting to receive messages; 
+        #it doesn't exit by default. Use Ctrl+C in the command window to terminate it.
+    except pika.exceptions.AMQPError as e:
+        print(f"Notification microservice: Failed to connect: {e}") 
+
+    except KeyboardInterrupt:
+        print("Notification microservice: Program interrupted by user.")
+
+
+
 """
 ########## initiate flask ##########
 app = Flask(__name__)  # initialize a flask application
