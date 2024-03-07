@@ -6,7 +6,9 @@ from flasgger import Swagger
 
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("BidsURL")
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    "mysql+mysqlconnector://root:password@localhost:3306/bids"
+)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 app.config["SWAGGER"] = {
