@@ -15,10 +15,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize flasgger 
 app.config['SWAGGER'] = {
-    'title': 'Book microservice API',
+    'title': 'Auction microservice API',
     'version': 1.0,
     "openapi": "3.0.2",
-    'description': 'Allows create, retrieve, update, and delete of books'
+    'description': 'Allows create, retrieve, update, and delete of Auctions'
 }
 swagger = Swagger(app)
 
@@ -135,6 +135,15 @@ def store_winner(auction_id, auction_winner_id):
 # get all auctions
 @app.route('/auction')
 def get_all():
+    """
+    Get all Auctions
+    ---
+    responses:
+        200:
+            description: Return all Auctions
+        404:
+            description: There are no auctions
+    """
     auctions = db.session.scalars(db.select(Auction)).all()
 
     if len(auctions):
@@ -157,6 +166,15 @@ def get_all():
 # get specific auction
 @app.route('/auction/<int:auction_id>')
 def find_by_auction_id(auction_id):
+    """
+    Find by Auctions
+    ---
+    responses:
+        200:
+            description: Return specific auction
+        404:
+            description: Auction does not exist
+    """
     auction = db.session.scalars(
         db.select(Auction).filter_by(auction_id=auction_id).limit(1)
     ).first()
@@ -178,6 +196,17 @@ def find_by_auction_id(auction_id):
 # create auction
 @app.route('/auction', methods=['POST'])
 def create_auction():
+    """
+    Create Auction
+    ---
+    responses:
+        201:
+            description: Auction created
+        400:
+            description: Bad request
+        500:
+            description: An error occurred creating the auction
+    """
     #when creating auction, i can still be creating the same item even though item already exist(2 items but different id no.(?)). TLDR i think there no point checking for id of auction. coz its auto increment in sql. when creating, seller wont ask to put id of auction
 
     data = request.get_json()
@@ -240,6 +269,19 @@ def create_auction():
 #edit auction data
 @app.route('/auction/<int:auction_id>', methods=['PUT'])
 def edit_auction(auction_id):
+    """
+    Edit Auction
+    ---
+    responses:
+        200:
+            description: Auction updated
+        400:
+            description: Bad request
+        404:
+            description: Auction not found
+        500:
+            description: An error occurred updating the auction
+    """
     auction = db.session.query(Auction).filter_by(auction_id=auction_id).first()
 
     if not auction:
@@ -279,6 +321,17 @@ def edit_auction(auction_id):
 #delete auction
 @app.route('/auction/<int:auction_id>', methods=['DELETE'])
 def delete_auction(auction_id):
+    """
+    Delete Auction
+    ---
+    responses:
+        200:
+            description: Auction deleted
+        404:
+            description: Auction not found
+        500:
+            description: An error occurred deleting the auction
+    """
     auction = db.session.query(Auction).filter_by(auction_id=auction_id).first()
 
     if not auction:
@@ -305,6 +358,15 @@ def delete_auction(auction_id):
     }), 200
 #function that closes auction when the passed time is greater than the end time
 def close_auction():
+    """
+    Close Auction
+    ---
+    responses:
+        200:
+            description: Auction closed
+
+            
+    """
     auctions = db.session.query(Auction).filter(Auction.end_time < datetime.now()).all()
     for auction in auctions:
         auction.auction_status = 0
