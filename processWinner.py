@@ -15,7 +15,7 @@ def check_auctions():
   # Check if the datetime matches the current time
   # If it does, call the process() function
   print("Checking auctions at: ", datetime.now())
-  auctions = invoke_http("http://localhost:5001/auction", "get") #? maybe only get all auctions that have a certin status then split the below up so that it doesnt need to process all auctions
+  auctions = invoke_http("http://localhost:5001/auction", "get") 
   five_seconds_ago = datetime.now() - timedelta(seconds=5)
 
   for auction in auctions['data']['auctions']:
@@ -27,9 +27,9 @@ def check_auctions():
 
     # if auction started then change status from 0 to 1
     if start_time >= five_seconds_ago and start_time <= datetime.now():
-      print("Auction", auction_id ,"started at: ", datetime.now())
       # send put request to change status of auction from 0 to 1 to show that auction has started
       if auction['auction_status'] == 0:
+        print("Auction", auction_id ,"started at: ", datetime.now())
         auction['auction_status'] = 1
         uri = "http://127.0.0.1:5001/auction" + "/" + str(auction_id)
         auction_copy = auction.copy()
@@ -116,7 +116,14 @@ def process(auction):
   else:
     print(auction['auction_id'], "has no winner")
     # call AMQP to send a message to the seller
-    email_seller("nowinner", auction)
+    # update auction status to reflect that there is no winner by changing status to -1
+    auction['auction_status'] = -1
+    uri = "http://127.0.0.1:5001/auction" + "/" + str(auction['auction_id'])
+    auction_copy = auction.copy()
+    del auction_copy['auction_id']
+    update_status = invoke_http(uri, "PUT", json=auction_copy)
+    # email_seller("nowinner", auction)
+
 
 def rollback(auction):
   # find the next highest bidder for the auction
@@ -132,16 +139,31 @@ def rollback(auction):
     # sort the bids in descending order
     sorted_bids = sorted(bids['data'], key=lambda k: k['bid_amount'], reverse=True)
     # get the next highest bidder
-    next_highest_bidder = sorted_bids[n_highiest_bidder]
-    print("Winner for", auction['auction_id'], "has been rolled back to the", (n_highiest_bidder + 1) , "highest bidder, which is user id", next_highest_bidder['user_id'])
-    # use notification to inform next highest bidder that they need to pay
-    message = {
-      "recipient_id": next_highest_bidder['user_id'],
-      "auction_id": auction['auction_id'],
-      "notification_type": "rollbackandpayremind"
-    }
-    message = json.dumps(message)
-    #?channel.basic_publish(exchange=exchangename, body=message, properties=pika.BasicProperties(delivery_mode = 2),routing_key="Notification")
+
+    # check if there is a next highest bidder
+    if len(sorted_bids) <= n_highiest_bidder:
+      print("There is no next highest bidder for auction", auction['auction_id'])
+
+      # update auction status to -1 to show that there is no winner
+      auction['auction_status'] = -1
+      uri = "http://127.0.0.1:5001/auction" + "/" + str(auction['auction_id'])
+      auction_copy = auction.copy()
+      del auction_copy['auction_id']
+      update_status = invoke_http(uri, "PUT", json=auction_copy)
+
+      # email_seller("nowinner", auction)
+      return
+    else: 
+      next_highest_bidder = sorted_bids[n_highiest_bidder]
+      print("Winner for", auction['auction_id'], "has been rolled back to the", (n_highiest_bidder + 1) , "highest bidder, which is user id", next_highest_bidder['user_id'])
+      # use notification to inform next highest bidder that they need to pay
+      message = {
+        "recipient_id": next_highest_bidder['user_id'],
+        "auction_id": auction['auction_id'],
+        "notification_type": "rollbackandpayremind"
+      }
+      message = json.dumps(message)
+      #?channel.basic_publish(exchange=exchangename, body=message, properties=pika.BasicProperties(delivery_mode = 2),routing_key="Notification")
   else:
     #inform seller via email that the next highest bidder could not be found due to an error in Bids microservice
     print("Error in Bids microservice when trying to find the next highest bidder for auction", auction['auction_id'])
