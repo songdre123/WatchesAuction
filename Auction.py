@@ -171,6 +171,13 @@ def find_by_auction_id(auction_id):
     """
     Find by Auctions
     ---
+    parameters:
+      - name: auction_id
+        in: path
+        description: ID of the auction to retrieve
+        required: true
+        schema:
+          type: integer
     responses:
         200:
             description: Return specific auction
@@ -201,13 +208,49 @@ def create_auction():
     """
     Create Auction
     ---
+    parameters:
+      - name: body
+        in: body
+        description: Auction data
+        required: true
+        schema:
+          type: object
+          properties:
+            auction_item:
+              type: string
+            start_time:
+              type: string
+            end_time:
+              type: string
+            start_price:
+              type: number
+            current_price:
+              type: number
+            auction_winner_id:
+              type: integer
+            auction_status:
+              type: integer
+            watch_condition:
+              type: string
+            watch_brand:
+              type: string
+            watch_box_present:
+              type: boolean
+            watch_papers_present:
+              type: boolean
+            watch_image1:
+              type: string
+            watch_image2:
+              type: string
+            watch_image3:
+              type: string
     responses:
-        201:
-            description: Auction created
-        400:
-            description: Bad request
-        500:
-            description: An error occurred creating the auction
+      201:
+        description: Auction created
+      400:
+        description: Bad request
+      500:
+        description: An error occurred creating the auction
     """
     #when creating auction, i can still be creating the same item even though item already exist(2 items but different id no.(?)). TLDR i think there no point checking for id of auction. coz its auto increment in sql. when creating, seller wont ask to put id of auction
 
@@ -274,6 +317,48 @@ def edit_auction(auction_id):
     """
     Edit Auction
     ---
+    parameters:
+      - name: auction_id
+        in: path
+        description: ID of the auction to update
+        required: true
+        schema:
+          type: integer
+      - name: body
+        in: body
+        description: Auction data to update
+        required: true
+        schema:
+          type: object
+          properties:
+            auction_item:
+              type: string
+            start_time:
+              type: string
+            end_time:
+              type: string
+            start_price:
+              type: number
+            current_price:
+              type: number
+            auction_winner_id:
+              type: integer
+            auction_status:
+              type: integer
+            watch_condition:
+              type: string
+            watch_brand:
+              type: string
+            watch_box_present:
+              type: boolean
+            watch_papers_present:
+              type: boolean
+            watch_image1:
+              type: string
+            watch_image2:
+              type: string
+            watch_image3:
+              type: string
     responses:
         200:
             description: Auction updated
@@ -326,6 +411,13 @@ def delete_auction(auction_id):
     """
     Delete Auction
     ---
+    parameters:
+      - name: auction_id
+        in: path
+        description: ID of the auction to delete
+        required: true
+        schema:
+          type: integer
     responses:
         200:
             description: Auction deleted
