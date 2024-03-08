@@ -387,22 +387,6 @@ def open_auction():
         "code": 200,
         "message": "Auction opened successfully."
     }), 200
-#run the close auction function every 5 minutes
-@app.route('/close_auction', methods=['POST'])
-def close_auction():
-    close_auction()
-    return jsonify({
-        "code": 200,
-        "message": "Auction closed successfully."
-    }), 200
-#run the open auction function every 5 minutes
-@app.route('/open_auction', methods=['POST'])
-def open_auction():
-    open_auction()
-    return jsonify({
-        "code": 200,
-        "message": "Auction opened successfully."
-    }), 200
 
 #get all open auctions
 @app.route('/open_auctions', methods=['GET'])
