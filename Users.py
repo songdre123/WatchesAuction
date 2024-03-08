@@ -294,6 +294,44 @@ def create_user(email):
     """
     Create user
     ---
+    parameters:
+      - name: email
+        in: path
+        description: Email of the user
+        required: true
+        schema:
+          type: string
+      - name: user_data
+        in: body
+        description: User data for creating a new user
+        required: true
+        schema:
+          type: object
+          properties:
+            password:
+              type: string
+              description: The user's password
+            phone_number:
+              type: string
+              description: The user's phone number
+            first_name:
+              type: string
+              description: The user's first name
+            last_name:
+              type: string
+              description: The user's last name
+            gender:
+              type: string
+              description: The user's gender (M/F)
+            address:
+              type: string
+              description: The user's address
+            account_type:
+              type: string
+              description: The type of user account
+            profile_picture:
+              type: string
+              description: URL or path to the user's profile picture
     responses:
         201:
             description: User created
