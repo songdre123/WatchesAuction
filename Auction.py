@@ -291,14 +291,14 @@ def edit_auction(auction_id):
             "code": 404,
             "message": "Auction not found."
         }), 404
-    if auction.auction_status == 0:
-        return jsonify({
-            "code": 400,
-            "message": "Auction is closed."
-        }), 400
+    # if auction.auction_status == 0:
+    #     return jsonify({
+    #         "code": 400,
+    #         "message": "Auction is closed."
+    #     }), 400
 
     data = request.get_json()
-    
+    print(data)
     # Update user attributes based on the provided data
     for key, value in data.items():
         setattr(auction, key, value)
