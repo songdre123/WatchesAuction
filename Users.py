@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
-
 from flasgger import Swagger
+from db_config import set_database_uri
 
 app = Flask(__name__)  # initialize a flask application
 
@@ -15,7 +15,9 @@ app.config['SWAGGER'] = {
 }
 swagger = Swagger(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Users'
+path = "Users"
+set_database_uri(app, path)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 '''
@@ -152,6 +154,11 @@ def find_by_email(email):
     """
     Get a specifc user by email
     ---
+    parameters:
+        -   in: email of user
+            name: email
+            required: true
+
     responses:
         200:
             description: Return user information with matching email
@@ -181,6 +188,11 @@ def find_by_id(user_id):
     """
     Get user by ID
     ---
+    parameters:
+        -   in: id of user
+            name: id
+            required: true
+
     responses:
         200:
             description: Returns user information with matching ID
@@ -208,15 +220,44 @@ def find_by_id(user_id):
 @app.route('/user/login/<string:email>', methods=['POST'])
 def login(email):
     """
-    Check log in credentials
+    Check user credentials
+
     ---
+    parameters:
+        - name: email
+          in: path
+          description: Email of the user
+          required: true
+          schema:
+              type: string
+    requestBody:
+        required: true
+        content:
+            application/json:
+                schema:
+                    type: object
+                    properties:
+                        bid_amount:
+                            type: number
+                            format: float
+                            description: Amount of the bid
+                            example: 100.0
+                        auction_id:
+                            type: integer
+                            description: ID of the auction associated with the bid
+                            example: 123
+                        user_id:
+                            type: integer
+                            description: ID of the user placing the bid
+                            example: 456
     responses:
-        200:
-            description: User authenticated
-        401:
-            description: Incorrect password
-        404:
-            description: User does not exist
+        201:
+            description: Bid created successfully
+        400:
+            description: Bid has already been placed or bad request
+        500:
+            description: Internal server error
+            
     """
 
     user = db.session.scalars(
@@ -253,6 +294,44 @@ def create_user(email):
     """
     Create user
     ---
+    parameters:
+      - name: email
+        in: path
+        description: Email of the user
+        required: true
+        schema:
+          type: string
+      - name: user_data
+        in: body
+        description: User data for creating a new user
+        required: true
+        schema:
+          type: object
+          properties:
+            password:
+              type: string
+              description: The user's password
+            phone_number:
+              type: string
+              description: The user's phone number
+            first_name:
+              type: string
+              description: The user's first name
+            last_name:
+              type: string
+              description: The user's last name
+            gender:
+              type: string
+              description: The user's gender (M/F)
+            address:
+              type: string
+              description: The user's address
+            account_type:
+              type: string
+              description: The type of user account
+            profile_picture:
+              type: string
+              description: URL or path to the user's profile picture
     responses:
         201:
             description: User created

@@ -1,16 +1,16 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from flask_cors import CORS  # Add this import
+from flask_cors import CORS
 from flasgger import Swagger
-from configparser import ConfigParser
+from db_config import set_database_uri
 
 app = Flask(__name__)
 CORS(app)
 
-config = ConfigParser()
-config.read('config.ini')
-app.config['SQLALCHEMY_DATABASE_URI'] = config.get('database', 'db_uri')
+path = "schedule"
+set_database_uri(app, path)
+
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SWAGGER"] = {
@@ -370,4 +370,4 @@ def get_schedules_within_time_range():
 
 
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(port=5003, debug=True)

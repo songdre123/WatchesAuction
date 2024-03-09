@@ -30,3 +30,4 @@ import Settings from "@/components/ProfileSettings.vue"
 
 
 </style>
+

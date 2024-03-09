@@ -12,8 +12,13 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 import re
 import json
+from flask import Flask
+from flask_cors import CORS
+
 
 app = Flask(__name__)  # initialize a flask application
+CORS(app)
+
 # Initialize flasgger 
 app.config['SWAGGER'] = {
     'title': 'Price Predictor microservice API',
