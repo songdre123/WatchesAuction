@@ -8,6 +8,21 @@ const routes = [
     component: () => import("@/views/Login.vue"),
   },
   {
+    path: "/checkout",
+    name: "Checkout",
+    component: () => import("@/views/Checkout.vue"),
+  },
+  {
+    path: "/Success",
+    name: "Success",
+    component: () => import("@/views/Success.vue"), // Fixed the casing of the file name
+  },
+  {
+    path: "/Cancel",
+    name: "Cancel",
+    component: () => import("@/views/Cancel.vue"),
+  },
+  {
     path: "/home",
     component: () => import("@/layouts/default/Default.vue"),
     children: [
