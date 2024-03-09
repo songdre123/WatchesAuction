@@ -28,19 +28,25 @@ def get_auction_start_price(auction_id):
 # Function to create bid
 def create_bid(auction_id, user_id, bid_amount):
     create_bid_response = requests.post(
-        f"http://localhost:5002/bid/{auction_id}",
+        f"http://localhost:5002/bid",
         json={"auction_id": auction_id, "user_id": user_id, "bid_amount": bid_amount}
     )
 
     if create_bid_response.status_code == 201:
         return jsonify(
             {
-                "code": 200, 
+                "code": 201, 
                 "message": "Authenticated Bid Created"
             }
-        ), 200
+        ), 201
+    elif create_bid_response.status_code == 400:
+        return jsonify(
+            {
+                "code": 400, 
+                "message": "Bad Request: Invalid bid data"
+            }
+        ), 400
     else:
-        
         return jsonify(
             {
                 "code": create_bid_response.status_code, 
@@ -113,10 +119,9 @@ def authenticate_bid():
     user_id = data.get("user_id")
     bid_amount = data.get("bid_amount")
 
-
     bids_response = requests.get(f"http://localhost:5002/bid/all/{auction_id}")
     # Proceed to process bids if there are existing bids
-    if bids_response.status_code == 200 and bids_response.json()["data"]["bids"]:
+    if bids_response.status_code == 200:
         highest_bid_response = requests.get(f"http://localhost:5002/bid/highest/{auction_id}")
 
         if highest_bid_response.status_code == 200:
@@ -124,14 +129,14 @@ def authenticate_bid():
 
             if bid_amount > highest_bid_amount:
                 #bid authenticated
-                create_bid_response = create_bid(auction_id, user_id, bid_amount)
-                if create_bid_response.status_code == 200:
+                create_bid_response, create_bid_status_code = create_bid(auction_id, user_id, bid_amount)
+                if create_bid_status_code == 201:
                     update_auction(auction_id, user_id, bid_amount)
                 
             else:
                 return jsonify({"code": 400, "message": "Bid amount is not higher than the current highest bid"}), 400
         else:
-            #error retrieving the highest bid
+            # Error retrieving the highest bid
             return jsonify({"code": highest_bid_response.status_code, "message": "Error retrieving highest bid information"}), highest_bid_response.status_code
 
     # No existing bids, compare with start price to process bid
@@ -139,19 +144,18 @@ def authenticate_bid():
         start_price = get_auction_start_price(auction_id)
 
         if start_price is not None and bid_amount > start_price:
-            #bid authentiated
-            create_bid_response = create_bid(auction_id, user_id, bid_amount)
-            if create_bid_response.status_code == 200:
+            # Bid authenticated
+            create_bid_response, create_bid_status_code = create_bid(auction_id, user_id, bid_amount)
+            if create_bid_status_code == 201:
                 update_auction(auction_id, user_id, bid_amount)
             
         else:
-            #bid not higher than start price
+            # Bid not higher than start price
             return jsonify({"code": 400, "message": "Bid amount is not higher than the start price"}), 400
     else:
         return jsonify({"code": bids_response.status_code, "message": "Error retrieving bids information"}), bids_response.status_code
 
-    return jsonify({"code": 200, "message": "Bid Authenticated & Created. Notification sent."}), 200
-    
+    return create_bid_response, create_bid_status_code
 
 if __name__ == '__main__':
     app.run(port=5006, debug=True)
