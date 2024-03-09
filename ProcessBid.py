@@ -4,6 +4,8 @@ from datetime import datetime
 from flask_cors import CORS
 from flasgger import Swagger
 import requests
+import pika
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +19,20 @@ app.config["SWAGGER"] = {
 swagger = Swagger(app)
 
 ######################################################################################
+# RabbitMQ configuration
+rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+rabbitmq_channel = rabbitmq_connection.channel()
+rabbitmq_channel.queue_declare(queue='Notification')
+
+# Function to publish notification to RabbitMQ
+def publish_notification(notification, recipient_id):
+    notification["recipient_id"] = recipient_id
+    rabbitmq_channel.basic_publish(
+        exchange='',
+        routing_key='Notification',
+        body=json.dumps(notification)
+    )
+
 # Function to get start price of auction
 def get_auction_start_price(auction_id):
     response = requests.get(f"http://localhost:5001/auction/{auction_id}")
@@ -129,10 +145,23 @@ def authenticate_bid():
 
             if bid_amount > highest_bid_amount:
                 #bid authenticated
+
                 create_bid_response, create_bid_status_code = create_bid(auction_id, user_id, bid_amount)
-                if create_bid_status_code == 201:
-                    update_auction(auction_id, user_id, bid_amount)
                 
+                #when bid is succesfully created, only then auction database will be updated
+                if create_bid_status_code == 201:
+
+                    #Notify previous highest bidder that he got outbidded
+                    previous_highest_bidder = highest_bid_response.json()["data"]["highest_bid"][0]["user_id"]
+                    outbid_notification = {
+                        "auction_id": auction_id,
+                        "notification_type": "outbid"
+                        }
+                    publish_notification(outbid_notification, previous_highest_bidder)
+
+                    #Update Auction to reflect latest bid
+                    update_auction(auction_id, user_id, bid_amount)
+    
             else:
                 return jsonify({"code": 400, "message": "Bid amount is not higher than the current highest bid"}), 400
         else:
@@ -146,7 +175,19 @@ def authenticate_bid():
         if start_price is not None and bid_amount > start_price:
             # Bid authenticated
             create_bid_response, create_bid_status_code = create_bid(auction_id, user_id, bid_amount)
+
+            #when bid is succesfully created, only then auction database will be updated
             if create_bid_status_code == 201:
+
+                #Notify previous highest bidder that he got outbidded
+                previous_highest_bidder = highest_bid_response.json()["data"]["highest_bid"][0]["user_id"]
+                outbid_notification = {
+                    "auction_id": auction_id,
+                    "notification_type": "outbid"
+                }
+                publish_notification(outbid_notification, previous_highest_bidder)
+
+                #Update Auction to reflect latest bid
                 update_auction(auction_id, user_id, bid_amount)
             
         else:
