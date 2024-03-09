@@ -208,42 +208,41 @@ def create_auction():
     """
     Create Auction
     ---
-    parameters:
-      - name: body
-        in: body
-        description: Auction data
-        required: true
-        schema:
-          type: object
-          properties:
-            auction_item:
-              type: string
-            start_time:
-              type: string
-            end_time:
-              type: string
-            start_price:
-              type: number
-            current_price:
-              type: number
-            auction_winner_id:
-              type: integer
-            auction_status:
-              type: integer
-            watch_condition:
-              type: string
-            watch_brand:
-              type: string
-            watch_box_present:
-              type: boolean
-            watch_papers_present:
-              type: boolean
-            watch_image1:
-              type: string
-            watch_image2:
-              type: string
-            watch_image3:
-              type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              auction_item:
+                type: string
+              start_time:
+                type: string
+              end_time:
+                type: string
+              start_price:
+                type: number
+              current_price:
+                type: number
+              auction_winner_id:
+                type: integer
+              auction_status:
+                type: integer
+              watch_condition:
+                type: string
+              watch_brand:
+                type: string
+              watch_box_present:
+                type: boolean
+              watch_papers_present:
+                type: boolean
+              watch_image1:
+                type: string
+              watch_image2:
+                type: string
+              watch_image3:
+                type: string
     responses:
       201:
         description: Auction created
@@ -263,9 +262,7 @@ def create_auction():
         return jsonify(
             {
                 "code": 400,
-                "data": {
-                    
-                },
+                "data": {},
                 "message": "Start time is after end time."
             }
         ), 400
@@ -274,7 +271,7 @@ def create_auction():
             {
                 "code": 400,
                 "data": {
-                    "auction_id": auction_id
+                    "auction_id": auction.id
                 },
                 "message": "Start price cannot be negative."
             }
@@ -284,7 +281,7 @@ def create_auction():
             {
                 "code": 400,
                 "data": {
-                    "auction_id": auction_id
+                    "auction_id": auction.id
                 },
                 "message": "Start time must be later than the current time."
             }
@@ -297,7 +294,7 @@ def create_auction():
             {
                 "code": 500,
                 "data": {
-                    "auction_id": auction_id
+                    "auction_id": auction.id
                 },
                 "message": "An error occurred creating the auction.",
                 "error": str(e),
@@ -324,41 +321,41 @@ def edit_auction(auction_id):
         required: true
         schema:
           type: integer
-      - name: body
-        in: body
-        description: Auction data to update
+    requestBody:
         required: true
-        schema:
-          type: object
-          properties:
-            auction_item:
-              type: string
-            start_time:
-              type: string
-            end_time:
-              type: string
-            start_price:
-              type: number
-            current_price:
-              type: number
-            auction_winner_id:
-              type: integer
-            auction_status:
-              type: integer
-            watch_condition:
-              type: string
-            watch_brand:
-              type: string
-            watch_box_present:
-              type: boolean
-            watch_papers_present:
-              type: boolean
-            watch_image1:
-              type: string
-            watch_image2:
-              type: string
-            watch_image3:
-              type: string
+        content:
+            application/json:
+                schema:
+                    type: object
+                    properties:
+                        auction_item:
+                            type: string
+                        start_time:
+                            type: string
+                        end_time:
+                            type: string
+                        start_price:
+                            type: number
+                        current_price:
+                            type: number
+                        auction_winner_id:
+                            type: integer
+                        auction_status:
+                            type: integer
+                        watch_condition:
+                            type: string
+                        watch_brand:
+                            type: string
+                        watch_box_present:
+                            type: boolean
+                        watch_papers_present:
+                            type: boolean
+                        watch_image1:
+                            type: string
+                        watch_image2:
+                            type: string
+                        watch_image3:
+                            type: string
     responses:
         200:
             description: Auction updated
