@@ -130,11 +130,6 @@ def scrape():
         type: string
         required: true
         description: Reference number of the watch
-      - name: ref_number_extra
-        in: query
-        type: string
-        required: true
-        description: Extra reference number of the watch
       - name: manufacturer_id
         in: query
         type: integer
@@ -167,4 +162,4 @@ def scrape():
         return jsonify({'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)
