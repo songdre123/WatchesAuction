@@ -19,15 +19,13 @@ export default {
     StripeCheckout
   },
   data() {
-    this.publishablekey = "pk_live_51OrZSVC6Ev8NcoAARa1n6fdYKRWNZMJJ0n9L9aIsArHZncbtPdKc0K2qYv306dERk0iA8lx7TIA6pTWxHMN0UMSB00sptNLtJ4"
+    this.publishablekey = "pk_test_51OrZSVC6Ev8NcoAAzjwUrkkQfpqoFasUwajb3GqNR7yGKt8EtSvS9Jjk4FFdaB4bUtvXVtQ0i9IsulHeU3HZUFEY00PTdyttJE"
     return {
         loading: false,
-        publishablekey: null,
         lineItems: [
             {
-            name: 'Watch Deposit',
+            price: 'price_1OsMzwC6Ev8NcoAAflI50SEB',
             quantity: 1,
-            amount: 1
             }
         ],
         successUrl: 'http://localhost:8080/success',
@@ -36,6 +34,9 @@ export default {
     }
     },
     methods: {
+        checkout(){
+            this.$refs.CheckoutRef.redirectToCheckout()
+        }
       
     }
     }
