@@ -41,6 +41,13 @@ scenario when user will receive the notification
 2) winandpayremind/rollbackandpayremind- when the person win the bid and it will tell the user to pay 
 3) paysucess-notify user when payment is successful 
 4) schedulesuccess - notifiy user about successful schedule of collection time
+
+5) auctionstartfail - notify the seller when auction did not start successfully
+6) auctionstarted - notify the seller when auction started successfully
+7) auctionendfail - notify the seller when auction did not end successfully
+8) auctionended - notify the seller when auction end successfully
+
+
 '''
 ########## initiate flask ##########
 app = Flask(__name__)  # initialize a flask application
@@ -72,7 +79,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL']= True
 mail=Mail(app)
 
-########## notification header ##########
+########## notification customisation ##########
 notification_header="Notification for item: "
 
 subheader={
@@ -80,7 +87,11 @@ subheader={
     "winandpayremind":"Congratulations!",
     "paysucess":"Payment success!",
     "rollbackandpayremind":"Congratulations!",
-    "schedulesuccess":"Schedule success!"
+    "schedulesuccess":"Schedule success!",
+    "auctionstartfail": "Fail to start Auction :( " ,
+    "auctionstarted": "Auction has started!" ,
+    "auctionendfail": " Fail to end Auction :(  " ,
+    "auctionended": " Auction has started! " 
 }
 
 briefMessage={
@@ -88,7 +99,11 @@ briefMessage={
     "winandpayremind":"Congratulations on winning the item: ",
     "paysucess":"Payment success for the item: ",
     "rollbackandpayremind":"Congratulations on winning the item: ",
-    "schedulesuccess":"You have schedule a time slot to collect the item: "
+    "schedulesuccess":"You have schedule a time slot to collect the item: ",
+    "auctionstartfail": "There is an error in starting your auction for item: " ,
+    "auctionstarted": "We have successfully started your auction for item: " ,
+    "auctionendfail": " There is an error in ending your auction for item:  " ,
+    "auctionended": " We have successfully ended your auction for item: " 
 }
 
 notification_body={
@@ -100,14 +115,21 @@ notification_body={
 
     "rollbackandpayremind":"Congratulation on winning the bid! As the highest bidder has given up the offer, the item will be offered to you! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.",
 
-    "schedulesuccess":"Thank you for using "
+    "schedulesuccess":"Do take note of the allocated time that you have indicated for the item collection. Vist our website to check the collection point with the seller!",
+
+    "auctionstartfail":"There seems to be an error starting the auction for your item mentioned above. Do log into our website to check on your auction. ",
+
+    "auctionstarted":"Your auction for the following item has open successfully for users to bid for your item. We will send you another email to notify you when the auction has ended. ",
+
+    "auctionendfail":" There seems to be an error ending the auction for your item mentioned above. Do log into our website to check on your auction. ",
+
+    "auctionended":"Your auction for the following item has ended successfully. Do log into our website to check on your auction and the winner's bid!. "
 
 }
 
-signOff="Best Regards, "
-sender="Watch Auction"
 
-#database
+
+########## database ##########
 class Notification(db.Model):
     __tablename__ = 'Notification'
 
@@ -421,8 +443,6 @@ def sendEmail():
         "auctionItem": email_info["auction"]["data"]["auction_item"],
         "briefMessage": briefMessage[email_info["type"]],
         "bodyMessage": notification_body[email_info["type"]],
-        "signOff": signOff,
-        "sender":sender,
         "schedule":schedule
     }
     # print(email_content)
