@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h1>Success</h1>
-        <p>Your order has been placed successfully.</p>
+        <h1>Failure</h1>
+        <p>Your deposit has not been placed successfully.</p>
     </div>
 </template>

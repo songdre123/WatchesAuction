@@ -148,7 +148,7 @@
                             <v-subheader>Enter date and times in YYYY/MM/DD/HH/MM</v-subheader>
                         </v-col>
                         <v-col cols="12">
-                            <v-btn color="amber">Create</v-btn>
+                            <v-btn color="amber darken-2" @click="CreateListing">Create Listing</v-btn>
                         </v-col>
                     </v-row>
                 </v-form>
@@ -277,6 +277,24 @@ CheckSelection() {
 }
 
 ,
+CreateListing() {
+
+
+},
+uploadtostripe(){
+    //upload to stripe
+    //use the image urls, watch name, reference number, brand, year, description, minimum bid, start date, end date, watch box, watch papers, watch condition
+    //to create a listing on stripe
+    //then redirect to the auction home page
+    //if successful
+    //else show an error message
+    //use the stripe api to create a listing
+
+
+    
+
+
+},
     uploadToS3() {
         // if number of files is more than 3, alert the user
         if (this.files.length > 3) {

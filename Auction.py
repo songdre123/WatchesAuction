@@ -5,7 +5,9 @@ from db_config import set_database_uri
 
 from flasgger import Swagger
 
+import stripe
 
+stripe.api_key = "rk_test_51OrZSVC6Ev8NcoAAsL8tWKsJQRCKKCry61vycl0wbj3FrQkTJ4qs56KKb9AXwAyW63S6no13Rws6Ao5kLWBm504M00jybuhTVc"
 
 
 app = Flask(__name__)  # initialize a flask application
@@ -60,7 +62,8 @@ CREATE TABLE Auction (
     watch_papers_present BOOLEAN NOT NULL,
     watch_image1 VARCHAR(255) NOT NULL,
     watch_image2 VARCHAR(255) NOT NULL,
-    watch_image3 VARCHAR(255) NOT NULL
+    watch_image3 VARCHAR(255) NOT NULL,
+    stripe_product_id VARCHAR(255) DEFAULT NULL
 );
 
 '''
@@ -85,12 +88,12 @@ class Auction(db.Model):
     watch_image1 = db.Column(db.String(255))
     watch_image2 = db.Column(db.String(255))
     watch_image3 = db.Column(db.String(255))
+    stripe_product_id = db.Column(db.String(255))
 
 
 
 
     def __init__(self, auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3):
-
         self.auction_item = auction_item
         self.start_time = start_time
         self.end_time = end_time
@@ -271,7 +274,7 @@ def create_auction():
             {
                 "code": 400,
                 "data": {
-                    "auction_id": auction.id
+                    "auction_id": auction.auction_id
                 },
                 "message": "Start price cannot be negative."
             }
@@ -281,20 +284,45 @@ def create_auction():
             {
                 "code": 400,
                 "data": {
-                    "auction_id": auction.id
+                    "auction_id": auction.auction_id
                 },
                 "message": "Start time must be later than the current time."
             }
         ), 400
     try:
+
+        product = stripe.Product.create(
+        name= auction.auction_item,
+        type="good",
+        description="Deposit for" + auction.auction_item
+        )
+
+        print("Product created:", product)
+
+        # Store the product ID for later reference
+        product_id = product.id
+        auction.stripe_product_id = product_id
+
+        # Create a price for the product
+        price = stripe.Price.create(
+            unit_amount=int(auction.start_price * 10),
+            currency="sgd",
+            product=product_id,
+        )
+
+        print("Price created:", price)
         db.session.add(auction)
         db.session.commit()
+
+
+
+
     except Exception as e:
         return jsonify(
             {
                 "code": 500,
                 "data": {
-                    "auction_id": auction.id
+                    "auction_id": auction.auction_id
                 },
                 "message": "An error occurred creating the auction.",
                 "error": str(e),
