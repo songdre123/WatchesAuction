@@ -1,22 +1,22 @@
 <template>
     <v-hover v-slot="{isHovering, props}">
-    <v-card class="mx-auto" max-width="400" v-bind="props">
+    <v-card class="mx-auto" max-width="400" v-bind="props" @click="goToWatchDetails">
         <v-img
-            src="https://cdn.watchbase.com/watch/lg/origin:png/rolex/datejust-31/278341rbr-0023-f.webp"
+            :src="watch.imageURL"
             height="200px"
             cover>
         </v-img>
         <v-card-title class="title">
-            {{ title }}
+            {{ watch.title }}
         </v-card-title>
         <v-card-subtitle class="content">
             <b>Ref</b>: {{ referenceNo }}
         </v-card-subtitle>
         <v-card-text class="content">
-            Date: {{ date }}
+            Date: {{ watch.Date }}
         </v-card-text>
         <v-card-text class="content">
-            Opening: ${{ minBid }} SGD
+            Opening: ${{ watch.MinBid }} SGD
         </v-card-text>
 
         <v-overlay :model-value="isHovering" class="align-center justify-center" contained>
@@ -28,9 +28,24 @@
 </template>
 
 <script>
+
+import { useWatchStore } from '@/store/watchStore'
+const watchStore = useWatchStore()
+
     export default {
-        props: ['title', 'referenceNo', 'date', 'minBid']
-    }
+        props: ['referenceNo', 'watch'],
+        methods: {
+            goToWatchDetails() {
+                watchStore.setWatch(this.watch)
+                this.$router.push({name: 'AuctionDetails', 
+                params: {id : this.referenceNo},
+            })
+            }
+        }
+        
+           
+}
+    
 </script>
 
 <style scoped>
