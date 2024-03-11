@@ -6,6 +6,7 @@ from flasgger import Swagger
 import requests
 import pika
 import json
+import amqp_connection
 
 app = Flask(__name__)
 CORS(app)
@@ -20,9 +21,9 @@ swagger = Swagger(app)
 
 ######################################################################################
 # RabbitMQ configuration
-rabbitmq_connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
+rabbitmq_connection = amqp_connection.create_connection() 
 rabbitmq_channel = rabbitmq_connection.channel()
-rabbitmq_channel.queue_declare(queue='Notification')
+
 
 # Function to publish notification to RabbitMQ
 def publish_notification(notification, recipient_id):

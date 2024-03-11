@@ -11,6 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 import os
 from flasgger import Swagger
 from db_config import set_database_uri
+from datetime import datetime
 
 '''
 API Endpoints:
@@ -41,7 +42,6 @@ scenario when user will receive the notification
 2) winandpayremind/rollbackandpayremind- when the person win the bid and it will tell the user to pay 
 3) paysucess-notify user when payment is successful 
 4) schedulesuccess - notifiy user about successful schedule of collection time
-
 5) auctionstartfail - notify the seller when auction did not start successfully
 6) auctionstarted - notify the seller when auction started successfully
 7) auctionendfail - notify the seller when auction did not end successfully
@@ -434,16 +434,30 @@ def sendEmail():
     # print(recipient_email)
     subject = notification_header+email_info["auction"]["data"]["auction_item"]
 
+
+    collectionDate,collectionTime="",""
+    #changing schedule format
+    print(email_info["schedule"])
+    if email_info["schedule"]!="":
+        print(email_info["schedule"]["data"]["collection_time"])
+
+        date_string = email_info["schedule"]["data"]["collection_time"]
+        dt_object = datetime.fromisoformat(date_string)
+        # Format the datetime object in a human-readable format
+        human_readable_date = dt_object.strftime("%Y-%m-%d %H:%M:%S")
+        collectionDate,collectionTime= human_readable_date.split(" ")
+        collectionDate="Date: "+collectionDate
+        collectionTime="Time: "+collectionTime
+
+
     #content for email body 
-    schedule=""
-    if "schedule" in email_info:
-        schedule=email_info["schedule"]
     email_content = {
         "subheader": subheader[email_info["type"]],
         "auctionItem": email_info["auction"]["data"]["auction_item"],
         "briefMessage": briefMessage[email_info["type"]],
         "bodyMessage": notification_body[email_info["type"]],
-        "schedule":schedule
+        "scheduleDate":collectionDate,
+        "scheduleTime":collectionTime
     }
     # print(email_content)
 
