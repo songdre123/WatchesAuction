@@ -412,7 +412,7 @@ def sendEmail():
                                         start_time:
                                             type: string
                                             format: date-time
-                        type:
+                        notification_type:
                             type: string
 
                         schedule:

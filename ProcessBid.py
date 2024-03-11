@@ -27,11 +27,13 @@ rabbitmq_channel = rabbitmq_connection.channel()
 
 # Function to publish notification to RabbitMQ
 def publish_notification(notification, recipient_id):
+    exchangename = "notification_direct" 
     notification["recipient_id"] = recipient_id
     rabbitmq_channel.basic_publish(
-        exchange='',
-        routing_key='Notification',
-        body=json.dumps(notification)
+        exchange=exchangename,
+        body=json.dumps(notification),
+        properties=pika.BasicProperties(delivery_mode = 2),
+        routing_key='Notification'
     )
 
 # Function to get start price of auction
