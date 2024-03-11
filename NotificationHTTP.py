@@ -334,8 +334,15 @@ def check_user_and_auction(userID,auctionID):
                 "start_time": "2024-02-23 10:00:00"
                 }
             },
-        "type": "outbid"
-
+        "type": "outbid",
+        "schedule": {
+            "code": 200,
+            "data": {
+                "auction_id": 1,
+                "collection_time": "2024-03-25T10:00:00.000",
+                "user_id": 1
+            }
+        }
     }"""
 #POST /notification/sendEmail - sending a email to the receipient regarding update on his bid
 @app.route('/notification/sendEmail', methods=['POST'])
@@ -407,6 +414,22 @@ def sendEmail():
                                             format: date-time
                         type:
                             type: string
+
+                        schedule:
+                            type: object
+                            properties:
+                                code:
+                                    type: integer
+                                data:
+                                    type: object
+                                    properties:
+                                        auction_id:
+                                            type: integer
+                                        collection_time:
+                                            type: string
+                                            format: date-time
+                                        user_id:
+                                            type: integer
                         
 
     responses:
@@ -415,7 +438,7 @@ def sendEmail():
 
     """
     email_info = request.get_json()
-    # print(email_info)
+    print(email_info)
     #check if both recipient and auction are valid
     recipient_code=email_info["recipient"]["code"]
     auction_code=email_info["auction"]["code"]
