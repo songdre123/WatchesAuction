@@ -1,10 +1,23 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
+from flasgger import Swagger
+from db_config import set_database_uri
 
 app = Flask(__name__)  # initialize a flask application
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@localhost:3306/Users'
+# Swagger UI configuration
+app.config['SWAGGER'] = {
+    'title': 'User microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Allows interaction with the Users microservice'
+}
+swagger = Swagger(app)
+
+path = "Users"
+set_database_uri(app, path)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 '''
@@ -106,6 +119,16 @@ class User(db.Model):
 # get all users
 @app.route('/user')
 def get_all():
+    """
+    Get all users
+    ---
+    responses:
+        200:
+            description: Return all books
+        404:
+            description: No users
+    """
+
     Users = db.session.scalars(db.select(User)).all()
 
     if len(Users):
@@ -128,6 +151,21 @@ def get_all():
 # get specific user by email
 @app.route('/user/<string:email>')
 def find_by_email(email):
+    """
+    Get a specifc user by email
+    ---
+    parameters:
+        -   in: email of user
+            name: email
+            required: true
+
+    responses:
+        200:
+            description: Return user information with matching email
+        404:
+            description: No user exists that currently uses that email
+    """
+
     user = db.session.scalars(
         db.select(User).filter_by(email=email).limit(1)).first()
     if user:
@@ -147,6 +185,21 @@ def find_by_email(email):
 # get specific user by id
 @app.route('/user/<int:user_id>')
 def find_by_id(user_id):
+    """
+    Get user by ID
+    ---
+    parameters:
+        -   in: id of user
+            name: id
+            required: true
+
+    responses:
+        200:
+            description: Returns user information with matching ID
+        404:
+            description: No user exists with that ID
+    """
+
     user = db.session.scalars(
         db.select(User).filter_by(id=user_id).limit(1)).first()
     if user:
@@ -166,6 +219,47 @@ def find_by_id(user_id):
 # check user password
 @app.route('/user/login/<string:email>', methods=['POST'])
 def login(email):
+    """
+    Check user credentials
+
+    ---
+    parameters:
+        - name: email
+          in: path
+          description: Email of the user
+          required: true
+          schema:
+              type: string
+    requestBody:
+        required: true
+        content:
+            application/json:
+                schema:
+                    type: object
+                    properties:
+                        bid_amount:
+                            type: number
+                            format: float
+                            description: Amount of the bid
+                            example: 100.0
+                        auction_id:
+                            type: integer
+                            description: ID of the auction associated with the bid
+                            example: 123
+                        user_id:
+                            type: integer
+                            description: ID of the user placing the bid
+                            example: 456
+    responses:
+        201:
+            description: Bid created successfully
+        400:
+            description: Bid has already been placed or bad request
+        500:
+            description: Internal server error
+            
+    """
+
     user = db.session.scalars(
         db.select(User).filter_by(email=email).limit(1)).first()
     if user:
@@ -197,6 +291,56 @@ def login(email):
 # create user
 @app.route('/user/<string:email>', methods=['POST'])
 def create_user(email):
+    """
+    Create user
+    ---
+    parameters:
+      - name: email
+        in: path
+        description: Email of the user
+        required: true
+        schema:
+          type: string
+      - name: user_data
+        in: body
+        description: User data for creating a new user
+        required: true
+        schema:
+          type: object
+          properties:
+            password:
+              type: string
+              description: The user's password
+            phone_number:
+              type: string
+              description: The user's phone number
+            first_name:
+              type: string
+              description: The user's first name
+            last_name:
+              type: string
+              description: The user's last name
+            gender:
+              type: string
+              description: The user's gender (M/F)
+            address:
+              type: string
+              description: The user's address
+            account_type:
+              type: string
+              description: The type of user account
+            profile_picture:
+              type: string
+              description: URL or path to the user's profile picture
+    responses:
+        201:
+            description: User created
+        400:
+            description: Email is already in use
+        500:
+            description: An error occurred while creating user
+    """
+
     if (db.session.scalars(db.select(User).filter_by(email=email).limit(1)).first()):
         return jsonify(
             {
@@ -237,6 +381,18 @@ def create_user(email):
 #edit user data
 @app.route('/user/<string:email>', methods=['PUT'])
 def edit_user(email):
+    """
+    Edit user data
+    ---
+    responses:
+        200:
+            description: User updated successfully
+        404:
+            description: User does not exist
+        500:
+            description: An error occurred while updating the user
+    """
+
     user = db.session.query(User).filter_by(email=email).first()
 
     if not user:
@@ -270,6 +426,18 @@ def edit_user(email):
 #delete user
 @app.route('/user/<string:email>', methods=['DELETE'])
 def delete_user(email):
+    """
+    Delete User
+    ---
+    responses:
+        200:
+            description: User deleted successfully
+        404:
+            description: User does not exist
+        500:
+            description: An error occurred while deleting the user
+    """
+
     user = db.session.query(User).filter_by(email=email).first()
 
     if not user:

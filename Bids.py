@@ -3,12 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 from flasgger import Swagger
+from db_config import set_database_uri
+from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    "mysql+mysqlconnector://root:password@localhost:3306/bids"
-)
+path = "Bids"
+set_database_uri(app, path)
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 app.config["SWAGGER"] = {
@@ -87,19 +89,12 @@ def get_all_bids():
 
 
 # create a bid
-@app.route("/bid/<int:bid_id>", methods=["POST"])
-def create_bid(bid_id):
+@app.route("/bid", methods=["POST"])
+def create_bid():
     """
-    Create a new bid with the given bid ID
+    Create a new bid
 
     ---
-    parameters:
-        - name: bid_id
-          in: path
-          description: ID of the bid to create
-          required: true
-          schema:
-              type: integer
     requestBody:
         required: true
         content:
@@ -129,56 +124,48 @@ def create_bid(bid_id):
             description: Internal server error
             
     """
-    if db.session.scalars(db.select(Bids).filter_by(bid_id=bid_id).limit(1)).first():
+    try:
+        data = request.json
+        bid_amount = data.get("bid_amount")
+        auction_id = data.get("auction_id")
+        user_id = data.get("user_id")
+        bid_time = datetime.now()
+
+        # Create a new Bid object and add it to the database session
+        new_bid = Bids(
+            bid_amount=bid_amount,
+            auction_id=auction_id,
+            user_id=user_id,
+            bid_time=bid_time,  # not necessary since bid_time will be auto based on the current datetime
+        )
+        db.session.add(new_bid)
+        db.session.commit()
+
+        return jsonify(
+            {
+                "code": 201,
+                "data": {"bid_id": new_bid.bid_id},
+                "message": "Bid created successfully",
+            }
+        ), 201
+    except IntegrityError as e:
+        # Handle integrity constraint violation (e.g., bid has already been placed)
+        db.session.rollback()
         return jsonify(
             {
                 "code": 400,
-                "data": {"bid_id": bid_id},
-                "message": "Bid has already been placed",
+                "data": {"message": "Bid has already been placed"},
             }
-        )
-
-    data = request.json
-    bid_amount = data.get("bid_amount")
-    auction_id = data.get("auction_id")
-    user_id = data.get("user_id")
-    bid_time = datetime.now()
-
-    # Create a new Bid object and add it to the database session
-    new_bid = Bids(
-        bid_amount=bid_amount,
-        auction_id=auction_id,
-        user_id=user_id,
-        bid_time=bid_time,  # not necessary since bid_time will be auto based on the current datetime
-    )
-    db.session.add(new_bid)
-
-    try:
-        db.session.commit()
-        return (
-            jsonify(
-                {
-                    "code": 201,
-                    "data": {"bid_id": bid_id},
-                    "message": "Bid created successfully",
-                }
-            ),
-            201,
-        )
+        ), 400
     except Exception as e:
-        # rollback and restore database to original state in event of error and changes to database
+        # Handle other exceptions
         db.session.rollback()
-        return (
-            jsonify(
-                {
-                    "code": 500,
-                    "data": {"bid_id": bid_id},
-                    "message": "An error occured while creating bid",
-                    "error": str(e),
-                }
-            ),
-            500,
-        )
+        return jsonify(
+            {
+                "code": 500,
+                "data": {"message": "An error occurred while creating bid", "error": str(e)},
+            }
+        ), 500
 
 
 # edit bid
