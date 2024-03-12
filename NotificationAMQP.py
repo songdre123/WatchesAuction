@@ -13,17 +13,23 @@ Functions (RabbitMQ)
 
 
 
-scenario when user will receive the notification (notification Type)
+scenario when user will receive the notification 
 1) outbid- when someone out bidded the customer (highest bid changed). send to previous person with highest bid 
 2) winandpayremind/rollbackandpayremind- when the person win the bid and it will tell the user to pay 
 3) paysucess-notify user when payment is successful 
 4) schedulesuccess - notifiy user about successful schedule of collection time
+5) auctionstartfail - notify the seller when auction did not start successfully
+6) auctionstarted - notify the seller when auction started successfully
+7) auctionendfail - notify the seller when auction did not end successfully
+8) auctionended - notify the seller when auction end successfully
+
 
 '''
 ########## URL ##########
 user_url="http://localhost:5000/user"
 auction_url="http://localhost:5001/auction"
 notification_url="http://localhost:5004/notification"
+schedule_url="http://localhost:5003/schedule"
 
 
 ########## For RabbitMQ ##########
@@ -82,10 +88,19 @@ def processNotif(notif):
     specify_auction_url= f"{auction_url}/{aution_id}"
     auction=invoke_http(specify_auction_url,method="GET")
 
+        #account for schedule 
+    schedule=""
+    if "schedule_id" in notif:
+        print("hellooooooooooooooooooooooo")
+        schedule_id=notif["schedule_id"]
+        specify_schedule_url= f"{schedule_url}/{schedule_id}"
+        schedule=invoke_http(specify_schedule_url,method="GET")
+    
     email_info={
         "recipient":user,
         "auction":auction,
-        "type":notif["notification_type"]
+        "type":notif["notification_type"],
+        "schedule":schedule
     }
 
     print("information:", email_info )

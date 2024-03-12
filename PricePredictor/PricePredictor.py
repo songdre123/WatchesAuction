@@ -1,32 +1,48 @@
 from flask import Flask, request, jsonify
+from flasgger import Swagger
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
+import undetected_chromedriver as uc 
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 import re
 import json
+from flask import Flask
+from flask_cors import CORS
 
-app = Flask(__name__)
 
-# Dictionary to map manufacturer IDs to reference number cleanup patterns
-manufacturer_ref_cleanup = {
-    221: r'[^a-zA-Z0-9]',  # Rolex
-    18: r'\.',  # Audemars Piguet
-    194: r'[^a-zA-Z0-9]'  # Patek Phillipe
+app = Flask(__name__)  # initialize a flask application
+CORS(app)
+
+# Initialize flasgger 
+app.config['SWAGGER'] = {
+    'title': 'Price Predictor microservice API',
+    'version': 1.0,
+    "openapi": "3.0.2",
+    'description': 'Retrieve current market price of watch'
 }
+swagger = Swagger(app)
+  
+def scrape_chrono24(ref_number, manufacturer_id, year, currency="SGD"):
+    options = Options()
+    options.add_argument('--headless')  # Set Chrome to run in headless mode
+    driver = webdriver.Chrome(options=options)
 
-def clean_ref_number(ref_number, manufacturer_id):
-    cleanup_pattern = manufacturer_ref_cleanup.get(manufacturer_id, '')
-    return re.sub(cleanup_pattern, '', ref_number).lower()
-
-def scrape_chrono24(ref_number, ref_number_extra, manufacturer_id, year, currency="SGD"):
-    ref_number = clean_ref_number(ref_number, manufacturer_id)
-
-    # Initialize Chrome WebDriver
-    driver = webdriver.Chrome()
-
+    ref_number_extra = None
+    
+    if manufacturer_id == "221":
+      ref_number_extra = 24221
+    elif manufacturer_id == "18":
+      ref_number_extra = 2418
+    elif manufacturer_id == "194":
+      ref_number_extra = 24194
+      
+    
     # Chrono24 Website URL
     chrono24_url = f"https://www.chrono24.sg/search/index.htm?currencyId={currency}&dosearch=true&manufacturerIds={manufacturer_id}&maxAgeInDays=0&pageSize=60&redirectToSearchIndex=true&referenceNumber={ref_number}%{ref_number_extra}&resultview=list&searchexplain=1&sortorder=0&usedOrNew=used&year={year}&specials=103"
 
@@ -105,19 +121,45 @@ def scrape_chrono24(ref_number, ref_number_extra, manufacturer_id, year, currenc
 
 @app.route('/scrape', methods=['GET'])
 def scrape():
+    """
+    Get current market price of auctioned watch.
+    ---
+    parameters:
+      - name: ref_number
+        in: query
+        type: string
+        required: true
+        description: Reference number of the watch
+      - name: manufacturer_id
+        in: query
+        type: integer
+        required: true
+        description: Manufacturer ID of the watch
+      - name: year
+        in: query
+        type: integer
+        required: true
+        description: Year of production of the watch
+    responses:
+      200:
+        description: Return all prices found on the web for this watch
+      500:
+        description: Internal server error
+    """
     ref_number = request.args.get('ref_number')
-    ref_number_extra = request.args.get('ref_number_extra')
+    # ref_number_extra = request.args.get('ref_number_extra')
     manufacturer_id = request.args.get('manufacturer_id')
     year = request.args.get('year')
-
-    if not (ref_number and ref_number_extra and manufacturer_id and year):
-        return jsonify({'error': 'Please provide all parameters: ref_number, ref_number_extra, manufacturer_id, year'})
-
+    
+    # ref_number_extra = None
+      
+    if not (ref_number and manufacturer_id and year):
+        return jsonify({'error': 'Please provide all parameters: ref_number, manufacturer_id, year'})
     try:
-        result = scrape_chrono24(ref_number, ref_number_extra, manufacturer_id, year)
+        result = scrape_chrono24(ref_number, manufacturer_id, year)
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=True)

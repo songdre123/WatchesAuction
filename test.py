@@ -46,8 +46,8 @@ def testNotification():
             print("\nReceived an notification in JSON:", notif)
             #publish to notification to create and send notification
             
-            channel.basic_publish(exchange=exchangename, body=message, properties=pika.BasicProperties(delivery_mode = 2),routing_key="Notification") 
-
+            print(channel.basic_publish(exchange=exchangename, body=message, properties=pika.BasicProperties(delivery_mode = 2),routing_key="Notification") )
+            
             return jsonify({
                 "code": 200,        
                 "message": "ok",
@@ -77,10 +77,4 @@ def testNotification():
 # Execute this program if it is run as a main script (not by 'import')
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5100, debug=True)
-    # Notes for the parameters: 
-    # - debug=True will reload the program automatically if a change is detected;
-    #   -- it in fact starts two instances of the same flask program, and uses one of the instances to monitor the program changes;
-    # - host="0.0.0.0" allows the flask program to accept requests sent from any IP/host (in addition to localhost),
-    #   -- i.e., it gives permissions to hosts with any IP to access the flask program,
-    #   -- as long as the hosts can already reach the machine running the flask program along the network;
-    #   -- it doesn't mean to use http://0.0.0.0 to access the flask program.
+  
