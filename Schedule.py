@@ -235,16 +235,21 @@ def get_schedule_for_auction(auction_id):
       404:
         description: No schedule found for the given auction ID
     """
-    schedules = db.session.query(Schedule).filter_by(auction_id=auction_id).all()
+    schedule = db.session.scalars(
+        db.select(Schedule).filter_by(auction_id=auction_id).limit(1)).first()
+    
+    # print(schedule.json())
 
-    if not schedules:
+    if not schedule:
         return jsonify({
             "code": 404,
             "message": f"No schedule found for auction ID {auction_id}",
         }), 404
 
-    schedule_list = [schedule.json() for schedule in schedules]
-    return jsonify(schedule_list)
+    return jsonify({
+        "code": 200,
+        "data": schedule.json()
+    })
 
 # Delete schedule by auction ID
 @app.route('/schedule/delete/<int:auction_id>', methods=['DELETE'])

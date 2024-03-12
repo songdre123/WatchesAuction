@@ -16,5 +16,6 @@ CREATE TABLE IF NOT EXISTS `Auction` (
     watch_papers_present BOOLEAN NOT NULL,
     watch_image1 VARCHAR(255) NOT NULL,
     watch_image2 VARCHAR(255) NOT NULL,
-    watch_image3 VARCHAR(255) NOT NULL
+    watch_image3 VARCHAR(255) NOT NULL,
+    stripe_product_id VARCHAR(255) DEFAULT NULL
 );
