@@ -8,20 +8,27 @@ const routes = [
     component: () => import("@/views/Login.vue"),
   },
   {
-    path: "/checkout",
-    name: "Checkout",
-    component: () => import("@/views/Checkout.vue"),
+    path:'/admin',
+    component: () => import('@/layouts/admin/AdminDefault.vue'),
+    children: [
+      {
+        path: "create",
+        name: "Create",
+        component: () => import("@/views/seller/CreateListing.vue")
+      },
+      {
+        path: "account",
+        name: "AdminAccount",
+        component: () => import("@/views/Account.vue")
+      },
+      {
+        path: "listings",
+        name: "Listings",
+        component: () => import("@/views/seller/Listing.vue")
+      }
+    ]
   },
-  {
-    path: "/Success",
-    name: "Success",
-    component: () => import("@/views/Success.vue"), // Fixed the casing of the file name
-  },
-  {
-    path: "/Cancel",
-    name: "Cancel",
-    component: () => import("@/views/Cancel.vue"),
-  },
+
   {
     path: "/home",
     component: () => import("@/layouts/default/Default.vue"),
@@ -45,13 +52,23 @@ const routes = [
         name: "Account",
         component: () => import("@/views/Account.vue"),
       },
-      {
-        path: "/Create",
-        name: "Create",
-        component: () => import("@/views/Createlisting.vue"),
-      }
     ],
-  }
+  },
+  {
+    path: "/checkout",
+    name: "Checkout",
+    component: () => import("@/views/Checkout.vue"),
+  },
+  {
+    path: "/Success",
+    name: "Success",
+    component: () => import("@/views/Success.vue"), // Fixed the casing of the file name
+  },
+  {
+    path: "/Cancel",
+    name: "Cancel",
+    component: () => import("@/views/Cancel.vue"),
+  },
 ];
 
 const router = createRouter({

@@ -68,6 +68,8 @@
 
 <script>
 import axios from 'axios'
+import { useUserStore } from '@/store/userStore'
+const userStore = useUserStore()
 
 export default {
   data() {
@@ -127,8 +129,7 @@ export default {
   },
 
     async createUser() {
-      try {
-        await axios.post(`/user/${this.email}`, {
+      const params = {
           password: this.password,
           phone_number: this.phoneNumber,
           first_name: this.firstName,
@@ -137,10 +138,14 @@ export default {
           address: this.address,
           account_type: this.accountType,
           profile_picture: this.fileLink
-        })
-      }
-      catch (error) {
-        console.log(`Error: ${error}, Failed to create user`);
+        }
+      userStore.setUser(params)
+      try {
+        await axios.post(`http://127.0.0.1:5000//user/${this.email}`, params);
+        // Optionally, perform any actions after successful user creation
+      } catch (error) {
+        console.error('Error creating user:', error);
+        throw error; // Re-throw the error to propagate it further
       }
     }
   }
