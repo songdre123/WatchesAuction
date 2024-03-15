@@ -104,9 +104,15 @@ def scrape_chrono24(ref_number, manufacturer_id, year, currency="SGD"):
 
     # Calculate mean, max, min of watch prices
     watch_prices = [watch['watch_price'] for watch in scraped_watches_arr]
-    mean_price = round(sum(watch_prices) / len(watch_prices), 2)
-    max_price = max(watch_prices)
-    min_price = min(watch_prices)
+    mean_price = 0
+    max_price = 0
+    min_price = 0
+
+    # Check if watch_prices is not empty before calculating mean, max, min
+    if watch_prices:
+        mean_price = round(sum(watch_prices) / len(watch_prices), 2) 
+        max_price = max(watch_prices)
+        min_price = min(watch_prices)
 
     # Add mean, max, min and total number of watches as keys in JSON
     json_data_with_stats = {
