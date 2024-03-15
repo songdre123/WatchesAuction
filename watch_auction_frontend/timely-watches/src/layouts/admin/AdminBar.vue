@@ -13,15 +13,15 @@
       <v-list density="compact" nav>
         <router-link class="router-link" to="/home">
           <v-list-item
-          prepend-icon="mdi-home"
-          title="All Auctions"
-          value="home">
+          prepend-icon="mdi-cash"
+          title="Price Recommendations"
+          value="recommend">
           </v-list-item>
         </router-link>
 
           <v-list-item
             prepend-icon="mdi-gavel"
-            title="My Auctions"
+            title="My Created Auctions"
             value="auction"
           ></v-list-item>
 
@@ -58,25 +58,6 @@
           Timely Watches
         </h4>
     </v-app-bar-title>
-    <v-badge v-if="notifications.length > 0" :content="notifications.length">
-      <v-menu :location="start">
-        <template v-slot:activator="{props}">
-          <v-btn density="compact" v-bind=props icon="mdi-bell-outline"></v-btn>
-        </template>
-
-        <V-list>
-          <v-list-item v-for="(alert, idx) in notifications" :key="idx">
-            <v-list-item-subtitle>
-              {{ alert }}
-            </v-list-item-subtitle>
-          </v-list-item>
-        </V-list>
-
-      </v-menu>
-    </v-badge>
-
-    <v-btn v-else density="compact" icon="mdi-bell-outline"></v-btn>
-
   </v-app-bar>
   </div>
 </template>
@@ -89,10 +70,6 @@ export default {
 	data() {
 		return {
       drawer: null,
-      notifications: [
-        'Your bid at Auction Ref: 1593478229v has beeen replaced',
-        'You won Auction Ref: 1593478229v'
-      ],
 		}
 	},
   computed: {

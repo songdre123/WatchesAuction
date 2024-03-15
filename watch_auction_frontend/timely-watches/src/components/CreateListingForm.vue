@@ -188,8 +188,6 @@ export default {
         min_price: null,
         max_price: null,
         avg_price: null,
-        
-    
     };
   },
   watch: {
@@ -215,86 +213,86 @@ export default {
   }
 },
 
-async GetSuggestedPrices() {
-  // get suggested prices from the backend
-  // use the watch name, reference number, brand, year, and condition
-  // to get the suggested prices
-  // then update the table
-  if(this.brand=="Rolex"){
-    this.manufacturer_id= "221";
-  }
-    else if(this.brand=="Patek Philippe"){
-        this.manufacturer_id= "18";
+    async GetSuggestedPrices() {
+    // get suggested prices from the backend
+    // use the watch name, reference number, brand, year, and condition
+    // to get the suggested prices
+    // then update the table
+    if(this.brand=="Rolex"){
+        this.manufacturer_id= "221";
     }
-    else if(this.brand=="Audemars Piguet"){
-        this.manufacturer_id= "223";
+        else if(this.brand=="Patek Philippe"){
+            this.manufacturer_id= "18";
+        }
+        else if(this.brand=="Audemars Piguet"){
+            this.manufacturer_id= "223";
+        }
+    console.log(this.do);
+    await axios.get('http://127.0.0.1:5000/scrape', {
+        params: {
+        "ref_number": this.reference_number,
+        "manufacturer_id": this.manufacturer_id,
+        "year": this.year,
+        }
+    })
+        .then((response) => {
+            console.log(response);
+            console.log("response");
+            this.items = response.data;
+            this.avg_price = response.data.average_price;
+            this.min_price = response.data.lowest_price;
+            this.max_price = response.data.highest_price;
     }
-console.log(this.do);
- await axios.get('http://127.0.0.1:5000/scrape', {
-    params: {
-    "ref_number": this.reference_number,
-    "manufacturer_id": this.manufacturer_id,
-    "year": this.year,
+        )
+        .catch((error) => {
+            console.log(error);
+        });
+    },
+    CovertToTimestampfromStringStart(date) {
+        let year = date.substring(0, 4);
+        let month = date.substring(5, 7);
+        let day = date.substring(8, 10);
+        let hour = date.substring(11, 13);
+        let minute = date.substring(14, 16);
+
+        this.Start_date = new Date(year, month - 1, day, hour, minute).getTime();
+    },
+    CovertToTimestampfromStringEnd(date) {
+        let year = date.substring(0, 4);
+        let month = date.substring(5, 7);
+        let day = date.substring(8, 10);
+        let hour = date.substring(11, 13);
+        let minute = date.substring(14, 16);
+
+        this.End_date = new Date(year, month - 1, day, hour, minute).getTime();
     }
-  })
-    .then((response) => {
-        console.log(response);
-        console.log("response");
-        this.items = response.data;
-        this.avg_price = response.data.average_price;
-        this.min_price = response.data.lowest_price;
-        this.max_price = response.data.highest_price;
-}
-    )
-    .catch((error) => {
-        console.log(error);
-    });
-},
-CovertToTimestampfromStringStart(date) {
-  let year = date.substring(0, 4);
-  let month = date.substring(5, 7);
-  let day = date.substring(8, 10);
-  let hour = date.substring(11, 13);
-  let minute = date.substring(14, 16);
-
-  this.Start_date = new Date(year, month - 1, day, hour, minute).getTime();
-},
-CovertToTimestampfromStringEnd(date) {
-let year = date.substring(0, 4);
-  let month = date.substring(5, 7);
-  let day = date.substring(8, 10);
-  let hour = date.substring(11, 13);
-  let minute = date.substring(14, 16);
-
-  this.End_date = new Date(year, month - 1, day, hour, minute).getTime();
-}
-,
-CheckSelection() {
-        console.log(this.reference_number);
-        if (this.reference_number && this.brand && this.year) {
-            this.GetSuggestedPrices();
+    ,
+    CheckSelection() {
+            console.log(this.reference_number);
+            if (this.reference_number && this.brand && this.year) {
+                this.GetSuggestedPrices();
+        }
     }
-}
 
-,
-CreateListing() {
-
-
-},
-uploadtostripe(){
-    //upload to stripe
-    //use the image urls, watch name, reference number, brand, year, description, minimum bid, start date, end date, watch box, watch papers, watch condition
-    //to create a listing on stripe
-    //then redirect to the auction home page
-    //if successful
-    //else show an error message
-    //use the stripe api to create a listing
+    ,
+    CreateListing() {
 
 
-    
+    },
+    uploadtostripe(){
+        //upload to stripe
+        //use the image urls, watch name, reference number, brand, year, description, minimum bid, start date, end date, watch box, watch papers, watch condition
+        //to create a listing on stripe
+        //then redirect to the auction home page
+        //if successful
+        //else show an error message
+        //use the stripe api to create a listing
 
 
-},
+        
+
+
+    },
     uploadToS3() {
         // if number of files is more than 3, alert the user
         if (this.files.length > 3) {

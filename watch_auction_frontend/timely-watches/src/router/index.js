@@ -8,6 +8,53 @@ const routes = [
     component: () => import("@/views/Login.vue"),
   },
   {
+    path:'/admin',
+    component: () => import('@/layouts/admin/AdminDefault.vue'),
+    children: [
+      {
+        path: "create",
+        name: "Create",
+        component: () => import("@/views/seller/CreateListing.vue")
+      },
+      {
+        path: "account",
+        name: "AdminAccount",
+        component: () => import("@/views/Account.vue")
+      },
+      {
+        path: "listings",
+        name: "Listings",
+        component: () => import("@/views/seller/Listing.vue")
+      }
+    ]
+  },
+
+  {
+    path: "/home",
+    component: () => import("@/layouts/default/Default.vue"),
+    children: [
+      {
+        path: "", // Empty path for the Home route
+        name: "Home",
+        component: () =>
+          import(/* webpackChunkName: "home" */ "@/views/AuctionHome.vue"),
+      },
+      {
+        path: ":id",
+        name: "AuctionDetails",
+        component: () => import("@/views/AuctionDetails.vue"),
+        meta: {
+          auth: true,
+        },
+      },
+      {
+        path: "account", // Removed the leading slash
+        name: "Account",
+        component: () => import("@/views/Account.vue"),
+      },
+    ],
+  },
+  {
     path: "/checkout",
     name: "Checkout",
     component: () => import("@/views/Checkout.vue"),
@@ -22,28 +69,6 @@ const routes = [
     name: "Cancel",
     component: () => import("@/views/Cancel.vue"),
   },
-  {
-    path: "/home",
-    component: () => import("@/layouts/default/Default.vue"),
-    children: [
-      {
-        path: "", // Empty path for the Home route
-        name: "Home",
-        component: () =>
-          import(/* webpackChunkName: "home" */ "@/views/AuctionHome.vue"),
-      },
-      {
-        path: "account", // Removed the leading slash
-        name: "Account",
-        component: () => import("@/views/Account.vue"),
-      },
-      {
-        path: "/Create",
-        name: "Create",
-        component: () => import("@/views/Createlisting.vue"),
-      }
-    ],
-  }
 ];
 
 const router = createRouter({
