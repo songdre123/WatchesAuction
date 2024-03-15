@@ -7,16 +7,19 @@
 
     <div class="name-fields">
       <label>First Name:</label>
-      <input type="text" v-model="firstName" />
+      <input type="text" v-model="firstName" required />
 
     <div class="horizontal-space"></div>
       
       <label>Last Name:</label>
-      <input type="text" v-model="lastName" />
+      <input type="text" v-model="lastName" required />
     </div>
 
     <label>Email:</label>
     <input type="email" v-model="email" required />
+
+    <label>Living Main Address:</label>
+    <input type="text" v-model="address" />
 
     <span>
     <label>Password:</label>
@@ -30,18 +33,24 @@
     <label>Phone Number:</label>
     <input type="text" v-model="phoneNumber" required pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="e.g., 94204837" />
 
+    <label>Gender:</label>
+    <v-select v-model="gender" :items="genders" required>
+    </v-select>
+
     <label>Account Type:</label>
     <v-select v-model="accountType" :items="accountTypes" required>
     </v-select>
 
     <label>Profile Picture:</label>
     <v-file-input
+    ref="fileInput"
     :rules="rules"
     accept="image/png, image/jpeg, image/bmp, image/jpg"
     label="Profile Photo"
     placeholder="Choose profile photo"
     prepend-icon="mdi-camera"
     loading="true"
+    @change="getFileLink"
     ></v-file-input>
 
     <div class="terms">
@@ -51,21 +60,32 @@
 
     <div class="submit">
       <router-link to="/home">
-        <v-btn size="small" class="pill" @click="handleSubmit">Create an account</v-btn>
+        <v-btn @click="createUser" size="small" class="pill">Create an account</v-btn>
       </router-link>
     </div>
   </form>
 </template>
 
 <script>
+import axios from 'axios'
+import { useUserStore } from '@/store/userStore'
+const userStore = useUserStore()
+
 export default {
   data() {
     return {
       email: "",
+      firstName: "",
+      lastName: "",
+      address: "",
       password: "",
+      phoneNumber: "",
       showPassword: false,
       accountType: "",
+      gender: "",
+      genders: ['M', 'F'],
       accountTypes: ['Buyer', 'Seller'],
+      fileLink: null,
       terms: false,
       names: [],
       passwordError: "",
@@ -95,6 +115,39 @@ export default {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
+
+    getFileLink() {
+      // Access the input element using $refs
+      const fileInput = this.$refs.fileInput.$el.querySelector('input[type="file"]');
+      // Check if a file is selected
+      if (fileInput.files.length > 0) {
+        // Get the first selected file
+        const file = fileInput.files[0];
+        // Create a URL for the selected file
+        this.fileLink = URL.createObjectURL(file);
+    }
+  },
+
+    async createUser() {
+      const params = {
+          password: this.password,
+          phone_number: this.phoneNumber,
+          first_name: this.firstName,
+          last_name: this.lastName,
+          gender: this.gender,
+          address: this.address,
+          account_type: this.accountType,
+          profile_picture: this.fileLink
+        }
+      userStore.setUser(params)
+      try {
+        await axios.post(`http://127.0.0.1:5000//user/${this.email}`, params);
+        // Optionally, perform any actions after successful user creation
+      } catch (error) {
+        console.error('Error creating user:', error);
+        throw error; // Re-throw the error to propagate it further
+      }
+    }
   }
 
 }

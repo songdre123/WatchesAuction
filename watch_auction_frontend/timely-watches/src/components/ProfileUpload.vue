@@ -70,8 +70,8 @@ export default {
         reader.onload = (event) => {
           let fileContent = event.target.result;
 
-          const accessKeyId = import.meta.env.ENV_AWS_ACCESS_KEY_ID;
-          const secretAccessKey = import.meta.env.ENV_AWS_SECRET_ACCESS_KEY;
+          const accessKeyId = import.meta.env.VITE_ENV_AWS_ACCESS_KEY_ID;
+          const secretAccessKey = import.meta.env.VITE_ENV_AWS_SECRET_ACCESS_KEY;
 
           AWS.config.update({
             accessKeyId: accessKeyId,
