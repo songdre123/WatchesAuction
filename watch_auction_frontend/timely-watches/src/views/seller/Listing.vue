@@ -1,4 +1,6 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
+  <div>
   <div class="listing">
     <h1>Auction Listing</h1>
   </div>
@@ -25,6 +27,7 @@
       </v-col>
     </v-row>
   </v-container>
+</div>
 </template>
 
 <script>

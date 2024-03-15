@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <template>
 <h1>Stripe Payment</h1>
 <stripe-checkout
@@ -28,8 +29,8 @@ export default {
             quantity: 1,
             }
         ],
-        successUrl: 'http://localhost:8080/success',
-        cancelUrl: 'http://localhost:8080/cancel',
+        successUrl: 'http://localhost:3000/success',
+        cancelUrl: 'http://localhost:3000/cancel',
         
     }
     },
