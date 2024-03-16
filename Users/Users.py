@@ -2,14 +2,16 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
 from flasgger import Swagger
-from config import set_database_uri
+# from config import set_database_uri
+from os import environ
 from flask_cors import CORS
-
 
 app = Flask(__name__)  # initialize a flask application
 
 # Flask CORS
 CORS(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Swagger UI configuration
 app.config['SWAGGER'] = {
@@ -20,10 +22,8 @@ app.config['SWAGGER'] = {
 }
 swagger = Swagger(app)
 
-path = "Users"
-set_database_uri(app, path)
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# path = "Users"
+# set_database_uri(app, path)
 
 '''
 API Endpoints:
@@ -471,4 +471,4 @@ def delete_user(email):
 
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5000, debug=True, host='0.0.0.0')
