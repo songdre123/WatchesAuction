@@ -2,9 +2,14 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
 from flasgger import Swagger
-from db_config import set_database_uri
+from config import set_database_uri
+from flask_cors import CORSf
+
 
 app = Flask(__name__)  # initialize a flask application
+
+# Flask CORS
+CORS(app)
 
 # Swagger UI configuration
 app.config['SWAGGER'] = {
