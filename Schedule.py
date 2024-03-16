@@ -29,7 +29,7 @@ swagger = Swagger(app)
 4. DELETE /schedule/delete/<int:auction_id> - Delete schedule by auction ID
 5. GET /schedule/<int:auction_id> - Get schedule for a specific auction ID
 6. GET /schedule/user/<int:user_id> - Get all schedules for a specific user ID
-7. GET /schedule/time - Get all schedules in a time range, use query params of (start_time=YYYY-MM-DDTHH:MM:SS.SSS&end_time=YYYY-MM-DDTHH:MM:SS.SSS)
+7. GET /schedule/date - Get all schedules in a date range, use query params of (start_date=YYYY-MM-DDT end_date=YYYY-MM-DD)
 
 -- SQL Database creation code for Schedule
 
@@ -38,7 +38,7 @@ USE Schedule;
 CREATE TABLE Schedule (
     auction_id INT PRIMARY KEY,
     user_id INT,
-    collection_time TIMESTAMP
+    collection_date DATE
 );
 """
 
@@ -50,18 +50,18 @@ class Schedule(db.Model):
 
     auction_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer)
-    collection_time = db.Column(db.TIMESTAMP)
+    collection_date = db.Column(db.TIMESTAMP)
 
-    def __init__(self, auction_id, user_id, collection_time=None):
+    def __init__(self, auction_id, user_id, collection_date=None):
         self.auction_id = auction_id
         self.user_id = user_id
-        self.collection_time = collection_time
+        self.collection_date = collection_date
 
     def json(self):
         return {
             'auction_id': self.auction_id,
             'user_id': self.user_id,
-            'collection_time': self.collection_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] if self.collection_time else None
+            'collection_date': self.collection_date.strftime('%Y-%m-%d') if self.collection_date else None 
         }
 
 # Create tables (including the 'Schedule' table in the 'Schedule' schema)
@@ -118,7 +118,7 @@ def create_schedule(auction_id):
     new_schedule = Schedule(
         auction_id=auction_id,
         user_id=None,
-        collection_time=None
+        collection_date=None
     )
 
     db.session.add(new_schedule)
@@ -163,10 +163,10 @@ def edit_schedule(auction_id):
                 schema:
                     type: object
                     properties:
-                        collection_time:
+                        collection_date:
                             type: string
-                            format: date-time
-                            description: The scheduled time for collection
+                            format: date
+                            description: The scheduled date for collection (YYYY-MM-DD)
                         user_id:
                             type: integer
                             description: The ID of the user
@@ -191,8 +191,21 @@ def edit_schedule(auction_id):
     data = request.get_json()
 
     if data:
-        for key, value in data.items():
-            setattr(schedule, key, value)
+        collection_date_str = data.get('collection_date')
+
+        if collection_date_str:
+            try:
+                collection_date = datetime.strptime(collection_date_str, '%Y-%m-%d').date()
+                schedule.collection_date = collection_date
+            except ValueError:
+                return jsonify({
+                    "code": 400,
+                    "message": "Invalid date format. Please use the format 'YYYY-MM-DD'",
+                }), 400
+
+        user_id = data.get('user_id')
+        if user_id is not None:
+            schedule.user_id = user_id
 
         try:
             db.session.commit()
@@ -329,50 +342,50 @@ def get_schedules_for_user(user_id):
     return jsonify(schedule_list)
 
 # Get all schedules in specific time range
-@app.route('/schedule/time', methods=['GET'])
-def get_schedules_within_time_range():
-    """Get all schedules in a specific time range
+@app.route('/schedule/date', methods=['GET'])
+def get_schedules_within_date_range():
+    """Get all schedules in a specific date range
     ---
     tags:
       - Schedule
     parameters:
-      - name: start_time
+      - name: start_date
         in: query
         type: string
-        format: date-time
+        format: date
         required: true
-        description: The start time of the time range YYYY-MM-DDTHH:MM:SS.SSS
-      - name: end_time
+        description: The start date of the date range YYYY-MM-DD
+      - name: end_date
         in: query
         type: string
-        format: date-time
+        format: date
         required: true
-        description: The end time of the time range YYYY-MM-DDTHH:MM:SS.SSS
+        description: The end date of the date range YYYY-MM-DD
     responses:
       200:
-        description: Returns a list of schedules within the specified time range
+        description: Returns a list of schedules within the specified date range
       400:
-        description: Invalid date format. Please use the format 'YYYY-MM-DDTHH:MM:SS.SSS'
+        description: Invalid date format. Please use the format 'YYYY-MM-DD'
     """
-    start_time_str = request.args.get('start_time')
-    end_time_str = request.args.get('end_time')
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
 
     try:
-        start_time = datetime.strptime(start_time_str, '%Y-%m-%dT%H:%M:%S.%f')
-        end_time = datetime.strptime(end_time_str, '%Y-%m-%dT%H:%M:%S.%f')
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
     except ValueError:
         return jsonify({
             "code": 400,
-            "message": "Invalid date format. Please use the format 'YYYY-MM-DDTHH:MM:SS.SSS'",
+            "message": "Invalid date format. Please use the format 'YYYY-MM-DD'",
         }), 400
 
     schedules = db.session.query(Schedule).filter(
-        Schedule.collection_time.between(start_time, end_time)
+        Schedule.collection_date >= start_date,
+        Schedule.collection_date <= end_date
     ).all()
 
     schedule_list = [schedule.json() for schedule in schedules]
     return jsonify(schedule_list)
-
 
 if __name__ == '__main__':
     app.run(port=5003, debug=True)
