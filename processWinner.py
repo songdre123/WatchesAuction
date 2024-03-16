@@ -186,4 +186,4 @@ if __name__ == '__main__':
   scheduler = BackgroundScheduler()
   scheduler.add_job(check_auctions, 'interval', seconds=5)  # Run the code every 5 seconds
   scheduler.start()
-  app.run(port=5005)
+  app.run(port=5005, debug=True)
