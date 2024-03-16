@@ -1,7 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from db_config import set_database_uri
+# from db_config import set_database_uri
+from configparser import ConfigParser
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from os import environ
+from flask_cors import CORS
+
+
 
 from flasgger import Swagger
 
@@ -12,9 +19,16 @@ stripe.api_key = "rk_test_51OrZSVC6Ev8NcoAAsL8tWKsJQRCKKCry61vycl0wbj3FrQkTJ4qs5
 
 app = Flask(__name__)  # initialize a flask application
 
-path = "Auction"
-set_database_uri(app, path)
+# path = "Auction"
+# set_database_uri(app, path)
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+config = ConfigParser()
+config.read('config.ini')
+db_uri_template = config.get('database', 'db_uri')
+db_uri = db_uri_template.format(database_name='Auction')
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+CORS(app)
 
 
 # Initialize flasgger 
@@ -582,4 +596,4 @@ def get_closed_auctions():
 
 
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(port=5001, debug=True, host='0.0.0.0')
