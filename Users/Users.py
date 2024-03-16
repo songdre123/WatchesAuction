@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import hashlib
 from flasgger import Swagger
 from config import set_database_uri
-from flask_cors import CORSf
+from flask_cors import CORS
 
 
 app = Flask(__name__)  # initialize a flask application
