@@ -6,7 +6,7 @@ from flasgger import Swagger
 from db_config import set_database_uri
 
 app = Flask(__name__)  # initialize a flask application
-CORS(app, origins=["http://localhost:3000"])
+CORS(app)
 
 # Swagger UI configuration
 app.config["SWAGGER"] = {
