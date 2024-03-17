@@ -1,48 +1,41 @@
 <template>
- <!--make a site for people to book a day to collect their watch  -->
-    <v-container>
-        <v-row>
-        <v-col>
-            <v-sheet>
-            <h3 class="mb-3">Schedule a Day to Collect Your Watch</h3>
-            <v-divider class="mb-3"></v-divider>
-            <v-row>
-                <v-col>
-                <v-text-field
-                    label="Date"
-                    type="date"
-                    v-model="date"
-                ></v-text-field>
-                </v-col>
-                <v-col>
-                <v-text-field
-                    label="Time"
-                    type="time"
-                    v-model="time"
-                ></v-text-field>
-                </v-col>
-            </v-row>
-            <v-btn
-                @click="schedule"
-            >Schedule</v-btn>
-            </v-sheet>
-        </v-col>
-        </v-row>
-    </v-container>
+
+    <div class="wrapper">
+        <ejs-calendar :selectedDate="date" :change="change" :showTodayButton="false">
+        </ejs-calendar>
+        <button @click="submitschedule" class="btn btn-primary" >Submit</button>
+    </div>
+    <div v-if="submitted">
+        <h1>Success</h1>
+        <p>Your collection date has been placed successfully.</p>
+    </div>
+
+
+
 </template>
 <script>
-export default {
-    data() {
-        return {
-            date: '',
-            time: ''
+import { CalendarComponent } from '@syncfusion/ej2-vue-calendars';
+export default{
+    name: 'Schedule',
+    data(){
+        return{
+            date: new Date()
+            submitted: false
+
         }
     },
-    methods: {
-        schedule() {
-            console.log('Scheduled')
-        }
-    }
+    components: {
+        'ejs-calendar': CalendarComponent
+    },
 }
-
 </script>
+<style>
+@import "@syncfusion/ej2-base/styles/material.css";
+@import "@syncfusion/ej2-buttons/styles/material.css";
+@import "@syncfusion/ej2-calendars/styles/material.css";
+@import "bootstrap/dist/css/bootstrap.css"; /* Add this line */
+.wrapper{
+    max-width: 200px;
+    margin: 0 auto;
+}
+</style>
