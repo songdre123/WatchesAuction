@@ -3,17 +3,23 @@ import { defineStore } from "pinia";
 
 export const useUserStore = defineStore("user", {
   state: () => ({
-    user: '',
+    user: "",
   }),
   actions: {
-    setUser(user) {
+    async setUser(user) {
       this.user = user;
+      return new Promise((resolve) => {
+        // Simulate asynchronous operation to set user data
+        setTimeout(() => {
+          resolve(); // Resolve the promise once user data is set
+        }, 100); // Adjust the delay as needed
+      });
     },
     getUser() {
       return this.user;
     },
     getUserName() {
-      return this.user["first_name"] + " " + this.user["last_name"];
+      return this.user.first_name + " " + this.user.last_name;
     },
     removeUser() {
       this.user = null;
@@ -28,7 +34,7 @@ export const useUserStore = defineStore("user", {
       this.user.last_name = lastName;
     },
     editPassword(password) {
-        this.user.password = password
-    }
+      this.user.password = password;
+    },
   },
 });

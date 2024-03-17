@@ -2,7 +2,7 @@
   <form @submit.prevent="handleSubmit">
 
     <div class="header-form">
-      <h1>Login</h1>
+      <h1>Register</h1>
     </div>
 
     <div class="name-fields">
@@ -59,9 +59,7 @@
     </div>
 
     <div class="submit">
-      <router-link to="/home">
         <v-btn @click="createUser" size="small" class="pill">Create an account</v-btn>
-      </router-link>
     </div>
   </form>
 </template>
@@ -129,6 +127,17 @@ export default {
   },
 
     async createUser() {
+      const paramsStore = {
+          email: this.email,
+          password: this.password,
+          phone_number: this.phoneNumber,
+          first_name: this.firstName,
+          last_name: this.lastName,
+          gender: this.gender,
+          address: this.address,
+          account_type: this.accountType,
+          profile_picture: this.fileLink
+        }
       const params = {
           password: this.password,
           phone_number: this.phoneNumber,
@@ -139,17 +148,23 @@ export default {
           account_type: this.accountType,
           profile_picture: this.fileLink
         }
-      userStore.setUser(params)
+      userStore.setUser(paramsStore)
       try {
-        await axios.post(`http://127.0.0.1:5000//user/${this.email}`, params);
+        await axios.post(`http://127.0.0.1:5000/user/${this.email}`, params);
         // Optionally, perform any actions after successful user creation
       } catch (error) {
         console.error('Error creating user:', error);
         throw error; // Re-throw the error to propagate it further
       }
+
+      if (this.accountType == 'Buyer') {
+        this.$router.push({path: '/home'})
+      }
+      else {
+        this.$router.push({path: '/admin'})
+      }
     }
   }
-
 }
 </script>
 
