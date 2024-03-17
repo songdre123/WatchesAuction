@@ -1,7 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from db_config import set_database_uri
+# from db_config import set_database_uri
+from configparser import ConfigParser
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+from os import environ
+from flask_cors import CORS
+
+
 
 from flasgger import Swagger
 
@@ -12,9 +19,16 @@ stripe.api_key = "rk_test_51OrZSVC6Ev8NcoAAsL8tWKsJQRCKKCry61vycl0wbj3FrQkTJ4qs5
 
 app = Flask(__name__)  # initialize a flask application
 
-path = "Auction"
-set_database_uri(app, path)
+# path = "Auction"
+# set_database_uri(app, path)
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+config = ConfigParser()
+config.read('config.ini')
+db_uri_template = config.get('database', 'db_uri')
+db_uri = db_uri_template.format(database_name='Auction')
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+CORS(app)
 
 
 # Initialize flasgger 
@@ -56,6 +70,7 @@ CREATE TABLE Auction (
     current_price FLOAT NOT NULL,
     auction_winner_id INT,
     auction_status INT DEFAULT 1,
+    watch_ref VARCHAR(255) NOT NULL,
     watch_condition VARCHAR(255) NOT NULL,
     watch_brand VARCHAR(255) NOT NULL,
     watch_box_present BOOLEAN NOT NULL,
@@ -81,6 +96,7 @@ class Auction(db.Model):
     current_price = db.Column(db.Float)
     auction_winner_id = db.Column(db.Integer)
     auction_status = db.Column(db.Integer, default=1)
+    watch_ref = db.Column(db.String(255))
     watch_condition = db.Column(db.String(255))
     watch_brand = db.Column(db.String(255))
     watch_box_present = db.Column(db.Boolean)
@@ -93,7 +109,7 @@ class Auction(db.Model):
 
 
 
-    def __init__(self, auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3):
+    def __init__(self, auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_ref, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3):
         self.auction_item = auction_item
         self.start_time = start_time
         self.end_time = end_time
@@ -101,6 +117,7 @@ class Auction(db.Model):
         self.current_price = current_price
         self.auction_winner_id = auction_winner_id
         self.auction_status = auction_status
+        self.watch_ref = watch_ref
         self.watch_condition = watch_condition
         self.watch_brand = watch_brand
         self.watch_box_present = watch_box_present
@@ -121,6 +138,7 @@ class Auction(db.Model):
             "auction_winner_id": self.auction_winner_id,
             "auction_status": self.auction_status,
             "watch_condition": self.watch_condition,
+            "watch_ref": self.watch_ref,
             "watch_brand": self.watch_brand,
             "watch_box_present": self.watch_box_present,
             "watch_papers_present": self.watch_papers_present,
@@ -230,7 +248,9 @@ def create_auction():
                 type: number
               auction_winner_id:
                 type: integer
-              auction_status:
+              watch_ref:
+                type: string
+              :
                 type: integer
               watch_condition:
                 type: string
@@ -366,6 +386,8 @@ def edit_auction(auction_id):
                             type: number
                         current_price:
                             type: number
+                        watch_ref:
+                            type: string
                         auction_winner_id:
                             type: integer
                         auction_status:
@@ -574,4 +596,4 @@ def get_closed_auctions():
 
 
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    app.run(port=5001, debug=True, host='0.0.0.0')

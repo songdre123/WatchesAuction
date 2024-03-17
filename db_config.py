@@ -1,7 +1,7 @@
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 
 def set_database_uri(app, database_name):
-    config_template = SafeConfigParser()
+    config_template = ConfigParser()
     config_template.read('config.ini')
 
     db_uri_template = config_template.get('database', 'db_uri')
