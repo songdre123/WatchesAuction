@@ -12,7 +12,8 @@
                             <v-divider class="mt-3 mb-3"></v-divider>
                             
                             <span class="d-flex justify-space-between">
-                                <h5 class="mb-3">Date of Auction: <u>{{ watch.Date }}</u></h5>
+                                <h5 class="mb-3">Start Date of Auction: <u>{{ watch.StartDate }}</u></h5>
+
                                 
                                 <v-dialog max-width="500">
                                     <template v-slot:activator="{ props: activatorProps }">
@@ -21,11 +22,11 @@
                                     <template v-slot:default="{ isActive }">
                                         <v-card title="Confirm Bid of Amount">
                                             <v-card-text>
-                                                Please confirm that you are willing and able to make a total bid of {{ watch.MinBid }}
+                                                Please confirm that you are willing and able to make a total bid of $SGD {{ watch.MinBid }}
                                             </v-card-text>
 
                                             <v-card-subtitle class="text-white-50" style="white-space: normal;">
-                                                Disclaimer: DownPayment of 10% of the Watch Winning Bid must
+                                                Disclaimer: Down Payment of 10% of the Watch Winning Bid must
                                                 be made before full payment and claim of watch
                                             </v-card-subtitle>
 
@@ -44,12 +45,16 @@
                                     </template>
                                 </v-dialog>
                             </span>
+                            <h5 class="mb-3">End Date of Auction: <u>{{ watch.EndDate }}</u></h5>
 
                             <v-divider class="mt-3 mb-3"></v-divider>
 
                             <h5 class="mb-3">Current Bid: {{ watch.MinBid }} SGD</h5>
                             <h5 class="mb-3">Minimum Bid: {{ watch.MinBid }} SGD</h5>
-                            <p class="mb-3">Watch Condition: Working</p>
+                            <p class="mb-3">Watch Condition: {{ watch.Condition }}</p>
+                            <p class="mb-3">Watch Box Present: {{ isWatchBoxPresent }}</p>
+                            <p class="mb-3">Watch Papers Present: {{ isWatchPapersPresent }}</p>
+                            
                             <p class="mb-3">Watch Status: In Progress</p>
 
                         </v-sheet>
@@ -75,14 +80,26 @@ export default {
         const id = computed(() => route.params.id)
 
         const isBidEnabled = computed(() => {
-            const watchDate = new Date(watch.value.Date)
-            const twoHoursAfterWatchDate = new Date(watchDate.getTime() + (2 * 60 * 60 * 1000)) // 2 hours in milliseconds
+            const watchStartDate = new Date(watch.value.StartDate)
+            const watchEndDate = new Date(watch.value.EndDate)
+
+             // 2 hours in milliseconds
             const currentDate = new Date()
 
-            return currentDate >= watchDate && currentDate <= twoHoursAfterWatchDate
+            return currentDate >= watchStartDate && currentDate <= watchEndDate
         })
 
-        return { watch, id, isBidEnabled}
+        const isWatchBoxPresent = computed(() => {
+            const watchBoxPresent = watch.value.WatchBoxPresent
+            return watchBoxPresent ? 'Present' : 'Not Present'
+        })
+
+        const isWatchPapersPresent = computed(() => {
+            const watchPapersPresent = watch.value.WatchPapersPresent
+            return watchPapersPresent ? 'Present' : 'Not Present'
+        })
+
+        return { watch, id, isBidEnabled, isWatchBoxPresent, isWatchPapersPresent}
     }
 }
 ;
