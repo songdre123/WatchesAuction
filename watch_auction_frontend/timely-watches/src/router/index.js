@@ -8,7 +8,7 @@ const routes = [
     component: () => import("@/views/Login.vue"),
   },
   {
-    path: "/schedule",
+    path: "/schedule/:id",
     name: "Schedule",
     component: () => import("@/views/Schedule.vue"),
   },
