@@ -20,4 +20,5 @@ const app = createApp(App);
 
 registerPlugins(app);
 
+
 app.mount("#app");
