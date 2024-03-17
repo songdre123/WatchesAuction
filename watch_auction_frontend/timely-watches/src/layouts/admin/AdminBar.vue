@@ -25,13 +25,15 @@
             value="auction"
           ></v-list-item>
 
-          <v-list-item
-            prepend-icon="mdi-cash-multiple"
-            title="My Bids"
-            value="bids"
-          ></v-list-item>
+          <router-link class="router-link" to="/admin/create">
+            <v-list-item
+              prepend-icon="mdi-watch"
+              title="List Watch"
+              value="list"
+            ></v-list-item>
+          </router-link>
 
-          <router-link class="router-link" to="/home/account">
+          <router-link class="router-link" to="/admin/account">
             <v-list-item
               prepend-icon="mdi-account"
               title="Account"
