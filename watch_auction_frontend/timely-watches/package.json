@@ -17,6 +17,7 @@
     "axios": "^1.6.7",
     "bootstrap": "^5.3.0",
     "core-js": "^3.29.0",
+    "cors": "^2.8.5",
     "pinia": "^2.0.0",
     "roboto-fontface": "*",
     "typescript": "^5.3.3",
