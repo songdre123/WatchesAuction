@@ -250,7 +250,7 @@ def create_auction():
                 type: integer
               watch_ref:
                 type: string
-              auction_status:
+              :
                 type: integer
               watch_condition:
                 type: string

@@ -60,7 +60,7 @@ const routes = [
     ],
   },
   {
-    path: "/checkout",
+    path: "/checkout/:id",
     name: "Checkout",
     component: () => import("@/views/Checkout.vue"),
   },
