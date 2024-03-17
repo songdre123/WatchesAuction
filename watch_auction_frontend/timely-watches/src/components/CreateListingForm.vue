@@ -133,7 +133,7 @@
                         </v-col>
                         <v-col cols="6">
                             <v-text-field label="Start date and time" required
-                            onchange="CovertToTimestampfromStringStart(this.value)"
+                            onchange="CovertToTimestampfromStringStart(this.value)" v-model="start_date"
                             >
                             </v-text-field>
                         </v-col>
