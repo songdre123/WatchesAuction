@@ -67,6 +67,7 @@ CREATE TABLE Auction (
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NULL,
     start_price FLOAT NOT NULL,
+    manufacture_year INT NOT NULL,
     current_price FLOAT NOT NULL,
     auction_winner_id INT,
     auction_status INT DEFAULT 1,
@@ -90,6 +91,7 @@ class Auction(db.Model):
     #should include nullable=False to prevent error when executing different end points for important attribute such as start time start etc. 
     auction_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     auction_item = db.Column(db.String(255)) 
+    manufacture_year = db.Column(db.Integer)
     start_time = db.Column(db.TIMESTAMP)
     end_time = db.Column(db.TIMESTAMP)
     start_price = db.Column(db.Float)
@@ -109,10 +111,11 @@ class Auction(db.Model):
 
 
 
-    def __init__(self, auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_ref, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3):
+    def __init__(self, auction_item, start_time, end_time, manufacture_year, start_price, current_price, auction_winner_id, auction_status, watch_ref, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3):
         self.auction_item = auction_item
         self.start_time = start_time
         self.end_time = end_time
+        self.manufacture_year = manufacture_year
         self.start_price = start_price
         self.current_price = current_price
         self.auction_winner_id = auction_winner_id
@@ -131,6 +134,7 @@ class Auction(db.Model):
         return {
             "auction_id": self.auction_id,
             "auction_item": self.auction_item,
+            "manufacture_year": self.manufacture_year,
             "start_time": self.start_time.strftime('%Y-%m-%d %H:%M:%S'),
             "end_time": self.end_time.strftime('%Y-%m-%d %H:%M:%S'),
             "start_price": self.start_price,
@@ -241,6 +245,10 @@ def create_auction():
               start_time:
                 type: string
               end_time:
+                type: string
+            manufacture_year:
+                type: integer
+            stripe_product_id:
                 type: string
               start_price:
                 type: number
