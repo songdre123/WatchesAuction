@@ -1,12 +1,90 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
+from flasgger import Swagger
 
 app = Flask(__name__)
 CORS(app)
 
+app.config["SWAGGER"] = {
+    "title": "User microservice API",
+    "version": 1.0,
+    "openapi": "3.0.2",
+    "description": "Allows interaction with the Users microservice",
+}
+swagger = Swagger(app)
+
 @app.route('/createAuction', methods=['POST'])
 def createAuction():
+    """
+    Create auction and schedule for the new item
+    ---
+    parameters:
+      - name: auction_data
+        in: body
+        description: User data for creating a new user
+        required: true
+        schema:
+          type: object
+          properties:
+              auction_item:
+                    type: string
+                    description: The item being auctioned.
+              start_time:
+                type: string
+                format: date-time
+                description: The start time of the auction.
+              end_time:
+                type: string
+                format: date-time
+                description: The end time of the auction.
+              start_price:
+                type: number
+                description: The starting price of the auction.
+              current_price:
+                type: number
+                description: The current price of the auction.
+              auction_winner_id:
+                type: integer
+                nullable: true
+                description: The ID of the auction winner.
+              auction_status:
+                type: integer
+                description: The status of the auction (0 = unopened, 1 = active, 2 = closed, -1 = no winner, -2 = winner has paid.).
+              watch_ref:
+                type: string
+                description: The reference number of the watch.
+              watch_condition:
+                type: string
+                description: The condition of the watch (e.g., new, used, like new).
+              watch_brand:
+                type: string
+                description: The brand of the watch.
+              watch_box_present:
+                type: boolean
+                description: Whether the watch box is present.
+              watch_papers_present:
+                type: boolean
+                description: Whether the watch papers are present.
+              watch_images:
+                type: array
+                items:
+                  type: string
+                minItems: 3
+                maxItems: 3
+                description: List of URLs or paths to the images of the watch.
+              year:
+                type: integer
+                description: The year of the watch.
+    responses:
+        201:
+            description: Auction and Schedule Created
+        401:
+            description: Error in Auction microservice
+        402:
+            description: Error in Schedule microservice
+    """
+
     data = request.json
     auction_item = data.get('Watch_name')
     start_time = data.get('start_date')
@@ -45,7 +123,6 @@ def createAuction():
         "watch_image2": watch_image2,
         "watch_image3": watch_image3
         # "year": year,
-        # "stripe_product_id": stripe_product_id
       }
     )
     print(auction_response)
@@ -67,7 +144,7 @@ def createAuction():
           # handle schedule creation error
             return jsonify(
                 {
-                    "code": schedule_response.status_code,
+                    "code": 402,
                     "message": "Error creating schedule in the Schedule microservice"
                 }
             ), schedule_response.status_code
@@ -76,7 +153,7 @@ def createAuction():
       # handle auction creation error
         return jsonify(
             {
-                "code": auction_response.status_code,
+                "code": 401,
                 "message": "Error creating auction in the Auctions microservice"
             }
         ), auction_response.status_code
