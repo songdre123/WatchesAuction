@@ -3,14 +3,14 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from datetime import datetime
 from flasgger import Swagger
-from db_config import set_database_uri
+from flask_cors import CORS
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 
-path = "Bids"
-set_database_uri(app, path)
-
+# Flask CORS
+CORS(app)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("dbURL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 app.config["SWAGGER"] = {
