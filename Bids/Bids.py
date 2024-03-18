@@ -37,6 +37,7 @@ DATABASE: bids
 TABLE: Bids
 SQL Credentials: root:password
 SQL Port: 3306
+SQL dbURL: mysql+mysqlconnector://root:password@localhost:3306/Bids
 """
 
 db = SQLAlchemy(app)
@@ -48,13 +49,13 @@ class Bids(db.Model):
     bid_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     bid_amount = db.Column(db.Float, nullable=False)
     auction_id = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, nullable=False)
+    user_email = db.Column(db.String(255), nullable=False)
     bid_time = db.Column(db.TIMESTAMP, nullable=False)
 
-    def __init__(self, bid_amount, auction_id, user_id, bid_time):
+    def __init__(self, bid_amount, auction_id, user_email, bid_time):
         self.bid_amount = bid_amount
         self.auction_id = auction_id
-        self.user_id = user_id
+        self.user_email = user_email
         self.bid_time = bid_time
 
     def json(self):
@@ -62,7 +63,7 @@ class Bids(db.Model):
             "bid_id": self.bid_id,
             "bid_amount": self.bid_amount,
             "auction_id": self.auction_id,
-            "user_id": self.user_id,
+            "user_email": self.user_email,
             "bid_time": self.bid_time,
         }
 
@@ -111,10 +112,10 @@ def create_bid():
                             type: integer
                             description: ID of the auction associated with the bid
                             example: 123
-                        user_id:
-                            type: integer
-                            description: ID of the user placing the bid
-                            example: 456
+                        user_email:
+                            type: string
+                            description: Email of the user placing the bid
+                            example: ethantay321@gmail.com
     responses:
         201:
             description: Bid created successfully
@@ -128,14 +129,14 @@ def create_bid():
         data = request.json
         bid_amount = data.get("bid_amount")
         auction_id = data.get("auction_id")
-        user_id = data.get("user_id")
+        user_email = data.get("user_email")
         bid_time = datetime.now()
 
         # Create a new Bid object and add it to the database session
         new_bid = Bids(
             bid_amount=bid_amount,
             auction_id=auction_id,
-            user_id=user_id,
+            user_email=user_email,
             bid_time=bid_time,  # not necessary since bid_time will be auto based on the current datetime
         )
         db.session.add(new_bid)
@@ -422,7 +423,7 @@ def get_all_bids_from_auction(auction_id):
                 "bid_id": bid.bid_id,
                 "bid_amount": bid.bid_amount,
                 "auction_id": bid.auction_id,
-                "user_id": bid.user_id,
+                "user_email": bid.user_email,
                 "bid_time": bid.bid_time,
             }
             for bid in bids_from_auction
