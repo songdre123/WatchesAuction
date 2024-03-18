@@ -57,6 +57,7 @@ import axios from 'axios'
         console.log(this.auctionData[i])
         if (this.auctionData[i].watch_brand == 'Rolex') {
           this.watches['Rolex'][this.auctionData[i].watch_ref] = {
+            'auctionID' : this.auctionData[i].auction_id,
             'title' : this.auctionData[i].auction_item,
             'StartDate' : this.auctionData[i].start_time,
             'EndDate' : this.auctionData[i].end_time,
@@ -73,6 +74,7 @@ import axios from 'axios'
         }
         else if (this.auctionData[i].watch_brand == 'Patek Philippe') {
           this.watches['Patek Philippe'][this.auctionData[i].watch_ref] = {
+            'auctionID' : this.auctionData[i].auction_id,
             'title' : this.auctionData[i].auction_item,
             'StartDate' : this.auctionData[i].start_time,
             'EndDate' : this.auctionData[i].end_time,
@@ -89,6 +91,7 @@ import axios from 'axios'
         }
         else {
           this.watches['Audemars Piguet'][this.auctionData[i].watch_ref] = {
+            'auctionID' : this.auctionData[i].auction_id,
             'title' : this.auctionData[i].auction_item,
             'StartDate' : this.auctionData[i].start_time,
             'EndDate' : this.auctionData[i].end_time,

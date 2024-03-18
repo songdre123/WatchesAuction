@@ -22,7 +22,7 @@
                                     <template v-slot:default="{ isActive }">
                                         <v-card title="Confirm Bid of Amount">
                                             <v-card-text>
-                                                Please confirm that you are willing and able to make a total bid of $SGD {{ watch.MinBid }}
+                                                Please confirm that you are willing and able to make a total bid of $SGD {{ watch.CurrentPrice }}
                                             </v-card-text>
 
                                             <v-card-subtitle class="text-white-50" style="white-space: normal;">
@@ -38,7 +38,7 @@
                                             ></v-btn>
                                             <v-btn 
                                                 text="Make Bid" 
-                                                @click="isActive.value = false"
+                                                @click="createBid"
                                             ></v-btn>
                                             </v-card-actions>
                                         </v-card>
@@ -49,7 +49,7 @@
 
                             <v-divider class="mt-3 mb-3"></v-divider>
 
-                            <h5 class="mb-3">Current Bid: {{ watch.MinBid }} SGD</h5>
+                            <h5 class="mb-3">Current Bid: {{ watch.CurrentPrice }} SGD</h5>
                             <h5 class="mb-3">Minimum Bid: {{ watch.MinBid }} SGD</h5>
                             <p class="mb-3">Watch Condition: {{ watch.Condition }}</p>
                             <p class="mb-3">Watch Box Present: {{ isWatchBoxPresent }}</p>
@@ -70,11 +70,16 @@
 import { useWatchStore } from '@/store/watchStore'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useUserStore } from '@/store/userStore'
+import axios from 'axios'
 
 export default {
     setup() {
         const watchStore = useWatchStore()
+        const userStore = useUserStore()
+
         const watch = computed(() => watchStore.getWatch())
+        const user = computed(() => userStore.getUser())
 
         const route = useRoute()
         const id = computed(() => route.params.id)
@@ -99,7 +104,39 @@ export default {
             return watchPapersPresent ? 'Present' : 'Not Present'
         })
 
-        return { watch, id, isBidEnabled, isWatchBoxPresent, isWatchPapersPresent}
+        const updateAuction = async () => {
+            const auctionParams = {
+                "current_price" : watch.value.CurrentPrice,
+            }
+            try {
+                await axios.put(`http://127.0.0.1:5001/auction/${watch.value.auctionID}`, auctionParams)
+            }
+            catch (error) {
+                console.error('Error creating user:', error);
+                throw error; // Re-throw the error to propagate it further
+            }
+        }
+
+        const createBid = async () => {
+            const bidParams = {
+                "auction_id" : watch.value.auctionID,
+                "bid_amount" : watch.value.CurrentPrice,
+                "user_email" : user.value.email
+            }
+            try {
+                await axios.post(`http://127.0.0.1:5002/bid`, bidParams);
+            }
+            catch (error) {
+                console.error('Error creating user:', error);
+                throw error; // Re-throw the error to propagate it further
+            }
+            watch.value.CurrentPrice += 500;
+            updateAuction()
+        }
+
+        
+
+        return { watch, user, id, isBidEnabled, isWatchBoxPresent, isWatchPapersPresent, createBid, updateAuction}
     }
 }
 ;

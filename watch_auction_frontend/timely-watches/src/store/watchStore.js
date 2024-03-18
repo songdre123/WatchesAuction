@@ -11,6 +11,9 @@ export const useWatchStore = defineStore("watch", {
     },
     getWatch() {
       return this.watch
+    },
+    updateWatchPrice() {
+      this.watch.CurrentPrice += 500;
     }
   },
 });
