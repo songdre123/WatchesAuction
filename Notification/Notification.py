@@ -4,14 +4,16 @@ from flask_mail import Mail
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from invokes import invoke_http
+# from invokes import invoke_http
 #pip3 install flask flask-mail
 from mailbox import Message
 from jinja2 import Environment, FileSystemLoader
+from os import environ
 import os
 from flasgger import Swagger
-from db_config import set_database_uri
+# from db_config import set_database_uri
 from datetime import datetime
+from flask_cors import CORS
 
 '''
 API Endpoints:
@@ -52,13 +54,14 @@ scenario when user will receive the notification
 ########## initiate flask ##########
 app = Flask(__name__)  # initialize a flask application
 
-path = "Notification"
-set_database_uri(app, path)
+# path = "Notification"
+# set_database_uri(app, path)
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-password="password@0000"
-db = SQLAlchemy(app)
 
+db = SQLAlchemy(app)
+CORS(app)
 ########## initiate swagger ##########
 # Initialize flasgger 
 app.config['SWAGGER'] = {

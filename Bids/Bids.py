@@ -1,17 +1,18 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
+from os import environ
 from datetime import datetime
 from flasgger import Swagger
-from db_config import set_database_uri
+# from db_config import set_database_uri
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
 
-path = "Bids"
-set_database_uri(app, path)
-
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# path = "Bids"
+# set_database_uri(app, path)
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root@localhost:3306/order'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["SWAGGER"] = {
     "title": "Bids microservice API",

@@ -2,8 +2,7 @@ from invokes import invoke_http
 import amqp_connection
 import json
 import pika
-import os, sys
-from invokes import invoke_http
+from os import environ;
 
 '''
 Functions (RabbitMQ)
@@ -26,14 +25,13 @@ scenario when user will receive the notification
 
 '''
 ########## URL ##########
-user_url="http://localhost:5000/user"
-auction_url="http://localhost:5001/auction"
-notification_url="http://localhost:5004/notification"
-schedule_url="http://localhost:5003/schedule"
-
+user_url=environ.get('user_url')  or 'http://localhost:5000/user'
+auction_url=environ.get('auction_url') or 'http://localhost:5001/auction'
+notification_url=environ.get('notification_url') or 'http://localhost:5004/notification'
+schedule_url=environ.get('schedule_url') or 'http://localhost:5003/schedule'
 
 ########## For RabbitMQ ##########
-e_queue_name = 'Notification'
+e_queue_name = environ.get('a_queue_name') or 'Notification'
 
 #1) receiveNotification- RabbitMQ consumer
 def receiveNotification(channel):

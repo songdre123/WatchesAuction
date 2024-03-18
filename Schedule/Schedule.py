@@ -3,15 +3,16 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_cors import CORS
 from flasgger import Swagger
-from db_config import set_database_uri
+from os import environ
+# from db_config import set_database_uri
 
 app = Flask(__name__)
 CORS(app)
 
-path = "schedule"
-set_database_uri(app, path)
+# path = "schedule"
+# set_database_uri(app, path)
 
-
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SWAGGER"] = {
     "title": "Schedule microservice API",

@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 # from db_config import set_database_uri
-from configparser import ConfigParser
+# from configparser import ConfigParser
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from os import environ
@@ -23,11 +23,11 @@ app = Flask(__name__)  # initialize a flask application
 # set_database_uri(app, path)
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-config = ConfigParser()
-config.read('config.ini')
-db_uri_template = config.get('database', 'db_uri')
-db_uri = db_uri_template.format(database_name='Auction')
-app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+# config = ConfigParser()
+# config.read('config.ini')
+# db_uri_template = config.get('database', 'db_uri')
+# db_uri = db_uri_template.format(database_name='Auction')
+# app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 CORS(app)
 
 

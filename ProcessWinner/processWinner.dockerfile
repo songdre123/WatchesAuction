@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Copy the required files into the container
 COPY processWinner.py .
-COPY invokes.py .
+COPY ../invokes.py .
 COPY processWinner_requirements.txt ./
 
 # Install any dependencies required by your application
