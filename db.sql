@@ -25,7 +25,8 @@ INSERT INTO Users (account_status, account_type, address, email, first_name, gen
 VALUES
 (1, 'Regular', 'Bencoolen Street 14', 'solaiym.2022@scis.smu.edu.sg', 'Solaiy', 'M', 1, 'Meyapan', '123', '88684378', NULL, '2024-02-21 22:15:49'),
 (1, '1', NULL, 'email1@sample.com', 'Person', 'M', 2, '1', 'pass', '90909090', NULL, '2024-02-22 14:26:46'),
-(1, '1', NULL, 'email2@sample.com', 'Person', 'M', 9, '1', 'd74ff0ee8da3b9806b18c877dbf29bbde50b5bd8e4dad7a3a725000feb82e8f1', '90909090', NULL, '2024-02-23 11:29:45');
+(1, '1', NULL, 'email2@sample.com', 'Person', 'M', 9, '1', 'd74ff0ee8da3b9806b18c877dbf29bbde50b5bd8e4dad7a3a725000feb82e8f1', '90909090', NULL, '2024-02-23 11:29:45'),
+(1, '1', NULL, 'wangkaijie2011@gmail.com', 'Person', 'M', 8, '1', 'd74ff0ee8da3b9806b18c877dbf29bbde50b5bd8e4dad7a3a725000feb82e8f1', '90909090', NULL, '2024-02-23 11:29:45');
 
 
 ############################################
@@ -36,15 +37,17 @@ CREATE DATABASE IF NOT EXISTS `Auction` DEFAULT CHARACTER SET utf8 COLLATE utf8_
 USE `Auction`;
 DROP TABLE IF EXISTS `Auction`;
 
-CREATE TABLE IF NOT EXISTS `Auction` (
+CREATE TABLE Auction (
     auction_id INT AUTO_INCREMENT PRIMARY KEY,
     auction_item VARCHAR(255) NOT NULL,
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NULL,
     start_price FLOAT NOT NULL,
+    manufacture_year INT NOT NULL,
     current_price FLOAT NOT NULL,
     auction_winner_id INT,
     auction_status INT DEFAULT 1,
+    watch_ref VARCHAR(255) NOT NULL,
     watch_condition VARCHAR(255) NOT NULL,
     watch_brand VARCHAR(255) NOT NULL,
     watch_box_present BOOLEAN NOT NULL,
@@ -55,9 +58,9 @@ CREATE TABLE IF NOT EXISTS `Auction` (
     stripe_product_id VARCHAR(255) DEFAULT NULL
 );
 
-INSERT INTO Auction (auction_item, start_time, end_time, start_price, current_price, auction_winner_id, auction_status, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3, stripe_product_id) 
+INSERT INTO Auction (auction_item, start_time, end_time, start_price, manufacture_year, current_price, auction_winner_id, auction_status, watch_ref, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3, stripe_product_id) 
 VALUES 
-('Rolex Submariner', '2024-03-15 12:00:00', '2024-03-20 12:00:00', 5000.00, 5500.00, NULL, 1, 'Excellent', 'Rolex', TRUE, TRUE, 'rolex_submariner_1.jpg', 'rolex_submariner_2.jpg', 'rolex_submariner_3.jpg', 'prod_1234567890');
+('Sample Item', '2024-03-11 12:00:00', '2024-03-12 12:00:00', 100.00, 2022, 120.00, NULL, 1, 'Sample Ref', 'Sample Condition', 'Sample Brand', TRUE, TRUE, 'image1.jpg', 'image2.jpg', 'image3.jpg', NULL);
 
 
 

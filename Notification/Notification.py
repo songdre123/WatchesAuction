@@ -161,9 +161,9 @@ class Notification(db.Model):
         }
 
 ########## all endpoint URL needed ##########
-user_url="http://localhost:5000/user"
-auction_url="http://localhost:5001/auction"
-notification_url="http://localhost:5004/notification"
+# user_url="http://localhost:5000/user"
+# auction_url="http://localhost:5001/auction"
+# notification_url="http://localhost:5004/notification"
 
 
 #1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
@@ -527,4 +527,4 @@ def sendEmail():
     
 
 if __name__ == "__main__": # execute this program only if it is run as a script (not by 'import')    
-    app.run(port=5004, debug=True)
+    app.run(port=5004, debug=True, host='0.0.0.0')

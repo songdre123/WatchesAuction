@@ -64,7 +64,8 @@ def callback(channel, method, properties, body):
     # print("--JSON:", notif)
 
     #log the notification into data
-    notification_response=invoke_http("http://localhost:5004/notification/createNotification", method="POST",json=notif)
+    createNotification_url=notification_url+"/createNotification"
+    notification_response=invoke_http(createNotification_url, method="POST",json=notif)
     if notification_response["code"] not in range(200,300):
         print(notification_response)
         print("unable to add into database")
@@ -89,7 +90,6 @@ def processNotif(notif):
         #account for schedule 
     schedule=""
     if "schedule_id" in notif:
-        print("hellooooooooooooooooooooooo")
         schedule_id=notif["schedule_id"]
         specify_schedule_url= f"{schedule_url}/{schedule_id}"
         schedule=invoke_http(specify_schedule_url,method="GET")
@@ -103,7 +103,8 @@ def processNotif(notif):
 
     print("information:", email_info )
     #send user email and the notification body 
-    invoke_http("http://localhost:5004/notification/sendEmail",method='POST', json=email_info)
+    send_email_url=notification_url+"/sendEmail"
+    invoke_http(send_email_url,method='POST', json=email_info)
     print("email has been sent")
   
 

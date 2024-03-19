@@ -5,13 +5,9 @@ FROM python:3-slim
 WORKDIR /usr/src/app
 
 # Copy the requirements file to the working directory
-COPY notification_requirements.txt ./
-
+COPY ./notification_requirements.txt ./Notification.py ./confirmEmailTemplate.html ./
 # Install the Python dependencies
 RUN python -m pip install --no-cache-dir -r notification_requirements.txt
-
-# Copy the application code to the working directory
-COPY ./Notification.py .
 
 # Set the command to run the application
 CMD ["python", "Notification.py"]
