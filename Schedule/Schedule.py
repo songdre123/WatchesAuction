@@ -7,6 +7,7 @@ from os import environ
 # from db_config import set_database_uri
 
 app = Flask(__name__)
+
 CORS(app)
 
 # path = "schedule"
@@ -389,4 +390,4 @@ def get_schedules_within_date_range():
     return jsonify(schedule_list)
 
 if __name__ == '__main__':
-    app.run(port=5003, debug=True)
+    app.run(port=5003, debug=True, host='0.0.0.0')
