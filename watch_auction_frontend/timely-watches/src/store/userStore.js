@@ -1,9 +1,12 @@
 // Utilities
 import { defineStore } from "pinia";
 
+
+
 export const useUserStore = defineStore("user", {
   state: () => ({
     user: "",
+    userID: "",
   }),
   actions: {
     async setUser(user) {
@@ -15,11 +18,25 @@ export const useUserStore = defineStore("user", {
         }, 100); // Adjust the delay as needed
       });
     },
+    setUserId(id) {
+      this.userID = id;
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 100);
+      });
+    },
     getUser() {
       return this.user;
     },
+    getUserId() {
+      return this.userID;
+    },
     getUserName() {
       return this.user.first_name + " " + this.user.last_name;
+    },
+    getUserEmail() {
+      return this.user.email;
     },
     removeUser() {
       this.user = null;
@@ -36,5 +53,8 @@ export const useUserStore = defineStore("user", {
     editPassword(password) {
       this.user.password = password;
     },
+  },
+  persist: {
+    enabled: true,
   },
 });
