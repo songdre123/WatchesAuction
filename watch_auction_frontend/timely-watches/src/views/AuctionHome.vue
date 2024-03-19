@@ -22,6 +22,9 @@
 
 <script>
 import axios from 'axios'
+import { useUserStore } from '@/store/userStore'
+const userStore = useUserStore()
+
   export default {
     data() {
       return {
@@ -48,6 +51,18 @@ import axios from 'axios'
   },
 
    async mounted() {
+
+      try {
+        const userResponse = await axios.get(`http://127.0.0.1:5000/user/${userStore.getUser().email}`)
+        const userData = userResponse.data.data
+        const userID = userData.id
+        userStore.setUserId(userID)
+        console.log(userID)
+      } catch (error) {
+        console.error('Error getting user:', error.message);
+        throw error; // Re-throw the error to propagate it further
+      }
+
       this.tab = this.categories[0]; // Initialize tab to the first category
       try {
         const response = await axios.get('http://127.0.0.1:5001/auction')

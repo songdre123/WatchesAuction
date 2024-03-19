@@ -68,25 +68,28 @@
 
 <script>
 import { useWatchStore } from '@/store/watchStore'
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/store/userStore'
 import axios from 'axios'
+const watchStore = useWatchStore()
+const userStore = useUserStore()
 
 export default {
     setup() {
-        const watchStore = useWatchStore()
-        const userStore = useUserStore()
-
-        const watch = computed(() => watchStore.getWatch())
-        const user = computed(() => userStore.getUser())
+        // const watchStore = useWatchStore()
+        // const userStore = useUserStore()
+        const isActive = ref(false)
+        const watch =  watchStore.getWatch()
+        const user = userStore.getUser()
+        const userId = computed(() => userStore.userID)
 
         const route = useRoute()
         const id = computed(() => route.params.id)
 
         const isBidEnabled = computed(() => {
-            const watchStartDate = new Date(watch.value.StartDate)
-            const watchEndDate = new Date(watch.value.EndDate)
+            const watchStartDate = new Date(watch.StartDate)
+            const watchEndDate = new Date(watch.EndDate)
 
              // 2 hours in milliseconds
             const currentDate = new Date()
@@ -95,48 +98,40 @@ export default {
         })
 
         const isWatchBoxPresent = computed(() => {
-            const watchBoxPresent = watch.value.WatchBoxPresent
+            const watchBoxPresent = watch.WatchBoxPresent
             return watchBoxPresent ? 'Present' : 'Not Present'
         })
 
         const isWatchPapersPresent = computed(() => {
-            const watchPapersPresent = watch.value.WatchPapersPresent
+            const watchPapersPresent = watch.WatchPapersPresent
             return watchPapersPresent ? 'Present' : 'Not Present'
         })
 
-        const updateAuction = async () => {
-            const auctionParams = {
-                "current_price" : watch.value.CurrentPrice,
-            }
-            try {
-                await axios.put(`http://127.0.0.1:5001/auction/${watch.value.auctionID}`, auctionParams)
-            }
-            catch (error) {
-                console.error('Error creating user:', error);
-                throw error; // Re-throw the error to propagate it further
-            }
-        }
-
         const createBid = async () => {
+            let price;
+            price = watchStore.getCurrentPrice 
+            
+
             const bidParams = {
-                "auction_id" : watch.value.auctionID,
-                "bid_amount" : watch.value.CurrentPrice,
-                "user_email" : user.value.email
+                "auction_id" : watch.auctionID,
+                "bid_amount" : price,
+                "user_id" : userId.value
             }
+            watchStore.incrementCurrentPrice(500)
             try {
-                await axios.post(`http://127.0.0.1:5002/bid`, bidParams);
+                await axios.post(`http://127.0.0.1:5006/authbid`, bidParams);
+                isActive.value = false;
             }
             catch (error) {
                 console.error('Error creating user:', error);
                 throw error; // Re-throw the error to propagate it further
             }
-            watch.value.CurrentPrice += 500;
-            updateAuction()
+
         }
 
         
 
-        return { watch, user, id, isBidEnabled, isWatchBoxPresent, isWatchPapersPresent, createBid, updateAuction}
+        return { watch, user, userId, id, isBidEnabled, isWatchBoxPresent, isWatchPapersPresent, createBid, isActive}
     }
 }
 ;
