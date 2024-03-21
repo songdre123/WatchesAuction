@@ -30,7 +30,7 @@ export default {
             quantity: 1,
             }
         ],
-        successUrl: 'http://localhost:3000/success?session_id={id}',
+        successUrl: `http://localhost:3000/schedule/${this.$route.params.id}`,
         cancelUrl: 'http://localhost:3000/cancel',
         
     }

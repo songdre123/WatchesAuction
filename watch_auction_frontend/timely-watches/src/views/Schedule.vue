@@ -29,6 +29,7 @@
 
 </template>
 <script>
+import axios from 'axios';
 import { CalendarComponent } from '@syncfusion/ej2-vue-calendars';
 export default{
     name: 'Schedule',
@@ -52,19 +53,22 @@ methods: {
             console.log(this.date);
             console.log(this.$route.params.id);
             this.id = this.$route.params.id;
-            // await this.$http.put('//schedule/edit/${id}',{
-            //     collection_date: this.date
-            // });
+
             const today = new Date();
             today.setDate(today.getDate() + 1);
             if(this.date < today){
                 this.tooearly = true;
             }
             else{
-                this.submitted = true;
-                this.tooearly = false;
-            }
+                const response = await axios.put(`/schedule/edit/${this.id}`, {
+                    collection_date: this.date
+                });
 
+                if(response.status === 200){
+                    this.submitted = true;
+                    this.tooearly = false;
+                }
+            }
         }
         catch(error){
             console.log(error);
