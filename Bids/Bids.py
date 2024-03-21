@@ -438,7 +438,7 @@ def get_all_bids_from_auction(auction_id):
             404,
         )
 
-@app.route("bid/all/<int:user_id>")
+@app.route("/bid/all/<int:user_id>")
 def get_all_bids_by_user(user_id):
     """
     Get all bids from a specific user ID
