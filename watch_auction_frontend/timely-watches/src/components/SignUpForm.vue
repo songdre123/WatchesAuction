@@ -59,7 +59,7 @@
     </div>
 
     <div class="submit">
-        <v-btn @click="createUser" size="small" class="pill">Create an account</v-btn>
+        <v-btn @click.prevent="createUser" size="small" class="pill">Create an account</v-btn>
     </div>
   </form>
 </template>

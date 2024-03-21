@@ -39,7 +39,7 @@ export const useUserStore = defineStore("user", {
       return this.user.email;
     },
     removeUser() {
-      this.user = null;
+      this.user = "";
     },
     editImage(photo_link) {
       this.user.profile_picture = photo_link;

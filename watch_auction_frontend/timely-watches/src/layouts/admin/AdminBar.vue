@@ -11,11 +11,11 @@
       <v-divider></v-divider>
 
       <v-list density="compact" nav>
-        <router-link class="router-link" to="/home">
+        <router-link class="router-link" to="/admin">
           <v-list-item
           prepend-icon="mdi-cash"
-          title="Price Recommendations"
-          value="recommend">
+          title="Home"
+          value="home">
           </v-list-item>
         </router-link>
 
@@ -81,7 +81,7 @@ export default {
   },
   methods: {
     removeUserStore() {
-      userStore.removeUser()
+      userStore.removeUser
     }
   }
 }
