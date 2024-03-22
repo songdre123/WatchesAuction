@@ -224,19 +224,10 @@ def login(email):
                 schema:
                     type: object
                     properties:
-                        bid_amount:
-                            type: number
-                            format: float
-                            description: Amount of the bid
-                            example: 100.0
-                        auction_id:
-                            type: integer
-                            description: ID of the auction associated with the bid
-                            example: 123
-                        user_id:
-                            type: integer
-                            description: ID of the user placing the bid
-                            example: 456
+                        password:
+                            type: string
+                            description: User password
+                            example: password123
     responses:
         201:
             description: Bid created successfully

@@ -53,6 +53,7 @@ CREATE TABLE Auction (
     start_time TIMESTAMP NOT NULL,
     end_time TIMESTAMP NULL,
     start_price FLOAT NOT NULL,
+    manufacture_year INT NOT NULL,
     current_price FLOAT NOT NULL,
     auction_winner_id INT,
     auction_status INT DEFAULT 1,
@@ -80,6 +81,7 @@ class Auction(db.Model):
     start_time = db.Column(db.TIMESTAMP)
     end_time = db.Column(db.TIMESTAMP)
     start_price = db.Column(db.Float)
+    manufacture_year = db.Column(db.Integer)
     current_price = db.Column(db.Float)
     auction_winner_id = db.Column(db.Integer)
     auction_status = db.Column(db.Integer, default=1)
@@ -98,6 +100,7 @@ class Auction(db.Model):
         auction_item,
         start_time,
         end_time,
+        manufacture_year,
         start_price,
         current_price,
         auction_winner_id,
@@ -114,6 +117,7 @@ class Auction(db.Model):
         self.auction_item = auction_item
         self.start_time = start_time
         self.end_time = end_time
+        self.manufacture_year = manufacture_year
         self.start_price = start_price
         self.current_price = current_price
         self.auction_winner_id = auction_winner_id
@@ -133,6 +137,7 @@ class Auction(db.Model):
             "auction_item": self.auction_item,
             "start_time": self.start_time.strftime("%Y-%m-%d %H:%M:%S"),
             "end_time": self.end_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "manufacture_year": self.manufacture_year,
             "start_price": self.start_price,
             "current_price": self.current_price,
             "auction_winner_id": self.auction_winner_id,
@@ -227,6 +232,8 @@ def create_auction():
                 type: string
               start_price:
                 type: number
+            manufacture_year:
+                type: integer
               current_price:
                 type: number
               auction_winner_id:
@@ -362,6 +369,8 @@ def edit_auction(auction_id):
                             type: string
                         start_price:
                             type: number
+                        manufacture_year:
+                            type: integer
                         current_price:
                             type: number
                         watch_ref:
