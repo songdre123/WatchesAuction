@@ -2,16 +2,12 @@
 FROM python:3-slim
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /usr/src/app
 
 # Copy the requirements file to the working directory
-COPY schedule_requirements.txt ./
-
+COPY ./notification_requirements.txt ./Notification.py ./confirmEmailTemplate.html ./
 # Install the Python dependencies
-RUN pip install --no-cache-dir -r schedule_requirements.txt
-
-# Copy the application code to the working directory
-COPY ./Schedule.py .
+RUN python -m pip install --no-cache-dir -r notification_requirements.txt
 
 # Set the command to run the application
-CMD ["python", "Schedule.py"]
+CMD ["python", "Notification.py"]

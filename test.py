@@ -7,10 +7,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 import os, sys
-
-import requests
-from invokes import invoke_http
-
+from os import environ
 import pika
 import json
 import amqp_connection
@@ -19,9 +16,9 @@ app = Flask(__name__)
 CORS(app)
 
 
-user_URL = "http://localhost:5000/user"
-auction_URL = "http://localhost:5001/auction"
-notification_URL="http://localhost:5004/notification"
+user_url=environ.get('user_url')  or 'http://localhost:5000/user'
+auction_url=environ.get('auction_url') or 'http://localhost:5001/auction'
+notification_url=environ.get('notification_url') or 'http://localhost:5004/notification'
 
 exchangename = "notification_direct" 
 exchangetype = "direct" 

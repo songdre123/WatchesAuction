@@ -2,8 +2,7 @@ from invokes import invoke_http
 import amqp_connection
 import json
 import pika
-import os, sys
-from invokes import invoke_http
+from os import environ;
 
 '''
 Functions (RabbitMQ)
@@ -26,14 +25,13 @@ scenario when user will receive the notification
 
 '''
 ########## URL ##########
-user_url="http://localhost:5000/user"
-auction_url="http://localhost:5001/auction"
-notification_url="http://localhost:5004/notification"
-schedule_url="http://localhost:5003/schedule"
-
+user_url=environ.get('user_url')  or 'http://localhost:5000/user'
+auction_url=environ.get('auction_url') or 'http://localhost:5001/auction'
+notification_url=environ.get('notification_url') or 'http://localhost:5004/notification'
+schedule_url=environ.get('schedule_url') or 'http://localhost:5003/schedule'
 
 ########## For RabbitMQ ##########
-e_queue_name = 'Notification'
+e_queue_name = environ.get('a_queue_name') or 'Notification'
 
 #1) receiveNotification- RabbitMQ consumer
 def receiveNotification(channel):
@@ -66,7 +64,8 @@ def callback(channel, method, properties, body):
     # print("--JSON:", notif)
 
     #log the notification into data
-    notification_response=invoke_http("http://localhost:5004/notification/createNotification", method="POST",json=notif)
+    createNotification_url=notification_url+"/createNotification"
+    notification_response=invoke_http(createNotification_url, method="POST",json=notif)
     if notification_response["code"] not in range(200,300):
         print(notification_response)
         print("unable to add into database")
@@ -91,7 +90,6 @@ def processNotif(notif):
         #account for schedule 
     schedule=""
     if "schedule_id" in notif:
-        print("hellooooooooooooooooooooooo")
         schedule_id=notif["schedule_id"]
         specify_schedule_url= f"{schedule_url}/{schedule_id}"
         schedule=invoke_http(specify_schedule_url,method="GET")
@@ -105,7 +103,8 @@ def processNotif(notif):
 
     print("information:", email_info )
     #send user email and the notification body 
-    invoke_http("http://localhost:5004/notification/sendEmail",method='POST', json=email_info)
+    send_email_url=notification_url+"/sendEmail"
+    invoke_http(send_email_url,method='POST', json=email_info)
     print("email has been sent")
   
 

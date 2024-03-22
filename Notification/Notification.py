@@ -4,14 +4,16 @@ from flask_mail import Mail
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from invokes import invoke_http
+# from invokes import invoke_http
 #pip3 install flask flask-mail
 from mailbox import Message
 from jinja2 import Environment, FileSystemLoader
+from os import environ
 import os
 from flasgger import Swagger
-from db_config import set_database_uri
+# from db_config import set_database_uri
 from datetime import datetime
+from flask_cors import CORS
 
 '''
 API Endpoints:
@@ -52,13 +54,14 @@ scenario when user will receive the notification
 ########## initiate flask ##########
 app = Flask(__name__)  # initialize a flask application
 
-path = "Notification"
-set_database_uri(app, path)
+# path = "Notification"
+# set_database_uri(app, path)
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-password="password@0000"
-db = SQLAlchemy(app)
 
+db = SQLAlchemy(app)
+CORS(app)
 ########## initiate swagger ##########
 # Initialize flasgger 
 app.config['SWAGGER'] = {
@@ -158,14 +161,14 @@ class Notification(db.Model):
         }
 
 ########## all endpoint URL needed ##########
-user_url="http://localhost:5000/user"
-auction_url="http://localhost:5001/auction"
-notification_url="http://localhost:5004/notification"
+# user_url="http://localhost:5000/user"
+# auction_url="http://localhost:5001/auction"
+# notification_url="http://localhost:5004/notification"
 
 
 #1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
-@app.route('/notification/<string:email>')
-def find_notification_by_email(email):
+@app.route('/notification/<int:user_id>')
+def find_notification_by_email(user_id):
     """
     Get all notification by user email
     ---
@@ -185,22 +188,23 @@ def find_notification_by_email(email):
 
     """
 
-    #get customer details
-    specify_user_url = f"{user_url}/{email}"
-    response=invoke_http(specify_user_url,method="GET")
+    # #get customer details
+    # specify_user_url = f"{user_url}/{email}"
+    # response=invoke_http(specify_user_url,method="GET")
     
-    code = response["code"]
-    print(response)
-    #if code is not ok  - user not exist
-    if code not in range(200,300):
-        print("there is some issue with getting the user. user may not exist")
-        return jsonify(
-        {
-            "code": 404,
-            "message": "User does not exist."
-        }
-    ), 404
-    user_id=response["data"]["id"]
+    # code = response["code"]
+    # print(response)
+    # #if code is not ok  - user not exist
+    # if code not in range(200,300):
+    #     print("there is some issue with getting the user. user may not exist")
+    #     return jsonify(
+    #     {
+    #         "code": 404,
+    #         "message": "User does not exist."
+    #     }
+    # ), 404
+    # user_id=response["data"]["id"]
+    
     #get all the notification that below to the specify user from the database
     allNotification = db.session.scalars(
         db.select(Notification).filter_by(recipient_id=user_id)).all()
@@ -260,15 +264,15 @@ def create_notification():
 
     new_notif = request.get_json()
 
-    #check if user and auction exist
-    are_exist=check_user_and_auction(new_notif["recipient_id"],new_notif["auction_id"])
-    if not are_exist:
-       return jsonify({
-            "code":404,
-            "data":new_notif,
-            "message": "either user or auction does not exist.",
-            "error": "not found",
-        }),404
+    # #check if user and auction exist
+    # are_exist=check_user_and_auction(new_notif["recipient_id"],new_notif["auction_id"])
+    # if not are_exist:
+    #    return jsonify({
+    #         "code":404,
+    #         "data":new_notif,
+    #         "message": "either user or auction does not exist.",
+    #         "error": "not found",
+    #     }),404
     
     #initialise new notification
     new_notification = Notification(recipient_id=new_notif["recipient_id"], notification_type="outbid", auction_id=new_notif["auction_id"])
@@ -293,16 +297,16 @@ def create_notification():
 
 
 #check if user and auction exist
-def check_user_and_auction(userID,auctionID):
-    specify_user_url= f"{user_url}/{userID}"
-    user_response=invoke_http(specify_user_url,method="GET")
+# def check_user_and_auction(userID,auctionID):
+#     specify_user_url= f"{user_url}/{userID}"
+#     user_response=invoke_http(specify_user_url,method="GET")
 
-    specify_auction_url= f"{user_url}/{auctionID}"
-    auction_response=invoke_http(specify_auction_url,method="GET")
+#     specify_auction_url= f"{user_url}/{auctionID}"
+#     auction_response=invoke_http(specify_auction_url,method="GET")
 
-    if user_response["code"] in range(200,300) and auction_response["code"] in range(200,300):
-        return True
-    return False
+#     if user_response["code"] in range(200,300) and auction_response["code"] in range(200,300):
+#         return True
+#     return False
 
 """
 {
@@ -439,17 +443,17 @@ def sendEmail():
     """
     email_info = request.get_json()
     print(email_info)
-    #check if both recipient and auction are valid
-    recipient_code=email_info["recipient"]["code"]
-    auction_code=email_info["auction"]["code"]
+    # #check if both recipient and auction are valid
+    # recipient_code=email_info["recipient"]["code"]
+    # auction_code=email_info["auction"]["code"]
 
-    if recipient_code not in range(200,300) or auction_code not in range(200,300):
-        return jsonify({
-            "code":404,
-            "data":{},
-            "message": "either user or auction does not exist.",
-            "error": "not found",
-        }),400
+    # if recipient_code not in range(200,300) or auction_code not in range(200,300):
+    #     return jsonify({
+    #         "code":404,
+    #         "data":{},
+    #         "message": "either user or auction does not exist.",
+    #         "error": "not found",
+    #     }),400
     
     #creating the body of notification/email
     sender_email = "watchauctiononlineplatform@outlook.com"
@@ -523,4 +527,4 @@ def sendEmail():
     
 
 if __name__ == "__main__": # execute this program only if it is run as a script (not by 'import')    
-    app.run(port=5004, debug=True)
+    app.run(port=5004, debug=True, host='0.0.0.0')

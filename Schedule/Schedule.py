@@ -10,6 +10,9 @@ app = Flask(__name__)
 
 CORS(app)
 
+# path = "schedule"
+# set_database_uri(app, path)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["SWAGGER"] = {
