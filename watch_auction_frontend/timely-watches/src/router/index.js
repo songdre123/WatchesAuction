@@ -8,6 +8,11 @@ const routes = [
     component: () => import("@/views/Login.vue"),
   },
   {
+    path: "/schedule/:id",
+    name: "Schedule",
+    component: () => import("@/views/Schedule.vue"),
+  },
+  {
     path:'/admin',
     component: () => import('@/layouts/admin/AdminDefault.vue'),
     children: [
@@ -55,7 +60,7 @@ const routes = [
     ],
   },
   {
-    path: "/checkout",
+    path: "/checkout/:id",
     name: "Checkout",
     component: () => import("@/views/Checkout.vue"),
   },

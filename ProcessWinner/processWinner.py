@@ -5,6 +5,11 @@ from invokes import invoke_http
 import amqp_connection
 import pika
 import json
+from os import environ
+
+##################  urls  ##################
+auction_url=environ.get('auction_url') or 'http://localhost:5001/auction'
+bids_url=environ.get('bids_url') or 'http://localhost:5002/bid'
 
 app = Flask(__name__)
 
@@ -15,7 +20,7 @@ def check_auctions():
   # Check if the datetime matches the current time
   # If it does, call the process() function
   print("Checking auctions at: ", datetime.now())
-  auctions = invoke_http("http://localhost:5001/auction", "get") 
+  auctions = invoke_http(auction_url, "get") 
   five_seconds_ago = datetime.now() - timedelta(seconds=5)
 
   for auction in auctions['data']['auctions']:
@@ -31,7 +36,7 @@ def check_auctions():
       if auction['auction_status'] == 0:
         print("Auction", auction_id ,"started at: ", datetime.now())
         auction['auction_status'] = 1
-        uri = "http://127.0.0.1:5001/auction" + "/" + str(auction_id)
+        uri = auction_url + "/" + str(auction_id)
         auction_copy = auction.copy()
         del auction_copy['auction_id']
         update_status = invoke_http(uri, "PUT", json=auction_copy)
@@ -56,7 +61,7 @@ def check_auctions():
         # process the top bidder of the auctionl
         process(auction)
         auction['auction_status'] = 2
-        uri = "http://127.0.0.1:5001/auction" + "/" + str(auction_id) 
+        uri = auction_url + "/" + str(auction_id) 
         auction_copy = auction.copy()
         del auction_copy['auction_id']
         update_status = invoke_http(uri, "PUT", json=auction_copy)
@@ -77,7 +82,7 @@ def check_auctions():
         print("Auction", auction_id ,"has been ended for", hours_passed, "hours")
         # Update auction status to reflect the number of hours that have passed
         auction['auction_status'] = hours_passed + 2 #! consider chaning the auction status one at a time??
-        uri = "http://127.0.0.1:5001/auction" + "/" + str(auction_id)
+        uri = auction_url + "/" + str(auction_id)
         auction_copy = auction.copy()
         auction_copy['auction_status'] = hours_passed + 2
         del auction_copy['auction_id']
@@ -118,7 +123,7 @@ def process(auction):
     # call AMQP to send a message to the seller
     # update auction status to reflect that there is no winner by changing status to -1
     auction['auction_status'] = -1
-    uri = "http://127.0.0.1:5001/auction" + "/" + str(auction['auction_id'])
+    uri = auction_url + "/" + str(auction['auction_id'])
     auction_copy = auction.copy()
     del auction_copy['auction_id']
     update_status = invoke_http(uri, "PUT", json=auction_copy)
@@ -133,7 +138,7 @@ def rollback(auction):
   n_highiest_bidder = auction['auction_status'] - 2
   n_highiest_bidder = int(n_highiest_bidder)
 
-  uri = "http://127.0.0.1:5002/bid/all" + "/" + str(auction_id)
+  uri = f"{bids_url}/all" + "/" + str(auction_id)
   bids = invoke_http(uri, "get")
   if bids['code'] == 200:
     # sort the bids in descending order
@@ -146,7 +151,7 @@ def rollback(auction):
 
       # update auction status to -1 to show that there is no winner
       auction['auction_status'] = -1
-      uri = "http://127.0.0.1:5001/auction" + "/" + str(auction['auction_id'])
+      uri = auction_url + "/" + str(auction['auction_id'])
       auction_copy = auction.copy()
       del auction_copy['auction_id']
       update_status = invoke_http(uri, "PUT", json=auction_copy)
@@ -186,4 +191,4 @@ if __name__ == '__main__':
   scheduler = BackgroundScheduler()
   scheduler.add_job(check_auctions, 'interval', seconds=5)  # Run the code every 5 seconds
   scheduler.start()
-  app.run(port=5005)
+  app.run(port=5005, debug=True)
