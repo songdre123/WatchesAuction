@@ -74,6 +74,7 @@ const userStore = useUserStore()
           this.watches['Rolex'][this.auctionData[i].watch_ref] = {
             'auctionID' : this.auctionData[i].auction_id,
             'title' : this.auctionData[i].auction_item,
+            'manufactureYear' : this.auctionData[i].manufacture_year,
             'StartDate' : this.auctionData[i].start_time,
             'EndDate' : this.auctionData[i].end_time,
             'MinBid' : this.auctionData[i].start_price,
@@ -91,6 +92,7 @@ const userStore = useUserStore()
           this.watches['Patek Philippe'][this.auctionData[i].watch_ref] = {
             'auctionID' : this.auctionData[i].auction_id,
             'title' : this.auctionData[i].auction_item,
+            'manufactureYear' : this.auctionData[i].manufacture_year,
             'StartDate' : this.auctionData[i].start_time,
             'EndDate' : this.auctionData[i].end_time,
             'MinBid' : this.auctionData[i].start_price,
@@ -108,6 +110,7 @@ const userStore = useUserStore()
           this.watches['Audemars Piguet'][this.auctionData[i].watch_ref] = {
             'auctionID' : this.auctionData[i].auction_id,
             'title' : this.auctionData[i].auction_item,
+            'manufactureYear' : this.auctionData[i].manufacture_year,
             'StartDate' : this.auctionData[i].start_time,
             'EndDate' : this.auctionData[i].end_time,
             'MinBid' : this.auctionData[i].start_price,

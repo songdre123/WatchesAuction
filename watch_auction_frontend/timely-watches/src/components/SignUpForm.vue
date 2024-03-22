@@ -58,9 +58,30 @@
       <label>Accept Terms and Conditions</label>
     </div>
 
-    <div class="submit">
-        <v-btn @click.prevent="createUser" size="small" class="pill">Create an account</v-btn>
-    </div>
+    <v-dialog max-width="500">
+      <template v-slot:activator="{ props: activatorProps }">
+        <div class="submit">
+            <v-btn v-bind="activatorProps" variant="elevated" @click.prevent="createUser" size="small" class="pill">Create an account</v-btn>
+        </div>
+      </template>
+
+      <template v-slot:default="{ isActive }">
+          <v-card title="Account Created">
+            <v-card-text>
+              Your account has beeen created, do proceed to the login form to log into your account
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+
+              <v-btn
+                text="Close"
+                @click="isActive.value = false"
+              ></v-btn>
+            </v-card-actions>
+          </v-card>
+        </template>
+    </v-dialog>
   </form>
 </template>
 
@@ -155,13 +176,6 @@ export default {
       } catch (error) {
         console.error('Error creating user:', error);
         throw error; // Re-throw the error to propagate it further
-      }
-
-      if (this.accountType == 'Buyer') {
-        this.$router.push({path: '/home'})
-      }
-      else {
-        this.$router.push({path: '/admin'})
       }
     }
   }
