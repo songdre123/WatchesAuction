@@ -292,6 +292,7 @@ export default {
         const params = {
             auction_item : this.Watch_name,
             watch_ref : this.reference_number,
+            manufacture_year : this.year,
             current_price : this.Minimum_bid,
             start_price : this.Minimum_bid,
             start_time: this.Start_date,
