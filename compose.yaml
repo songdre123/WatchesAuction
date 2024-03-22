@@ -15,7 +15,7 @@ services:
     image: wangkaijie2001/notification:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/Notification
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Notification
       PYTHONUNBUFFERED: 1
     ports:
       - "5004:5004"
@@ -45,7 +45,7 @@ services:
     image: wangkaijie2001/user:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/Users
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Users
       PYTHONUNBUFFERED: 1
     ports:
       - "5000:5000"
@@ -60,7 +60,7 @@ services:
     image: wangkaijie2001/auction:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/Auction
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Auction
       PYTHONUNBUFFERED: 1
     ports:
       - "5001:5001"
@@ -75,7 +75,7 @@ services:
     image: wangkaijie2001/bids:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/bids
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/bids
       PYTHONUNBUFFERED: 1
     ports:
       - "5002:5002"
@@ -90,20 +90,37 @@ services:
     image: wangkaijie2001/schedule:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/Schedule
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Schedule
       PYTHONUNBUFFERED: 1
     ports:
       - "5003:5003"
 
 
   #################################################
-  # NotificationAMQP: The NotificationAMQP microservice (complex)
+  # pricePredictor: The pricePredictor microservice (complex)
   #################################################
-  notificationAMQP:
+  pricePredictor:
     build:
-      context: ./NotificationAMQP
-      dockerfile: notificationAMQP.dockerfile
-    image: wangkaijie2001/notificationamqp:esd
+      context: ./PricePredictor
+      dockerfile: pricePredictor.dockerfile
+    image: wangkaijie2001/pricepredictor:esd
+    restart: always
+    environment:      
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5008:5008"
+
+
+
+
+  #################################################
+  # createNotification: The createNotification microservice (complex)
+  #################################################
+  createNotification:
+    build:
+      context: ./createNotification
+      dockerfile: createNotification.dockerfile
+    image: wangkaijie2001/createnotification:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -122,7 +139,7 @@ services:
       PYTHONUNBUFFERED: 1
 
 
- #################################################
+  #################################################
   # test: The test microservice (complex)
   #################################################
   test:
@@ -147,6 +164,76 @@ services:
     ports:
       - "5100:5100"
 
+  
+
+  #################################################
+  # createAuction: The createAuction microservice (complex)
+  #################################################
+  createAuction:
+    build:
+      context: ./CreateAuction
+      dockerfile: createAuction.dockerfile
+    image: wangkaijie2001/createauction:esd
+    restart: always
+    depends_on:
+      - auction
+      - schedule
+    environment:      
+      auction_url: http://auction:5001/auction 
+      schedule_url: http://schedule:5003/schedule 
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5010:5010"
+
+
+
+
+  #################################################
+  # processBid: The processBid microservice (complex)
+  #################################################
+  processBid:
+    build:
+      context: ./ProcessBid
+      dockerfile: ProcessBid.dockerfile
+    image: wangkaijie2001/processbid:esd
+    restart: always
+    depends_on:
+      - rabbitmq
+      - auction
+      - bids
+    environment:      
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      a_queue_name: Notification
+      auction_url: http://auction:5001/auction 
+      bids_url: http://bids:5002/bids 
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5006:5006"
+
+
+  #################################################
+  # ProcessWinner: The ProcessWinner microservice (complex)
+  #################################################
+  processWinner:
+    build:
+      context: ./ProcessWinner
+      dockerfile: processWinner.dockerfile
+    image: wangkaijie2001/processwinner:esd
+    restart: always
+    depends_on:
+      - rabbitmq
+      - auction
+      - bids
+    environment:      
+      rabbit_host: rabbitmq
+      rabbit_port: 5672
+      a_queue_name: Notification
+      auction_url: http://auction:5001/auction 
+      bids_url: http://bids:5002/bids 
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5005:5005"
 
 
 
@@ -188,7 +275,7 @@ services:
   #   image: wangkaijie2001/book:esd
   #   restart: always
   #   environment:
-  #     dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/book
+  #     dbURL: mysql+mysqlconnector://@host.docker.internal:3306/book
   #     PYTHONUNBUFFERED: 1
   #   ports:
   #     - "5000:5000"

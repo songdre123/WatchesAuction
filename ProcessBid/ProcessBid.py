@@ -7,6 +7,7 @@ import requests
 import pika
 import json
 import amqp_connection
+from os import environ
 
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +19,12 @@ app.config["SWAGGER"] = {
     "openapi": "3.0.2",
     "description": "Authenticate Bid"}
 swagger = Swagger(app)
+
+
+########################### urls ########################
+auction_url=environ.get('auction_url') or 'http://localhost:5001/auction'
+bids_url=environ.get('bids_url') or 'http://localhost:5002/bid'
+
 
 ######################################################################################
 # RabbitMQ configuration
@@ -38,7 +45,7 @@ def publish_notification(notification, recipient_id):
 
 # Function to get start price of auction
 def get_auction_start_price(auction_id):
-    response = requests.get(f"http://localhost:5001/auction/{auction_id}")
+    response = requests.get(f"{auction_url}/{auction_id}")
     if response.status_code == 200:
         return response.json()["data"]["start_price"]
     else:
@@ -47,7 +54,7 @@ def get_auction_start_price(auction_id):
 # Function to create bid
 def create_bid(auction_id, user_id, bid_amount):
     create_bid_response = requests.post(
-        f"http://localhost:5002/bid",
+        bids_url,
         json={"auction_id": auction_id, "user_id": user_id, "bid_amount": bid_amount}
     )
 
@@ -76,7 +83,7 @@ def create_bid(auction_id, user_id, bid_amount):
 # Function to update auction
 def update_auction(auction_id, user_id, bid_amount):
     update_auction_response = requests.put(
-        f"http://localhost:5001/auction/{auction_id}",
+        f"{auction_url}/{auction_id}",
         json={"auction_winner_id": user_id, "current_price": bid_amount}
     )
     
@@ -138,10 +145,10 @@ def authenticate_bid():
     user_id = data.get("user_id")
     bid_amount = data.get("bid_amount")
 
-    bids_response = requests.get(f"http://localhost:5002/bid/all/{auction_id}")
+    bids_response = requests.get(f"{bids_url}/all/{auction_id}")
     # Proceed to process bids if there are existing bids
     if bids_response.status_code == 200:
-        highest_bid_response = requests.get(f"http://localhost:5002/bid/highest/{auction_id}")
+        highest_bid_response = requests.get(f"{bids_url}/highest/{auction_id}")
 
         if highest_bid_response.status_code == 200:
             highest_bid_amount = highest_bid_response.json()["data"]["highest_bid"][0]["bid_amount"]

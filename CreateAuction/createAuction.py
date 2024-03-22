@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import requests
 from flasgger import Swagger
+from os import environ
 
 app = Flask(__name__)
 CORS(app)
@@ -13,6 +14,11 @@ app.config["SWAGGER"] = {
     "description": "Allows interaction with the Users microservice",
 }
 swagger = Swagger(app)
+
+########## URL ##########
+auction_url=environ.get('auction_url') or 'http://localhost:5001/auction'
+schedule_url=environ.get('schedule_url') or 'http://localhost:5003/schedule'
+
 
 @app.route('/createAuction', methods=['POST'])
 def createAuction():
@@ -105,7 +111,7 @@ def createAuction():
     stripe_product_id = None
 
     auction_response = requests.post(
-      "http://localhost:5001/auction",
+      auction_url,
       json={
         "auction_item": auction_item,
         "start_time": start_time,
@@ -131,7 +137,7 @@ def createAuction():
         auction_data = auction_response.json()
         auction_id = auction_data['data']['auction_id']
         schedule_response = requests.post(
-          f"http://localhost:5003/schedule/create/{auction_id}"
+          f"{schedule_url}/create/{auction_id}"
         )
         if (schedule_response.status_code == 201):
             return jsonify(
