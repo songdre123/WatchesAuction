@@ -259,7 +259,7 @@ def create_auction():
                 type: integer
               watch_ref:
                 type: string
-              :
+              watch_ref:
                 type: integer
               watch_condition:
                 type: string
@@ -288,8 +288,9 @@ def create_auction():
     data = request.get_json()
     #auction_id is auto increment. dont need to include. if done this way, user will need to provide auction id but they wont know. id is for us
     auction = Auction(**data)
-    start_time = datetime.strptime(auction.start_time, '%Y-%m-%d %H:%M:%S')
-    end_time = datetime.strptime(auction.end_time, '%Y-%m-%d %H:%M:%S')
+
+    start_time = datetime.strptime(auction.start_time, '%Y-%m-%d %H:%M')
+    end_time = datetime.strptime(auction.end_time, '%Y-%m-%d %H:%M')
     if start_time > end_time:
         return jsonify(
             {

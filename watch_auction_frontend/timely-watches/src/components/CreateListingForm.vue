@@ -126,26 +126,20 @@
                         </v-col>
                         <v-col cols="12">
                             <!-- enter min bid amount -->
-                            <v-text-field label="Minimum Bid" required
+                            <v-text-field 
+                            label="Minimum Bid" 
+                            required
                             v-model="Minimum_bid"
-                            type="number"
-                            ></v-text-field>
+                            :rules="[value => /^\d+$/.test(value) || 'Please enter an integer']"
+                        ></v-text-field>
                         </v-col>
                         <v-col cols="6">
-                            <v-text-field label="Start date and time" required
-                            onchange="CovertToTimestampfromStringStart(this.value)" v-model="start_date"
-                            >
-                            </v-text-field>
-                        </v-col>
+                            Pick a starting date and time
+                            <flat-pickr v-model="Start_date" :config="{enableTime: true, time_24hr: true}"></flat-pickr>
+                          </v-col>
                         <v-col cols="6">
-                            <v-text-field label="End date and time" required
-                            v-model="End_date"
-                            onchange="CovertToTimestampfromStringEnd(this.value)"
-                            >
-                        </v-text-field>
-                        </v-col>
-                        <v-col cols="12">
-                            <v-subheader>Enter date and times in YYYY/MM/DD/HH/MM</v-subheader>
+                            Pick an ending date and time
+                            <flat-pickr v-model="End_date" :config="{enableTime: true, time_24hr: true}"></flat-pickr>  
                         </v-col>
                         <v-col cols="12">
                             <v-btn color="amber darken-2" @click="CreateListing">Create Listing</v-btn>
@@ -168,7 +162,17 @@
 import AWS from 'aws-sdk';
 import axios from 'axios';
 
+import { ref } from 'vue';
+import flatPickr from 'vue-flatpickr-component';
+import 'flatpickr/dist/flatpickr.css';
+
 export default {
+components: {
+    flatPickr,
+},
+setup(){
+    const date = ref(null);
+},
   data() {
     return {
         files: [],
@@ -181,8 +185,8 @@ export default {
         Minimum_bid: null,
         Start_date: null,
         End_date: null,
-        Watch_box: null,
-        Watch_papers: null,
+        Watch_box: false,
+        Watch_papers: false,
         Watch_condition: "New",
         manufacturer_id: null,
         min_price: null,
@@ -249,24 +253,25 @@ export default {
         });
     },
     CovertToTimestampfromStringStart(date) {
-        let year = date.substring(0, 4);
-        let month = date.substring(5, 7);
-        let day = date.substring(8, 10);
-        let hour = date.substring(11, 13);
-        let minute = date.substring(14, 16);
+        let parts = date.split('/');
+        let year = parts[0];
+        let month = parts[1];
+        let day = parts[2];
+        let hour = parts[3];
+        let minute = parts[4];
 
         this.Start_date = new Date(year, month - 1, day, hour, minute).getTime();
     },
     CovertToTimestampfromStringEnd(date) {
-        let year = date.substring(0, 4);
-        let month = date.substring(5, 7);
-        let day = date.substring(8, 10);
-        let hour = date.substring(11, 13);
-        let minute = date.substring(14, 16);
+        let parts = date.split('/');
+        let year = parts[0];
+        let month = parts[1];
+        let day = parts[2];
+        let hour = parts[3];
+        let minute = parts[4];
 
         this.End_date = new Date(year, month - 1, day, hour, minute).getTime();
-    }
-    ,
+    },
     CheckSelection() {
             console.log(this.reference_number);
             if (this.reference_number && this.brand && this.year) {
@@ -276,32 +281,77 @@ export default {
 
     ,
     CreateListing() {
-
-
-    },
-    uploadtostripe(){
-        //upload to stripe
-        //use the image urls, watch name, reference number, brand, year, description, minimum bid, start date, end date, watch box, watch papers, watch condition
-        //to create a listing on stripe
-        //then redirect to the auction home page
-        //if successful
-        //else show an error message
-        //use the stripe api to create a listing
-
-
-        
-
-
-    },
-    uploadToS3() {
+        // check if all fields are filled
+        if (!this.Watch_name || !this.reference_number || !this.brand || !this.year || !this.Minimum_bid || !this.Start_date || !this.End_date ) {
+            alert('Please fill in all fields.');
+            return;
+        }
+        // check if the start date is before the end date
+        if (this.Start_date >= this.End_date) {
+            alert('The start date must be before the end date.');
+            return;
+        }
+        // check if the minimum bid is a number
+        if (isNaN(this.Minimum_bid)) {
+            alert('The minimum bid must be a number.');
+            return;
+        }
+        // check if the minimum bid is greater than 0
+        if (this.Minimum_bid <= 0) {
+            alert('The minimum bid must be greater than 0.');
+            return;
+        }
+        // check if the watch condition is new or used
+        if (this.Watch_condition !== 'New' && this.Watch_condition !== 'Used') {
+            alert('The watch condition must be either "New" or "Used".');
+            return;
+        }
+        // check if the number of images is less than 3
+        if (this.image_urls.length < 3) {
+            alert('You must upload at least 3 images.');
+            return;
+        }
+        // upload to stripe
+        else{
+            console.log(this.Start_date);
+            console.log(this.End_date);
+            axios.post('http://127.0.0.1:5001/auction', {
+                auction_item: this.Watch_name,
+                watch_ref: parseInt(this.reference_number),
+                watch_brand: this.brand,
+                manufacture_year: this.year,
+                auction_status: 0,
+                auction_winner_id: null,
+                start_price: parseInt(this.Minimum_bid),
+                current_price: parseInt(this.Minimum_bid),
+                start_time: this.Start_date,
+                end_time: this.End_date,
+                watch_box_present: this.Watch_box,
+                watch_papers_present: this.Watch_papers,
+                watch_condition: this.Watch_condition,
+                watch_image1: this.image_urls[0],
+                watch_image2: this.image_urls[1],
+                watch_image3: this.image_urls[2],
+            })
+                .then((response) => {
+                    console.log(response);
+                    alert('Listing created successfully.');
+                })
+                .catch((error) => {
+                    console.log(error);
+                    alert('An error occurred. Please try again.');
+                });
+            }
+        },
+        async uploadToS3() { 
         // if number of files is more than 3, alert the user
         if (this.files.length > 3) {
             alert('You can only upload up to 3 images.');
             return;
         }
         if (!this.files) return;
-
-this.files.forEach((file, index) => {
+    console
+    this.files.forEach((file, index) => {
     let reader = new FileReader();
 
     reader.onload = (event) => {
@@ -339,6 +389,11 @@ this.files.forEach((file, index) => {
     reader.readAsArrayBuffer(file);
 });
     }
+
+
+    }
+    
+    
+
   }
-}
 </script>
