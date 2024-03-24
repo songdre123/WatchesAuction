@@ -56,7 +56,7 @@
                         <thead>
                             <tr>
                                 <th class="text-left">Average</th>
-                                <th class="text-left">Mix</th>
+                                <th class="text-left">Min</th>
                                 <th class="text-left">Max</th>
                             </tr>
                         </thead>
@@ -232,7 +232,7 @@ setup(){
             this.manufacturer_id= "223";
         }
     console.log(this.do);
-    await axios.get('http://127.0.0.1:5000/scrape', {
+    await axios.get('http://127.0.0.1:5008/scrape', {
         params: {
         "ref_number": this.reference_number,
         "manufacturer_id": this.manufacturer_id,
@@ -251,6 +251,7 @@ setup(){
         .catch((error) => {
             console.log(error);
         });
+    
     },
     CovertToTimestampfromStringStart(date) {
         let parts = date.split('/');
@@ -354,46 +355,41 @@ setup(){
     this.files.forEach((file, index) => {
     let reader = new FileReader();
 
-    reader.onload = (event) => {
-        let fileContent = event.target.result;
+        reader.onload = (event) => {
+            let fileContent = event.target.result;
 
-        const accessKeyId = import.meta.env.VITE_APP_AWS_ACCESS_KEY_ID;
-        const secretAccessKey = import.meta.env.VITE_APP_AWS_SECRET_ACCESS_KEY;
-        console.log(accessKeyId);
-        console.log(secretAccessKey);
-        AWS.config.update({
-            accessKeyId: accessKeyId,
-            secretAccessKey: secretAccessKey,
-            region: 'ap-southeast-1',
-        });
+            const accessKeyId = import.meta.env.VITE_APP_AWS_ACCESS_KEY_ID;
+            const secretAccessKey = import.meta.env.VITE_APP_AWS_SECRET_ACCESS_KEY;
+            console.log(accessKeyId);
+            console.log(secretAccessKey);
+            AWS.config.update({
+                accessKeyId: accessKeyId,
+                secretAccessKey: secretAccessKey,
+                region: 'ap-southeast-1',
+            });
 
-        const s3 = new AWS.S3();
-        const params = {
-            Bucket: 'watchauctionimages',
-            Key: `file-${index}-${file.name}`, // Unique key for each file
-            Body: fileContent,
-            ContentType: file.type,
+            const s3 = new AWS.S3();
+            const params = {
+                Bucket: 'watchauctionimages',
+                Key: `file-${index}-${file.name}`, // Unique key for each file
+                Body: fileContent,
+                ContentType: file.type,
+            };
+
+            s3.upload(params, (err, data) => {
+        if (err) {
+            console.log("Error", err);
+        } if (data) {
+            console.log("Upload Success", data.Location);
+            this.image_urls.push(data.Location);
+            this.files = [];
+        }
+    });     
         };
 
-        s3.upload(params, (err, data) => {
-    if (err) {
-        console.log("Error", err);
-    } if (data) {
-        console.log("Upload Success", data.Location);
-        this.image_urls.push(data.Location);
-        this.files = [];
+        reader.readAsArrayBuffer(file);
+    });
+        }
     }
-});     
-    };
-
-    reader.readAsArrayBuffer(file);
-});
     }
-
-
-    }
-    
-    
-
-  }
 </script>

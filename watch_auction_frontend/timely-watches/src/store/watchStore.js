@@ -7,10 +7,21 @@ export const useWatchStore = defineStore("watch", {
   }),
   actions: {
     setWatch(watch) {
-      this.watch = watch
+      this.watch = watch;
     },
     getWatch() {
-      return this.watch
-    }
+      return this.watch;
+    },
+    incrementCurrentPrice(amount) {
+      this.watch.CurrentPrice += amount;
+    },
+  },
+  getters: {
+    getCurrentPrice() {
+      return this.watch.CurrentPrice;
+    },
+  },
+  persist: {
+    enabled: true,
   },
 });

@@ -5,7 +5,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 # from invokes import invoke_http
-#pip3 install flask flask-mail
+# pip3 install flask flask-mail
 from mailbox import Message
 from jinja2 import Environment, FileSystemLoader
 from os import environ
@@ -56,14 +56,16 @@ app = Flask(__name__)  # initialize a flask application
 
 # path = "Notification"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    environ.get("dbURL") or "mysql+mysqlconnector://root:password@localhost:3306/Notification"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 db = SQLAlchemy(app)
 CORS(app)
 ########## initiate swagger ##########
-# Initialize flasgger 
+# Initialize flasgger
 app.config['SWAGGER'] = {
     'title': 'Notification microservice API',
     'version': 1.0,
@@ -131,7 +133,6 @@ notification_body={
 }
 
 
-
 ########## database ##########
 class Notification(db.Model):
     __tablename__ = 'Notification'
@@ -166,18 +167,18 @@ class Notification(db.Model):
 # notification_url="http://localhost:5004/notification"
 
 
-#1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
+# 1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
 @app.route('/notification/<int:user_id>')
 def find_notification_by_email(user_id):
     """
     Get all notification by user email
     ---
     parameters:
-        -   name: email
+        -   name: user_id
             in: path
-            type: string
+            type: integer
             required: true
-            description: The user's email
+            description: The user's id
     responses:
         200:
             description: retrieve all the notification that user has using the email passed in
@@ -229,7 +230,7 @@ def find_notification_by_email(user_id):
     ), 404
 
 
-#2. POST /notification/createNotification - create notification in the database 
+# 2. POST /notification/createNotification - create notification in the database
 @app.route('/notification/createNotification', methods=['POST'])
 def create_notification():
     """
@@ -296,7 +297,7 @@ def create_notification():
     }),201
 
 
-#check if user and auction exist
+# check if user and auction exist
 # def check_user_and_auction(userID,auctionID):
 #     specify_user_url= f"{user_url}/{userID}"
 #     user_response=invoke_http(specify_user_url,method="GET")
@@ -348,7 +349,7 @@ def create_notification():
             }
         }
     }"""
-#POST /notification/sendEmail - sending a email to the receipient regarding update on his bid
+# POST /notification/sendEmail - sending a email to the receipient regarding update on his bid
 @app.route('/notification/sendEmail', methods=['POST'])
 def sendEmail():
     """
@@ -523,8 +524,7 @@ def sendEmail():
     except Exception as e:
         print("Error in sending email")
         return 'Error: ' + str(e)
-    
-    
+
 
 if __name__ == "__main__": # execute this program only if it is run as a script (not by 'import')    
     app.run(port=5004, debug=True, host='0.0.0.0')

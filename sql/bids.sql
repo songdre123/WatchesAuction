@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS `Bids`;
 CREATE TABLE IF NOT EXISTS `Bids` (
     bid_id INT AUTO_INCREMENT PRIMARY KEY,
     bid_amount FLOAT NOT NULL,
-    auction_id INT,
-    user_id INT,
+    auction_id INT NOT NULL,
+    user_id INT NOT NULL,
     bid_time TIMESTAMP NOT NULL
 );
 

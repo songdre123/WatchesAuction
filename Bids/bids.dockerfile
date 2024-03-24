@@ -2,7 +2,7 @@
 FROM python:3-slim
 
 # Set the working directory inside the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy the requirements file to the working directory
 COPY bids_requirements.txt ./

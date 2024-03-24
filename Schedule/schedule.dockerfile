@@ -8,7 +8,7 @@ WORKDIR /app
 COPY schedule_requirements.txt ./
 
 # Install the Python dependencies
-RUN pip install --no-cache-dir -r schedule_requirements.txt
+RUN python -m pip install --no-cache-dir -r schedule_requirements.txt
 
 # Copy the application code to the working directory
 COPY ./Schedule.py .
