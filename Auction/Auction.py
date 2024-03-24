@@ -76,10 +76,10 @@ CREATE TABLE Auction (
     watch_brand VARCHAR(255) NOT NULL,
     watch_box_present BOOLEAN NOT NULL,
     watch_papers_present BOOLEAN NOT NULL,
-    watch_image1 VARCHAR(255) NOT NULL,
-    watch_image2 VARCHAR(255) NOT NULL,
-    watch_image3 VARCHAR(255) NOT NULL,
-    stripe_product_id VARCHAR(255) DEFAULT NULL
+    watch_image1 VARCHAR(500) NOT NULL,
+    watch_image2 VARCHAR(500) NOT NULL,
+    watch_image3 VARCHAR(500) NOT NULL,
+    stripe_product_id VARCHAR(500) DEFAULT NULL
 );
 
 '''
@@ -148,7 +148,8 @@ class Auction(db.Model):
             "watch_papers_present": self.watch_papers_present,
             "watch_image1": self.watch_image1,
             "watch_image2": self.watch_image2,
-            "watch_image3": self.watch_image3
+            "watch_image3": self.watch_image3,
+            "stripe_product_id": self.stripe_product_id
 
 
         }
@@ -318,29 +319,54 @@ def create_auction():
             }
         ), 400
     try:
-
         product = stripe.Product.create(
-        name= auction.auction_item,
-        type="good",
-        description="Deposit for" + auction.auction_item
+            name=auction.auction_item,
+            type="good",
+            description="Deposit for " + auction.auction_item
         )
 
         print("Product created:", product)
 
         # Store the product ID for later reference
         product_id = product.id
-        auction.stripe_product_id = product_id
 
         # Create a price for the product
         price = stripe.Price.create(
-            unit_amount=int(auction.start_price * 10),
+            unit_amount=int(auction.start_price * 10),  # Make sure this is correct for your currency
             currency="sgd",
             product=product_id,
         )
 
         print("Price created:", price)
+
+        # Create a checkout session
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[
+                {
+                    'price': price.id,
+                    'quantity': 1,
+                },
+            ],
+            mode='payment',
+            success_url= 'http://localhost:3000/schedule/' + str(auction.auction_id),
+            cancel_url= 'http://localhost:3000/cancel'
+        )
+
+
+    # Store the checkout session URL in stripe_product_id
+        print("Checkout link:", checkout_session.url)
+        auction.stripe_product_id = checkout_session.url
+
         db.session.add(auction)
         db.session.commit()
+
+    except stripe.error.StripeError as e:
+        print("Stripe error:", str(e))
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"error": "An error occurred"}), 400
 
 
 

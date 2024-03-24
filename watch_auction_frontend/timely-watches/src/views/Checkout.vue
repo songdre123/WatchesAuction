@@ -1,57 +1,44 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
 <h1>Stripe Payment</h1>
-<stripe-checkout
-ref= "CheckoutRef"
-mode="payment"
-:pk='publishablekey'
-:line-items="lineItems"
-:success-url="successUrl"
-:cancel-url="cancelUrl"
-@loading="v=>loading = v"
-/>
-<button @click="checkout">Pay Now</button>
+
+
+<button @click="redirectToCheckout">Click to make deposit</button>
 </template>
 
 <script>
-import {StripeCheckout} from 'vue-stripe-checkout'
+import axios from 'axios';
 export default {
-  components: {
-    StripeCheckout
-  },
   data() {
-    this.publishablekey = "pk_test_51OrZSVC6Ev8NcoAAzjwUrkkQfpqoFasUwajb3GqNR7yGKt8EtSvS9Jjk4FFdaB4bUtvXVtQ0i9IsulHeU3HZUFEY00PTdyttJE"
     return {
-        loading: false,
-        prod_id: '',
-        lineItems: [
-            {
-            price: '',
-            quantity: 1,
-            }
-        ],
-        successUrl: `http://localhost:3000/schedule/${this.$route.params.id}`,
-        cancelUrl: 'http://localhost:3000/cancel',
-        
-    }
+      checkoutUrl: null,
+      stripe: null,
+      key: null,
+    };
+  },
+  methods: {
+    redirectToCheckout() {
+      if (this.checkoutUrl) {
+        window.location.href = this.checkoutUrl;
+      }
     },
-    async created(){
-        const id= this.$route.params.id;
-        try{
-            const response = await this.$http.get(`/auction/${id}`);
-            this.prod_id = response.data.stripe_product_id;
-            const prod_details = await stripe.products.retrieve(this.prod_id);
-            this.lineItems[0].price = prod_details.prices.data[0].id;
-        }catch(error){
-            console.log(error);
-        }
-    }
-    ,
-    methods: {
-        checkout(){
-            this.$refs.CheckoutRef.redirectToCheckout()
-        
-    }
-}
-}
+    async getCheckoutUrl() {
+      try {
+    const response = await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`);
+    console.log(`http://127.0.0.1:5001/auction/${this.$route.params.id}`);
+       this.checkoutUrl = response.data.data.stripe_product_id;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  },
+    mounted() {
+    this.key = import.meta.env.VUE_APP_STRIPE_PUBLISHABLE_KEY;  // Add this line
+    console.log(this.key);
+    this.stripe = window.Stripe(this.key);
+    },
+  created() {
+    this.getCheckoutUrl();
+  },
+};
 </script>

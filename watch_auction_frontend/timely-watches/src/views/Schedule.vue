@@ -73,7 +73,22 @@ methods: {
         catch(error){
             console.log(error);
         }
+    },
+    async update_status(){
+        try{
+            const response = await axios.put(`/auction/${this.$route.params.id}`, {
+                status: -2
+            });
+            console.log(response);
+        }
+        catch(error){
+            console.log(error);
+        }
     }
+},
+
+created(){
+    this.update_status();
 }
 }
 
