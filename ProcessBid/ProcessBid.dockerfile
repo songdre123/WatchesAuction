@@ -2,7 +2,7 @@
 FROM python:3-slim
 
 # Set the working directory inside the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy the required files into the container
 COPY ./ProcessBid_requirements.txt ./ProcessBid.py  ./amqp_connection.py ./

@@ -5,7 +5,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 # from invokes import invoke_http
-#pip3 install flask flask-mail
+# pip3 install flask flask-mail
 from mailbox import Message
 from jinja2 import Environment, FileSystemLoader
 from os import environ
@@ -56,7 +56,9 @@ app = Flask(__name__)  # initialize a flask application
 
 # path = "Notification"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    environ.get("dbURL") or "mysql+mysqlconnector://root:password@localhost:3306/Notification"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -131,7 +133,6 @@ notification_body={
 }
 
 
-
 ########## database ##########
 class Notification(db.Model):
     __tablename__ = 'Notification'
@@ -166,7 +167,7 @@ class Notification(db.Model):
 # notification_url="http://localhost:5004/notification"
 
 
-#1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
+# 1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
 @app.route('/notification/<int:user_id>')
 def find_notification_by_email(user_id):
     """
@@ -296,7 +297,7 @@ def create_notification():
     }),201
 
 
-#check if user and auction exist
+# check if user and auction exist
 # def check_user_and_auction(userID,auctionID):
 #     specify_user_url= f"{user_url}/{userID}"
 #     user_response=invoke_http(specify_user_url,method="GET")

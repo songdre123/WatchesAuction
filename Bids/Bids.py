@@ -12,7 +12,7 @@ app = Flask(__name__)
 
 # path = "Bids"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/Bids'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/bids'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["SWAGGER"] = {

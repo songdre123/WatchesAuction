@@ -8,10 +8,10 @@ app = Flask(__name__)
 CORS(app)
 
 app.config["SWAGGER"] = {
-    "title": "User microservice API",
+    "title": "CreateAuction microservice API",
     "version": 1.0,
     "openapi": "3.0.2",
-    "description": "Allows interaction with the Users microservice",
+    "description": "Allows interaction with the CreateAuction complex microservice",
 }
 swagger = Swagger(app)
 
@@ -28,7 +28,7 @@ def createAuction():
     parameters:
       - name: auction_data
         in: body
-        description: User data for creating a new user
+        description: For creating a new Auction and Unfilled Schedule
         required: true
         schema:
           type: object
@@ -72,7 +72,7 @@ def createAuction():
               watch_papers_present:
                 type: boolean
                 description: Whether the watch papers are present.
-              watch_images:
+              image_urls:
                 type: array
                 items:
                   type: string
@@ -107,29 +107,29 @@ def createAuction():
     watch_image1 = data.get('image_urls')[0]
     watch_image2 = data.get('image_urls')[1]
     watch_image3 = data.get('image_urls')[2]
-    year = data.get('year')
+    manufacture_year = data.get('year')
     stripe_product_id = None
 
     auction_response = requests.post(
-      auction_url,
-      json={
-        "auction_item": auction_item,
-        "start_time": start_time,
-        "end_time": end_time,
-        "start_price": start_price,
-        "current_price": current_price,
-        "auction_winner_id": auction_winner_id,
-        "auction_status": auction_status,
-        "watch_ref": watch_ref,
-        "watch_condition": watch_condition,
-        "watch_brand": watch_brand,
-        "watch_box_present": watch_box_present,
-        "watch_papers_present": watch_papers_present,
-        "watch_image1": watch_image1,
-        "watch_image2": watch_image2,
-        "watch_image3": watch_image3
-        # "year": year,
-      }
+        auction_url,
+        json={
+            "auction_item": auction_item,
+            "start_time": start_time,
+            "end_time": end_time,
+            "start_price": start_price,
+            "current_price": current_price,
+            "auction_winner_id": auction_winner_id,
+            "auction_status": auction_status,
+            "watch_ref": watch_ref,
+            "watch_condition": watch_condition,
+            "watch_brand": watch_brand,
+            "watch_box_present": watch_box_present,
+            "watch_papers_present": watch_papers_present,
+            "watch_image1": watch_image1,
+            "watch_image2": watch_image2,
+            "watch_image3": watch_image3,
+            "manufacture_year": manufacture_year,
+        },
     )
     print(auction_response)
     if (auction_response.status_code == 201):
@@ -147,7 +147,7 @@ def createAuction():
                 }
             ), 201
         else:
-          # handle schedule creation error
+            # handle schedule creation error
             return jsonify(
                 {
                     "code": 402,
@@ -156,7 +156,7 @@ def createAuction():
             ), schedule_response.status_code
 
     else:
-      # handle auction creation error
+        # handle auction creation error
         return jsonify(
             {
                 "code": 401,
