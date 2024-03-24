@@ -12,12 +12,13 @@ from os import environ
 app = Flask(__name__)
 CORS(app)
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SWAGGER"] = {
     "title": "ProcessBids microservice API",
     "version": 1.0,
     "openapi": "3.0.2",
-    "description": "Authenticate Bid"}
+    "description": "Authenticate Bid",
+}
 swagger = Swagger(app)
 
 
@@ -43,6 +44,7 @@ def publish_notification(notification, recipient_id):
         routing_key='Notification'
     )
 
+
 # Function to get start price of auction
 def get_auction_start_price(auction_id):
     response = requests.get(f"{auction_url}/{auction_id}")
@@ -50,7 +52,8 @@ def get_auction_start_price(auction_id):
         return response.json()["data"]["start_price"]
     else:
         return None
-    
+
+
 # Function to create bid
 def create_bid(auction_id, user_id, bid_amount):
     create_bid_response = requests.post(
@@ -59,26 +62,20 @@ def create_bid(auction_id, user_id, bid_amount):
     )
 
     if create_bid_response.status_code == 201:
-        return jsonify(
-            {
-                "code": 201, 
-                "message": "Authenticated Bid Created"
-            }
-        ), 201
+        return jsonify({"code": 201, "message": "Authenticated Bid Created"}), 201
     elif create_bid_response.status_code == 400:
-        return jsonify(
-            {
-                "code": 400, 
-                "message": "Bad Request: Invalid bid data"
-            }
-        ), 400
+        return jsonify({"code": 400, "message": "Bad Request: Invalid bid data"}), 400
     else:
-        return jsonify(
-            {
-                "code": create_bid_response.status_code, 
-                "message": "Error creating bid in the Bids microservice"
-            }
-        ), create_bid_response.status_code
+        return (
+            jsonify(
+                {
+                    "code": create_bid_response.status_code,
+                    "message": "Error creating bid in the Bids microservice",
+                }
+            ),
+            create_bid_response.status_code,
+        )
+
 
 # Function to update auction
 def update_auction(auction_id, user_id, bid_amount):
@@ -86,14 +83,17 @@ def update_auction(auction_id, user_id, bid_amount):
         f"{auction_url}/{auction_id}",
         json={"auction_winner_id": user_id, "current_price": bid_amount}
     )
-    
+
     if update_auction_response.status_code == 200:
-        return jsonify(
-            {
-                "code": 200,
-                "message": "Auction Updated & Reflected",
-            }
-        ), 200
+        return (
+            jsonify(
+                {
+                    "code": 200,
+                    "message": "Auction Updated & Reflected",
+                }
+            ),
+            200,
+        )
     else:
         return (
             jsonify(
@@ -101,14 +101,16 @@ def update_auction(auction_id, user_id, bid_amount):
                     "code": update_auction_response.status_code,
                     "message": "Error updating auction data",
                 }
-            ), update_auction_response.status_code
+            ),
+            update_auction_response.status_code,
         )
-    
+
 
 ######################################################################################
 
+
 # Authenticate Bid, Places Bid, Updates Auction
-@app.route("/authbid" , methods=["POST"])
+@app.route("/authbid", methods=["POST"])
 def authenticate_bid():
     """
     Authenticate a bid by comparing the bid amount with the current highest bid for the specified auction.
@@ -151,62 +153,105 @@ def authenticate_bid():
         highest_bid_response = requests.get(f"{bids_url}/highest/{auction_id}")
 
         if highest_bid_response.status_code == 200:
-            highest_bid_amount = highest_bid_response.json()["data"]["highest_bid"][0]["bid_amount"]
+            highest_bid_amount = highest_bid_response.json()["data"]["highest_bid"][0][
+                "bid_amount"
+            ]
 
             if bid_amount > highest_bid_amount:
-                #bid authenticated
+                # bid authenticated
 
-                create_bid_response, create_bid_status_code = create_bid(auction_id, user_id, bid_amount)
-                
-                #when bid is succesfully created, only then auction database will be updated
+                create_bid_response, create_bid_status_code = create_bid(
+                    auction_id, user_id, bid_amount
+                )
+
+                # when bid is succesfully created, only then auction database will be updated
                 if create_bid_status_code == 201:
 
-                    #Notify previous highest bidder that he got outbidded
-                    previous_highest_bidder = highest_bid_response.json()["data"]["highest_bid"][0]["user_id"]
+                    # Notify previous highest bidder that he got outbidded
+                    previous_highest_bidder = highest_bid_response.json()["data"][
+                        "highest_bid"
+                    ][0]["user_id"]
                     outbid_notification = {
                         "auction_id": auction_id,
-                        "notification_type": "outbid"
-                        }
+                        "notification_type": "outbid",
+                    }
                     publish_notification(outbid_notification, previous_highest_bidder)
 
-                    #Update Auction to reflect latest bid
+                    # Update Auction to reflect latest bid
                     update_auction(auction_id, user_id, bid_amount)
-    
+
             else:
-                return jsonify({"code": 400, "message": "Bid amount is not higher than the current highest bid"}), 400
+                return (
+                    jsonify(
+                        {
+                            "code": 400,
+                            "message": "Bid amount is not higher than the current highest bid",
+                        }
+                    ),
+                    400,
+                )
         else:
             # Error retrieving the highest bid
-            return jsonify({"code": highest_bid_response.status_code, "message": "Error retrieving highest bid information"}), highest_bid_response.status_code
+            return (
+                jsonify(
+                    {
+                        "code": highest_bid_response.status_code,
+                        "message": "Error retrieving highest bid information",
+                    }
+                ),
+                highest_bid_response.status_code,
+            )
 
     # No existing bids, compare with start price to process bid
     elif bids_response.status_code == 404:
         start_price = get_auction_start_price(auction_id)
 
-        if start_price is not None and bid_amount > start_price:
+        if start_price is not None and bid_amount >= start_price:
             # Bid authenticated
-            create_bid_response, create_bid_status_code = create_bid(auction_id, user_id, bid_amount)
+            create_bid_response, create_bid_status_code = create_bid(
+                auction_id, user_id, bid_amount
+            )
 
-            #when bid is succesfully created, only then auction database will be updated
+            # when bid is succesfully created, only then auction database will be updated
             if create_bid_status_code == 201:
 
-                #Notify previous highest bidder that he got outbidded
-                previous_highest_bidder = highest_bid_response.json()["data"]["highest_bid"][0]["user_id"]
-                outbid_notification = {
-                    "auction_id": auction_id,
-                    "notification_type": "outbid"
-                }
-                publish_notification(outbid_notification, previous_highest_bidder)
+                # # Notify previous highest bidder that he got outbidded
+                # previous_highest_bidder = highest_bid_response.json()["data"][
+                #     "highest_bid"
+                # ][0]["user_id"]
+                # outbid_notification = {
+                #     "auction_id": auction_id,
+                #     "notification_type": "outbid",
+                # }
+                # publish_notification(outbid_notification, previous_highest_bidder)
 
-                #Update Auction to reflect latest bid
+                # Update Auction to reflect latest bid
                 update_auction(auction_id, user_id, bid_amount)
-            
+
         else:
             # Bid not higher than start price
-            return jsonify({"code": 400, "message": "Bid amount is not higher than the start price"}), 400
+            return (
+                jsonify(
+                    {
+                        "code": 400,
+                        "message": "Bid amount is not higher than the start price",
+                    }
+                ),
+                400,
+            )
     else:
-        return jsonify({"code": bids_response.status_code, "message": "Error retrieving bids information"}), bids_response.status_code
+        return (
+            jsonify(
+                {
+                    "code": bids_response.status_code,
+                    "message": "Error retrieving bids information",
+                }
+            ),
+            bids_response.status_code,
+        )
 
     return create_bid_response, create_bid_status_code
 
-if __name__ == '__main__':
-    app.run(port=5006, debug=True)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5006, debug=True)

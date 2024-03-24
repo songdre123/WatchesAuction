@@ -11,11 +11,11 @@
       <v-divider></v-divider>
 
       <v-list density="compact" nav>
-        <router-link class="router-link" to="/home">
+        <router-link class="router-link" to="/admin">
           <v-list-item
           prepend-icon="mdi-cash"
-          title="Price Recommendations"
-          value="recommend">
+          title="Home"
+          value="home">
           </v-list-item>
         </router-link>
 
@@ -25,13 +25,15 @@
             value="auction"
           ></v-list-item>
 
-          <v-list-item
-            prepend-icon="mdi-cash-multiple"
-            title="My Bids"
-            value="bids"
-          ></v-list-item>
+          <router-link class="router-link" to="/admin/create">
+            <v-list-item
+              prepend-icon="mdi-watch"
+              title="List Watch"
+              value="list"
+            ></v-list-item>
+          </router-link>
 
-          <router-link class="router-link" to="/home/account">
+          <router-link class="router-link" to="/admin/account">
             <v-list-item
               prepend-icon="mdi-account"
               title="Account"
@@ -44,7 +46,7 @@
             prepend-icon="mdi-door"
             title="Logout"
             value="logout"
-            @click.prevent="removeUserStore"
+            @click="removeUserStore"
           ></v-list-item>
           </router-link>
         </v-list>
@@ -79,7 +81,7 @@ export default {
   },
   methods: {
     removeUserStore() {
-      userStore.removeUser()
+      userStore.removeUser
     }
   }
 }

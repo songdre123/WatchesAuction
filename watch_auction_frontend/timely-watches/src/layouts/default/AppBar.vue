@@ -44,7 +44,7 @@
             prepend-icon="mdi-door"
             title="Logout"
             value="logout"
-            @click.prevent="removeUserStore"
+            @click="removeUserStore"
           ></v-list-item>
           </router-link>
         </v-list>
@@ -102,7 +102,7 @@ export default {
   },
   methods: {
     removeUserStore() {
-      userStore.removeUser()
+      userStore.removeUser
     }
   }
 }

@@ -4,6 +4,7 @@ import os
 from os import environ
 from datetime import datetime
 from flasgger import Swagger
+from flask_cors import CORS
 # from db_config import set_database_uri
 from sqlalchemy.exc import IntegrityError
 
@@ -11,7 +12,7 @@ app = Flask(__name__)
 
 # path = "Bids"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root@localhost:3306/order'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/bids'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["SWAGGER"] = {
@@ -38,6 +39,7 @@ DATABASE: bids
 TABLE: Bids
 SQL Credentials: root:password
 SQL Port: 3306
+SQL dbURL: mysql+mysqlconnector://root:password@localhost:3306/Bids
 """
 
 db = SQLAlchemy(app)
@@ -115,7 +117,7 @@ def create_bid():
                         user_id:
                             type: integer
                             description: ID of the user placing the bid
-                            example: 456
+                            example: 46
     responses:
         201:
             description: Bid created successfully
@@ -434,6 +436,51 @@ def get_all_bids_from_auction(auction_id):
         return (
             jsonify(
                 {"code": 404, "message": "No bids found for the specified auction ID"}
+            ),
+            404,
+        )
+
+@app.route("/bid/all/<int:user_id>")
+def get_all_bids_by_user(user_id):
+    """
+    Get all bids from a specific user ID
+
+    ---
+    parameters:
+        - name: user_id
+          in: path
+          description: ID of the user to get all bids from
+          required: true
+          schema:
+              type: integer
+    responses:
+        200:
+            description: Bids found for the specified user ID
+
+        404:
+            description: No bids found for the specified user ID
+
+    """
+
+    bids_by_user = Bids.query.filter_by(user_id=user_id).all()
+
+    if bids_by_user:
+        bids_data = [
+            {
+                "bid_id": bid.bid_id,
+                "bid_amount": bid.bid_amount,
+                "auction_id": bid.auction_id,
+                "user_id": bid.user_id,
+                "bid_time": bid.bid_time,
+            }
+            for bid in bids_by_user
+        ]
+        return jsonify({"code": 200, "data": bids_data})
+    else:
+        # If no bids were found, return a 404 response
+        return (
+            jsonify(
+                {"code": 404, "message": "No bids found for the specified user ID"}
             ),
             404,
         )

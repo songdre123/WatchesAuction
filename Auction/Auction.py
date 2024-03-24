@@ -9,7 +9,6 @@ from os import environ
 from flask_cors import CORS
 
 
-
 from flasgger import Swagger
 
 import stripe
@@ -18,10 +17,11 @@ stripe.api_key = "rk_test_51OrZSVC6Ev8NcoAAsL8tWKsJQRCKKCry61vycl0wbj3FrQkTJ4qs5
 
 
 app = Flask(__name__)  # initialize a flask application
+CORS(app)
 
 # path = "Auction"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/Auction'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # config = ConfigParser()
 # config.read('config.ini')
@@ -31,19 +31,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 CORS(app)
 
 
-# Initialize flasgger 
-app.config['SWAGGER'] = {
-    'title': 'Auction microservice API',
-    'version': 1.0,
+# Initialize flasgger
+app.config["SWAGGER"] = {
+    "title": "Auction microservice API",
+    "version": 1.0,
     "openapi": "3.0.2",
-    'description': 'Allows create, retrieve, update, and delete of Auctions'
+    "description": "Allows create, retrieve, update, and delete of Auctions",
 }
 swagger = Swagger(app)
 
 
-
-
-#should test database see if this work. coz i tried and they say need configure mySQL strict mode. i configure the following then it works. if it works for you then its okay
+# should test database see if this work. coz i tried and they say need configure mySQL strict mode. i configure the following then it works. if it works for you then its okay
 """
 #the query below remove no zero date and make sure that auction can take in not null dates
 SELECT @@sql_mode; #this line and the one below check the sql mode and its restriction
@@ -55,7 +53,7 @@ SET @@sql_mode = sys.list_drop(@@sql_mode, 'NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_F
 SELECT @@SESSION.sql_mode; #check the sql mode again
 
 """
-'''
+"""
 #auction closed = 0
 #auction open = 1
 
@@ -82,19 +80,20 @@ CREATE TABLE Auction (
     stripe_product_id VARCHAR(500) DEFAULT NULL
 );
 
-'''
+"""
 
 db = SQLAlchemy(app)
 
+
 class Auction(db.Model):
-    __tablename__ = 'Auction'
-    #should include nullable=False to prevent error when executing different end points for important attribute such as start time start etc. 
+    __tablename__ = "Auction"
+    # should include nullable=False to prevent error when executing different end points for important attribute such as start time start etc.
     auction_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    auction_item = db.Column(db.String(255)) 
-    manufacture_year = db.Column(db.Integer)
+    auction_item = db.Column(db.String(255))
     start_time = db.Column(db.TIMESTAMP)
     end_time = db.Column(db.TIMESTAMP)
     start_price = db.Column(db.Float)
+    manufacture_year = db.Column(db.Integer)
     current_price = db.Column(db.Float)
     auction_winner_id = db.Column(db.Integer)
     auction_status = db.Column(db.Integer, default=1)
@@ -108,10 +107,25 @@ class Auction(db.Model):
     watch_image3 = db.Column(db.String(255))
     stripe_product_id = db.Column(db.String(255))
 
-
-
-
-    def __init__(self, auction_item, start_time, end_time, manufacture_year, start_price, current_price, auction_winner_id, auction_status, watch_ref, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3):
+    def __init__(
+        self,
+        auction_item,
+        start_time,
+        end_time,
+        manufacture_year,
+        start_price,
+        current_price,
+        auction_winner_id,
+        auction_status,
+        watch_ref,
+        watch_condition,
+        watch_brand,
+        watch_box_present,
+        watch_papers_present,
+        watch_image1,
+        watch_image2,
+        watch_image3,
+    ):
         self.auction_item = auction_item
         self.start_time = start_time
         self.end_time = end_time
@@ -128,15 +142,14 @@ class Auction(db.Model):
         self.watch_image1 = watch_image1
         self.watch_image2 = watch_image2
         self.watch_image3 = watch_image3
-        
 
     def json(self):
         return {
             "auction_id": self.auction_id,
             "auction_item": self.auction_item,
+            "start_time": self.start_time.strftime("%Y-%m-%d %H:%M:%S"),
+            "end_time": self.end_time.strftime("%Y-%m-%d %H:%M:%S"),
             "manufacture_year": self.manufacture_year,
-            "start_time": self.start_time.strftime('%Y-%m-%d %H:%M:%S'),
-            "end_time": self.end_time.strftime('%Y-%m-%d %H:%M:%S'),
             "start_price": self.start_price,
             "current_price": self.current_price,
             "auction_winner_id": self.auction_winner_id,
@@ -154,14 +167,16 @@ class Auction(db.Model):
 
         }
 
+
 def store_winner(auction_id, auction_winner_id):
     auction = db.session.query(Auction).filter_by(auction_id=auction_id).first()
     auction.auction_winner_id = auction_winner_id
     auction.auction_status = 0
     db.session.commit()
 
+
 # get all auctions
-@app.route('/auction')
+@app.route("/auction")
 def get_all():
     """
     Get all Auctions
@@ -178,21 +193,14 @@ def get_all():
         return jsonify(
             {
                 "code": 200,
-                "data": {
-                    "auctions": [auction.json() for auction in auctions]
-                }
+                "data": {"auctions": [auction.json() for auction in auctions]},
             }
         )
-    return jsonify(
-        {
-            "code": 404,
-            "message": "There are no auctions."
-        }
-    ), 404
+    return jsonify({"code": 404, "message": "There are no auctions."}), 404
 
 
 # get specific auction
-@app.route('/auction/<int:auction_id>')
+@app.route("/auction/<int:auction_id>")
 def find_by_auction_id(auction_id):
     """
     Find by Auctions
@@ -214,22 +222,12 @@ def find_by_auction_id(auction_id):
         db.select(Auction).filter_by(auction_id=auction_id).limit(1)
     ).first()
     if auction:
-        return jsonify(
-            {
-                "code": 200,
-                "data": auction.json()
-            }
-        )
-    return jsonify(
-        {
-            "code": 404,
-            "message": "Auction does not exist."
-        }
-    ), 404
+        return jsonify({"code": 200, "data": auction.json()})
+    return jsonify({"code": 404, "message": "Auction does not exist."}), 404
 
 
 # create auction
-@app.route('/auction', methods=['POST'])
+@app.route("/auction", methods=["POST"])
 def create_auction():
     """
     Create Auction
@@ -253,13 +251,15 @@ def create_auction():
                 type: string
               start_price:
                 type: number
+            manufacture_year:
+                type: integer
               current_price:
                 type: number
               auction_winner_id:
                 type: integer
               watch_ref:
                 type: string
-              :
+              auction_status:
                 type: integer
               watch_condition:
                 type: string
@@ -283,41 +283,42 @@ def create_auction():
       500:
         description: An error occurred creating the auction
     """
-    #when creating auction, i can still be creating the same item even though item already exist(2 items but different id no.(?)). TLDR i think there no point checking for id of auction. coz its auto increment in sql. when creating, seller wont ask to put id of auction
+    # when creating auction, i can still be creating the same item even though item already exist(2 items but different id no.(?)). TLDR i think there no point checking for id of auction. coz its auto increment in sql. when creating, seller wont ask to put id of auction
 
     data = request.get_json()
-    #auction_id is auto increment. dont need to include. if done this way, user will need to provide auction id but they wont know. id is for us
+    # auction_id is auto increment. dont need to include. if done this way, user will need to provide auction id but they wont know. id is for us
     auction = Auction(**data)
-    start_time = datetime.strptime(auction.start_time, '%Y-%m-%d %H:%M:%S')
-    end_time = datetime.strptime(auction.end_time, '%Y-%m-%d %H:%M:%S')
+    start_time = datetime.strptime(auction.start_time, "%Y-%m-%d %H:%M:%S")
+    end_time = datetime.strptime(auction.end_time, "%Y-%m-%d %H:%M:%S")
     if start_time > end_time:
-        return jsonify(
-            {
-                "code": 400,
-                "data": {},
-                "message": "Start time is after end time."
-            }
-        ), 400
-    if auction.start_price < 0:
-        return jsonify(
-            {
-                "code": 400,
-                "data": {
-                    "auction_id": auction.auction_id
-                },
-                "message": "Start price cannot be negative."
-            }
-        ), 400
+        return (
+            jsonify(
+                {"code": 400, "data": {}, "message": "Start time is after end time."}
+            ),
+            400,
+        )
+    if float(auction.start_price) < 0:
+        return (
+            jsonify(
+                {
+                    "code": 400,
+                    "data": {"auction_id": auction.auction_id},
+                    "message": "Start price cannot be negative.",
+                }
+            ),
+            400,
+        )
     if start_time < datetime.now():
-        return jsonify(
-            {
-                "code": 400,
-                "data": {
-                    "auction_id": auction.auction_id
-                },
-                "message": "Start time must be later than the current time."
-            }
-        ), 400
+        return (
+            jsonify(
+                {
+                    "code": 400,
+                    "data": {"auction_id": auction.auction_id},
+                    "message": "Start time must be later than the current time.",
+                }
+            ),
+            400,
+        )
     try:
         product = stripe.Product.create(
             name=auction.auction_item,
@@ -332,7 +333,7 @@ def create_auction():
 
         # Create a price for the product
         price = stripe.Price.create(
-            unit_amount=int(auction.start_price * 10),  # Make sure this is correct for your currency
+            unit_amount=int(auction.start_price),
             currency="sgd",
             product=product_id,
         )
@@ -372,26 +373,23 @@ def create_auction():
 
 
     except Exception as e:
-        return jsonify(
-            {
-                "code": 500,
-                "data": {
-                    "auction_id": auction.auction_id
-                },
-                "message": "An error occurred creating the auction.",
-                "error": str(e),
-            }
-        ), 500
+        return (
+            jsonify(
+                {
+                    "code": 500,
+                    "data": {"auction_id": auction.auction_id},
+                    "message": "An error occurred creating the auction.",
+                    "error": str(e),
+                }
+            ),
+            500,
+        )
 
-    return jsonify(
-        {
-            "code": 201,
-            "data": auction.json()
-        }
-    ), 201
+    return jsonify({"code": 201, "data": auction.json()}), 201
 
-#edit auction data
-@app.route('/auction/<int:auction_id>', methods=['PUT'])
+
+# edit auction data
+@app.route("/auction/<int:auction_id>", methods=["PUT"])
 def edit_auction(auction_id):
     """
     Edit Auction
@@ -418,6 +416,8 @@ def edit_auction(auction_id):
                             type: string
                         start_price:
                             type: number
+                        manufacture_year:
+                            type: integer
                         current_price:
                             type: number
                         watch_ref:
@@ -453,10 +453,7 @@ def edit_auction(auction_id):
     auction = db.session.query(Auction).filter_by(auction_id=auction_id).first()
 
     if not auction:
-        return jsonify({
-            "code": 404,
-            "message": "Auction not found."
-        }), 404
+        return jsonify({"code": 404, "message": "Auction not found."}), 404
     # if auction.auction_status == 0:
     #     return jsonify({
     #         "code": 400,
@@ -473,21 +470,32 @@ def edit_auction(auction_id):
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        return jsonify({
-            "code": 500,
-            "data": {"auction_id": auction_id},
-            "message": "An error occurred while updating the auction.",
-            "error": str(e)
-        }), 500
+        return (
+            jsonify(
+                {
+                    "code": 500,
+                    "data": {"auction_id": auction_id},
+                    "message": "An error occurred while updating the auction.",
+                    "error": str(e),
+                }
+            ),
+            500,
+        )
 
-    return jsonify({
-        "code": 200,
-        "data": auction.json(),
-        "message": "Auction updated successfully."
-    }), 200
+    return (
+        jsonify(
+            {
+                "code": 200,
+                "data": auction.json(),
+                "message": "Auction updated successfully.",
+            }
+        ),
+        200,
+    )
 
-#delete auction
-@app.route('/auction/<int:auction_id>', methods=['DELETE'])
+
+# delete auction
+@app.route("/auction/<int:auction_id>", methods=["DELETE"])
 def delete_auction(auction_id):
     """
     Delete Auction
@@ -510,28 +518,29 @@ def delete_auction(auction_id):
     auction = db.session.query(Auction).filter_by(auction_id=auction_id).first()
 
     if not auction:
-        return jsonify({
-            "code": 404,
-            "message": "Auction not found."
-        }), 404
+        return jsonify({"code": 404, "message": "Auction not found."}), 404
 
     try:
         db.session.delete(auction)
         db.session.commit()
     except Exception as e:
         db.session.rollback()
-        return jsonify({
-            "code": 500,
-            "data": {"auction_id": auction_id},
-            "message": "An error occurred while deleting the auction.",
-            "error": str(e)
-        }), 500
+        return (
+            jsonify(
+                {
+                    "code": 500,
+                    "data": {"auction_id": auction_id},
+                    "message": "An error occurred while deleting the auction.",
+                    "error": str(e),
+                }
+            ),
+            500,
+        )
 
-    return jsonify({
-        "code": 200,
-        "message": "Auction deleted successfully."
-    }), 200
-#function that closes auction when the passed time is greater than the end time
+    return jsonify({"code": 200, "message": "Auction deleted successfully."}), 200
+
+
+# function that closes auction when the passed time is greater than the end time
 def close_auction():
     """
     Close Auction
@@ -540,29 +549,28 @@ def close_auction():
         200:
             description: Auction closed
 
-            
+
     """
     auctions = db.session.query(Auction).filter(Auction.end_time < datetime.now()).all()
     for auction in auctions:
         auction.auction_status = 0
         db.session.commit()
-        #store_winner(auction.auction_id, auction.auction_winner_id)
-    return jsonify({
-        "code": 200,
-        "message": "Auction closed successfully."
-    }), 200
+        # store_winner(auction.auction_id, auction.auction_winner_id)
+    return jsonify({"code": 200, "message": "Auction closed successfully."}), 200
+
+
 def open_auction():
-    auctions = db.session.query(Auction).filter(Auction.start_time < datetime.now()).all()
+    auctions = (
+        db.session.query(Auction).filter(Auction.start_time < datetime.now()).all()
+    )
     for auction in auctions:
         auction.auction_status = 1
         db.session.commit()
-    return jsonify({
-        "code": 200,
-        "message": "Auction opened successfully."
-    }), 200
+    return jsonify({"code": 200, "message": "Auction opened successfully."}), 200
 
-#get all open auctions
-@app.route('/open_auctions', methods=['GET'])
+
+# get all open auctions
+@app.route("/open_auctions", methods=["GET"])
 def get_open_auctions():
     """
     Get all Open Auctions
@@ -579,20 +587,14 @@ def get_open_auctions():
         return jsonify(
             {
                 "code": 200,
-                "data": {
-                    "auctions": [auction.json() for auction in auctions]
-                }
+                "data": {"auctions": [auction.json() for auction in auctions]},
             }
         )
-    return jsonify(
-        {
-            "code": 404,
-            "message": "There are no open auctions."
-        }
-    ), 404
+    return jsonify({"code": 404, "message": "There are no open auctions."}), 404
 
-#get all closed auctions
-@app.route('/closed_auctions', methods=['GET'])
+
+# get all closed auctions
+@app.route("/closed_auctions", methods=["GET"])
 def get_closed_auctions():
     """
     Get all Closed Auctions
@@ -609,25 +611,11 @@ def get_closed_auctions():
         return jsonify(
             {
                 "code": 200,
-                "data": {
-                    "auctions": [auction.json() for auction in auctions]
-                }
+                "data": {"auctions": [auction.json() for auction in auctions]},
             }
         )
-    return jsonify(
-        {
-            "code": 404,
-            "message": "There are no closed auctions."
-        }
-    ), 404
+    return jsonify({"code": 404, "message": "There are no closed auctions."}), 404
 
 
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    app.run(port=5001, debug=True, host='0.0.0.0')
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5001, debug=True)

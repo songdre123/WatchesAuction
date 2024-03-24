@@ -13,7 +13,7 @@
             <b>Ref</b>: {{ referenceNo }}
         </v-card-subtitle>
         <v-card-text class="content">
-            Date: {{ watch.Date }}
+            Date: {{ watch.StartDate }}
         </v-card-text>
         <v-card-text class="content">
             Opening: ${{ watch.MinBid }} SGD

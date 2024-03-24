@@ -8,11 +8,11 @@ from os import environ
 from flask_cors import CORS
 
 app = Flask(__name__)  # initialize a flask application
-CORS(app, origins=["http://localhost:3000"])
+CORS(app)
 
 # Flask CORS
 CORS(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/Users'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Swagger UI configuration

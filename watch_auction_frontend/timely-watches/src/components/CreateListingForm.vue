@@ -56,7 +56,7 @@
                         <thead>
                             <tr>
                                 <th class="text-left">Average</th>
-                                <th class="text-left">Mix</th>
+                                <th class="text-left">Min</th>
                                 <th class="text-left">Max</th>
                             </tr>
                         </thead>
@@ -133,19 +133,18 @@
                         </v-col>
                         <v-col cols="6">
                             <v-text-field label="Start date and time" required
-                            onchange="CovertToTimestampfromStringStart(this.value)" v-model="start_date"
+                            v-model="Start_date"
                             >
                             </v-text-field>
                         </v-col>
                         <v-col cols="6">
                             <v-text-field label="End date and time" required
                             v-model="End_date"
-                            onchange="CovertToTimestampfromStringEnd(this.value)"
                             >
-                        </v-text-field>
+                            </v-text-field>
                         </v-col>
                         <v-col cols="12">
-                            <v-subheader>Enter date and times in YYYY/MM/DD/HH/MM</v-subheader>
+                            <v-subheader>Enter date and times in YYYY-MM-DD HH:MM:SS</v-subheader>
                         </v-col>
                         <v-col cols="12">
                             <v-btn color="amber darken-2" @click="CreateListing">Create Listing</v-btn>
@@ -168,6 +167,7 @@
 import AWS from 'aws-sdk';
 import axios from 'axios';
 
+
 export default {
   data() {
     return {
@@ -181,8 +181,8 @@ export default {
         Minimum_bid: null,
         Start_date: null,
         End_date: null,
-        Watch_box: null,
-        Watch_papers: null,
+        Watch_box: false,
+        Watch_papers: false,
         Watch_condition: "New",
         manufacturer_id: null,
         min_price: null,
@@ -228,7 +228,7 @@ export default {
             this.manufacturer_id= "223";
         }
     console.log(this.do);
-    await axios.get('http://127.0.0.1:5000/scrape', {
+    await axios.get('http://127.0.0.1:5008/scrape', {
         params: {
         "ref_number": this.reference_number,
         "manufacturer_id": this.manufacturer_id,
@@ -247,6 +247,7 @@ export default {
         .catch((error) => {
             console.log(error);
         });
+    
     },
     CovertToTimestampfromStringStart(date) {
         let year = date.substring(0, 4);
@@ -275,9 +276,59 @@ export default {
     }
 
     ,
-    CreateListing() {
+    async CreateListing() {
+        // const auction_winner_id = 0
+        // const auction_status = 0
+        let imageUrl1 = "No URL"; // Default value if image URL is not present
+        let imageUrl2 = "No URL"; // Default value if image URL is not present
+        let imageUrl3 = "No URL"; // Default value if image URL is not present
 
+        imageUrl3 = this.image_urls[2] ? this.image_urls[2] : imageUrl3;
+        imageUrl2 = this.image_urls[1] ? this.image_urls[1] : imageUrl2;
+        imageUrl1 = this.image_urls[0] ? this.image_urls[0] : imageUrl1;
 
+        const params = {
+            auction_item : this.Watch_name,
+            watch_ref : this.reference_number,
+            manufacture_year : this.year,
+            current_price : this.Minimum_bid,
+            start_price : this.Minimum_bid,
+            start_time: this.Start_date,
+            end_time : this.End_date,
+            watch_box_present: this.Watch_box,
+            watch_condition: this.Watch_condition,
+            watch_papers_present: this.Watch_papers,
+            watch_brand: this.brand,
+            image_urls: [imageUrl1, imageUrl2, imageUrl3],
+            // auction_winner_id: auction_winner_id,
+            // auction_status: auction_status,
+        }
+        try {
+        await axios.post('http://127.0.0.1:5010/createAuction', params);
+        // Optionally, perform any actions after successful user creation
+        } catch (error) {
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                console.error('Response Status:', error.response.status);
+                console.error('Response Data:', error.response.data);
+                console.error('Response Headers:', error.response.headers);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error('No response received:', error.request);
+            } else {
+                // Something happened in setting up the request that triggered an error
+                console.error('Error:', error.message);
+    } // Re-throw the error to propagate it further
+        }
+        this.Watch_box = false
+        this.Watch_papers = false
+        this.Watch_name = ""
+        this.Watch_condition = ""
+        this.Start_date = ""
+        this.End_date = ""
+        this.reference_number = ""
+        this.brand = ""
+        this.Minimum_bid = ""
     },
     uploadtostripe(){
         //upload to stripe
@@ -287,7 +338,7 @@ export default {
         //if successful
         //else show an error message
         //use the stripe api to create a listing
-
+        
 
         
 
@@ -301,44 +352,44 @@ export default {
         }
         if (!this.files) return;
 
-this.files.forEach((file, index) => {
-    let reader = new FileReader();
+    this.files.forEach((file, index) => {
+        let reader = new FileReader();
 
-    reader.onload = (event) => {
-        let fileContent = event.target.result;
+        reader.onload = (event) => {
+            let fileContent = event.target.result;
 
-        const accessKeyId = import.meta.env.VITE_APP_AWS_ACCESS_KEY_ID;
-        const secretAccessKey = import.meta.env.VITE_APP_AWS_SECRET_ACCESS_KEY;
-        console.log(accessKeyId);
-        console.log(secretAccessKey);
-        AWS.config.update({
-            accessKeyId: accessKeyId,
-            secretAccessKey: secretAccessKey,
-            region: 'ap-southeast-1',
-        });
+            const accessKeyId = import.meta.env.VITE_APP_AWS_ACCESS_KEY_ID;
+            const secretAccessKey = import.meta.env.VITE_APP_AWS_SECRET_ACCESS_KEY;
+            console.log(accessKeyId);
+            console.log(secretAccessKey);
+            AWS.config.update({
+                accessKeyId: accessKeyId,
+                secretAccessKey: secretAccessKey,
+                region: 'ap-southeast-1',
+            });
 
-        const s3 = new AWS.S3();
-        const params = {
-            Bucket: 'watchauctionimages',
-            Key: `file-${index}-${file.name}`, // Unique key for each file
-            Body: fileContent,
-            ContentType: file.type,
+            const s3 = new AWS.S3();
+            const params = {
+                Bucket: 'watchauctionimages',
+                Key: `file-${index}-${file.name}`, // Unique key for each file
+                Body: fileContent,
+                ContentType: file.type,
+            };
+
+            s3.upload(params, (err, data) => {
+        if (err) {
+            console.log("Error", err);
+        } if (data) {
+            console.log("Upload Success", data.Location);
+            this.image_urls.push(data.Location);
+            this.files = [];
+        }
+    });     
         };
 
-        s3.upload(params, (err, data) => {
-    if (err) {
-        console.log("Error", err);
-    } if (data) {
-        console.log("Upload Success", data.Location);
-        this.image_urls.push(data.Location);
-        this.files = [];
+        reader.readAsArrayBuffer(file);
+    });
+        }
     }
-});     
-    };
-
-    reader.readAsArrayBuffer(file);
-});
     }
-  }
-}
 </script>
