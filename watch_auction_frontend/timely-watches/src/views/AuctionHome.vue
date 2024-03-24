@@ -127,7 +127,7 @@ const userStore = useUserStore()
     }
       }
       catch (error) {
-        console.error('Error fetching auction data', error.message)
+        console.error('Error fetching auction data', error.message, error.status)
       }
       
     },

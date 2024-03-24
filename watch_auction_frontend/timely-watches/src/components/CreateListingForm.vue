@@ -277,8 +277,8 @@ export default {
 
     ,
     async CreateListing() {
-        const auction_winner_id = 0
-        const auction_status = 0
+        // const auction_winner_id = 0
+        // const auction_status = 0
         let imageUrl1 = "No URL"; // Default value if image URL is not present
         let imageUrl2 = "No URL"; // Default value if image URL is not present
         let imageUrl3 = "No URL"; // Default value if image URL is not present
@@ -286,8 +286,6 @@ export default {
         imageUrl3 = this.image_urls[2] ? this.image_urls[2] : imageUrl3;
         imageUrl2 = this.image_urls[1] ? this.image_urls[1] : imageUrl2;
         imageUrl1 = this.image_urls[0] ? this.image_urls[0] : imageUrl1;
-        console.log(this.Start_date)
-        console.log(this.End_date)
 
         const params = {
             auction_item : this.Watch_name,
@@ -301,14 +299,12 @@ export default {
             watch_condition: this.Watch_condition,
             watch_papers_present: this.Watch_papers,
             watch_brand: this.brand,
-            watch_image1: imageUrl1,
-            watch_image2: imageUrl2,
-            watch_image3: imageUrl3,
-            auction_winner_id: auction_winner_id,
-            auction_status: auction_status,
+            image_urls: [imageUrl1, imageUrl2, imageUrl3],
+            // auction_winner_id: auction_winner_id,
+            // auction_status: auction_status,
         }
         try {
-        await axios.post('http://127.0.0.1:5001/auction', params);
+        await axios.post('http://127.0.0.1:5010/createAuction', params);
         // Optionally, perform any actions after successful user creation
         } catch (error) {
             if (error.response) {
