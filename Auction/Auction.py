@@ -9,7 +9,6 @@ from os import environ
 from flask_cors import CORS
 
 
-
 from flasgger import Swagger
 
 import stripe
@@ -22,7 +21,7 @@ CORS(app)
 
 # path = "Auction"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL')
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/Auction'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # config = ConfigParser()
 # config.read('config.ini')
@@ -588,4 +587,4 @@ def get_closed_auctions():
 
 
 if __name__ == "__main__":
-    app.run(port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
