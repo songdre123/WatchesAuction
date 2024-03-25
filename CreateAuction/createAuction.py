@@ -107,8 +107,8 @@ def createAuction():
     watch_box_present = data.get('watch_box_present')
     watch_papers_present = data.get('watch_papers_present')
     watch_image1 = data.get('watch_image1')
-    watch_image2 = data.get('watch_image1')
-    watch_image3 = data.get('watch_image1')
+    watch_image2 = data.get('watch_image2')
+    watch_image3 = data.get('watch_image3')
     manufacture_year = data.get('manufacture_year')
 
     auction_response = requests.post(
