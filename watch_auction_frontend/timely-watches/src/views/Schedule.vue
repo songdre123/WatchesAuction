@@ -31,6 +31,9 @@
 <script>
 import axios from 'axios';
 import { CalendarComponent } from '@syncfusion/ej2-vue-calendars';
+import { useUserStore } from '@/store/userStore';
+const userStore = useUserStore();
+const userid = userStore.userID;
 export default{
     name: 'Schedule',
     data(){
@@ -50,18 +53,23 @@ methods: {
     },
     async submitschedule(){
         try{
-            console.log(this.date);
+            // Convert this.date to a string in the "yyyy-mm-dd" format
+            const formattedDate = this.date.toISOString().slice(0, 10);
+            console.log(formattedDate);
             console.log(this.$route.params.id);
             this.id = this.$route.params.id;
 
             const today = new Date();
             today.setDate(today.getDate() + 1);
+            console.log(this.id);
             if(this.date < today){
                 this.tooearly = true;
             }
             else{
-                const response = await axios.put(`/schedule/edit/${this.id}`, {
-                    collection_date: this.date
+                const response = await axios.put(`http://127.0.0.1:5003/schedule/edit/${this.id}`, {
+                    collection_date: formattedDate,
+                    user_id: userid
+                    // for ethan to settle session variable <3
                 });
 
                 if(response.status === 200){
