@@ -65,27 +65,30 @@ def callback(channel, method, properties, body):
 
     #log the notification into data
     createNotification_url=notification_url+"/createNotification"
+    #checking if the user and auction exist
+    specify_user_url= f"{user_url}/{notif["recipient_id"]}"
+    user_response=invoke_http(specify_user_url,method="GET")
+
+    specify_auction_url= f"{auction_url}/{notif["auction_id"]}"
+    auction_response=invoke_http(specify_auction_url,method="GET")
+
+    if user_response["code"] not in range(200,300) or auction_response["code"] not in range(200,300):
+        print("either user or auction does not exist")
+        return
+    
     notification_response=invoke_http(createNotification_url, method="POST",json=notif)
+    
     if notification_response["code"] not in range(200,300):
         print(notification_response)
         print("unable to add into database")
         return
     
     #process to send the notiification to that email  
-    processNotif(notif)
+    processNotif(user_response, auction_response, notif)
 
 #3) processNotif(recipient_id,auction_id,notification_type ) - process the notification received from the callback function 
-def processNotif(notif):
+def processNotif(user , auction, notif):
     print(notif)
-        #get the specify user email
-    recipient_id=notif["recipient_id"]
-    specify_user_url= f"{user_url}/{recipient_id}"
-    user=invoke_http(specify_user_url,method="GET")
-    
-        #find the item name 
-    aution_id=notif["auction_id"]
-    specify_auction_url= f"{auction_url}/{aution_id}"
-    auction=invoke_http(specify_auction_url,method="GET")
 
         #account for schedule 
     schedule=""

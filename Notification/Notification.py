@@ -161,11 +161,6 @@ class Notification(db.Model):
             "is_unread": self.is_unread,
         }
 
-########## all endpoint URL needed ##########
-# user_url="http://localhost:5000/user"
-# auction_url="http://localhost:5001/auction"
-# notification_url="http://localhost:5004/notification"
-
 
 # 1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
 @app.route('/notification/<int:user_id>')
@@ -189,22 +184,6 @@ def find_notification_by_email(user_id):
 
     """
 
-    # #get customer details
-    # specify_user_url = f"{user_url}/{email}"
-    # response=invoke_http(specify_user_url,method="GET")
-    
-    # code = response["code"]
-    # print(response)
-    # #if code is not ok  - user not exist
-    # if code not in range(200,300):
-    #     print("there is some issue with getting the user. user may not exist")
-    #     return jsonify(
-    #     {
-    #         "code": 404,
-    #         "message": "User does not exist."
-    #     }
-    # ), 404
-    # user_id=response["data"]["id"]
     
     #get all the notification that below to the specify user from the database
     allNotification = db.session.scalars(
@@ -256,8 +235,6 @@ def create_notification():
     responses:
         201:
             description: notification created for user
-        404:
-            description: either user or auction does not exist
         500:
             description: Internal server error. An error occurred add new notification to database
 
@@ -265,15 +242,6 @@ def create_notification():
 
     new_notif = request.get_json()
 
-    # #check if user and auction exist
-    # are_exist=check_user_and_auction(new_notif["recipient_id"],new_notif["auction_id"])
-    # if not are_exist:
-    #    return jsonify({
-    #         "code":404,
-    #         "data":new_notif,
-    #         "message": "either user or auction does not exist.",
-    #         "error": "not found",
-    #     }),404
     
     #initialise new notification
     new_notification = Notification(recipient_id=new_notif["recipient_id"], notification_type="outbid", auction_id=new_notif["auction_id"])
@@ -297,17 +265,7 @@ def create_notification():
     }),201
 
 
-# check if user and auction exist
-# def check_user_and_auction(userID,auctionID):
-#     specify_user_url= f"{user_url}/{userID}"
-#     user_response=invoke_http(specify_user_url,method="GET")
 
-#     specify_auction_url= f"{user_url}/{auctionID}"
-#     auction_response=invoke_http(specify_auction_url,method="GET")
-
-#     if user_response["code"] in range(200,300) and auction_response["code"] in range(200,300):
-#         return True
-#     return False
 
 """
 {
@@ -444,17 +402,6 @@ def sendEmail():
     """
     email_info = request.get_json()
     print(email_info)
-    # #check if both recipient and auction are valid
-    # recipient_code=email_info["recipient"]["code"]
-    # auction_code=email_info["auction"]["code"]
-
-    # if recipient_code not in range(200,300) or auction_code not in range(200,300):
-    #     return jsonify({
-    #         "code":404,
-    #         "data":{},
-    #         "message": "either user or auction does not exist.",
-    #         "error": "not found",
-    #     }),400
     
     #creating the body of notification/email
     sender_email = "watchauctiononlineplatform@outlook.com"
