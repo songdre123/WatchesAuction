@@ -24,8 +24,10 @@ services:
       - kong-net
     environment:
       POSTGRES_DB: kong
-      POSTGRES_USER: kong
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+      POSTGRES_HOST: 35.240.166.22
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     healthcheck:
@@ -33,8 +35,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+
 
   #######################################
   # Kong database migration
@@ -49,7 +50,7 @@ services:
     environment:
       KONG_DATABASE: postgres
       KONG_PG_HOST: kong-database
-      KONG_PG_USER: kong
+      KONG_PG_USER: postgres
       KONG_PG_PASSWORD: password
     depends_on:
       - kong-database
@@ -66,7 +67,7 @@ services:
     environment:
       KONG_DATABASE: postgres
       KONG_PG_HOST: kong-database
-      KONG_PG_USER: kong
+      KONG_PG_USER: postgres
       KONG_PG_PASSWORD: password
       KONG_PROXY_ACCESS_LOG: /dev/stdout
       KONG_ADMIN_ACCESS_LOG: /dev/stdout
@@ -87,6 +88,8 @@ services:
       - "8446:8446" # Dev Portal. Listens for HTTP traffic, assuming Dev Portal is enabled.
       - "8004:8004" # Dev Portal /files traffic over HTTPS, assuming the Dev Portal is enabled.
       - "8447:8447" # Dev Portal /files traffic over HTTPS, assuming the Dev Portal is enabled.
+    volumes:
+      - ./kong.yml:/etc/kong/kong.yml
 
 
 
