@@ -162,7 +162,7 @@ class Notification(db.Model):
         }
 
 
-# 1. GET /notification/<string:email> - Get all notification that belongs to a user (email)
+# 1. GET /notification/<int:user_id> - Get all notification that belongs to a user (id)
 @app.route('/notification/<int:user_id>')
 def find_notification_by_email(user_id):
     """
