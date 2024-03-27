@@ -28,6 +28,8 @@
     "roboto-fontface": "*",
     "typescript": "^5.3.3",
     "uuid": "^9.0.1",
+    "vite": "^5.2.5",
+    "vite-plugin-vuetify": "^2.0.3",
     "vue": "^3.2.0",
     "vue-flatpickr-component": "^11.0.5",
     "vue-router": "^4.0.0",

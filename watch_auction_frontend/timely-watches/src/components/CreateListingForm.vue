@@ -316,7 +316,7 @@ setup(){
         else{
             console.log(this.Start_date);
             console.log(this.End_date);
-            axios.post('http://127.0.0.1:5001/auction', {
+            axios.post('http://127.0.0.1:5010/createAuction', {
                 auction_item: this.Watch_name,
                 watch_ref: parseInt(this.reference_number),
                 watch_brand: this.brand,

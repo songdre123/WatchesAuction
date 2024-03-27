@@ -72,14 +72,16 @@ def createAuction():
               watch_papers_present:
                 type: boolean
                 description: Whether the watch papers are present.
-              image_urls:
-                type: array
-                items:
-                  type: string
-                minItems: 3
-                maxItems: 3
-                description: List of URLs or paths to the images of the watch.
-              year:
+              watch_image1:
+                type: string
+                description: URL of image1
+              watch_image2:
+                type: string
+                description: URL of image2
+              watch_image3:
+                type: string
+                description: URL of image3
+              manufacture_year:
                 type: integer
                 description: The year of the watch.
     responses:
@@ -92,23 +94,22 @@ def createAuction():
     """
 
     data = request.json
-    auction_item = data.get('Watch_name')
-    start_time = data.get('start_date')
-    end_time = data.get('End_date')
-    start_price = data.get('Minimum_bid')
-    current_price = data.get('Minimum_bid')
+    auction_item = data.get('auction_item')
+    start_time = data.get('start_time')
+    end_time = data.get('end_time')
+    start_price = data.get('start_price')
+    current_price = data.get('current_price')
     auction_winner_id = None
     auction_status = 0
-    watch_ref = data.get('reference_number')
-    watch_condition = data.get('Watch_condition')
-    watch_brand = data.get('brand')
-    watch_box_present = data.get('Watch_box')
-    watch_papers_present = data.get('Watch_papers')
-    watch_image1 = data.get('image_urls')[0]
-    watch_image2 = data.get('image_urls')[1]
-    watch_image3 = data.get('image_urls')[2]
-    manufacture_year = data.get('year')
-    stripe_product_id = None
+    watch_ref = data.get('watch_ref')
+    watch_condition = data.get('watch_condition')
+    watch_brand = data.get('watch_brand')
+    watch_box_present = data.get('watch_box_present')
+    watch_papers_present = data.get('watch_papers_present')
+    watch_image1 = data.get('watch_image1')
+    watch_image2 = data.get('watch_image2')
+    watch_image3 = data.get('watch_image3')
+    manufacture_year = data.get('manufacture_year')
 
     auction_response = requests.post(
         auction_url,
