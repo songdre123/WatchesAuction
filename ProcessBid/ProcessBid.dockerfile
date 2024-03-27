@@ -10,4 +10,4 @@ COPY ./ProcessBid_requirements.txt ./ProcessBid.py  ./amqp_connection.py ./
 RUN python -m pip install --no-cache-dir -r ProcessBid_requirements.txt
 
 # Set the command to run your application
-CMD ["python", "ProcessBid.py"]
+CMD ["python", "ProcessBid.py", "amqp_connection.py"]
