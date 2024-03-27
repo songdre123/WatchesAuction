@@ -19,17 +19,13 @@
           </v-list-item>
         </router-link>
 
-          <v-list-item
-            prepend-icon="mdi-gavel"
-            title="My Auctions"
-            value="auction"
-          ></v-list-item>
-
+        <router-link class="router-link" to="/home/bids">
           <v-list-item
             prepend-icon="mdi-cash-multiple"
             title="My Bids"
             value="bids"
           ></v-list-item>
+        </router-link>
 
           <router-link class="router-link" to="/home/account">
             <v-list-item
@@ -83,6 +79,8 @@
 
 <script>
 import { useUserStore } from '@/store/userStore'
+import axios from 'axios'
+
 const userStore = useUserStore()
 
 export default {
@@ -90,8 +88,7 @@ export default {
 		return {
       drawer: null,
       notifications: [
-        'Your bid at Auction Ref: 1593478229v has beeen replaced',
-        'You won Auction Ref: 1593478229v'
+        
       ],
 		}
 	},
@@ -103,6 +100,21 @@ export default {
   methods: {
     removeUserStore() {
       userStore.removeUser
+    }
+  },
+  async mounted() {
+    try {
+      const userID = userStore.getUserId()
+      const notificationResponse = await axios.get(`http://127.0.0.1:5004/notification/${userID}`)
+      const notificationData = notificationResponse.data.data.notifications
+      this.notifications = notificationData
+      console.log(notificationResponse)
+    }
+    catch (error) {
+      console.error('Error getting user:', error.message);
+      console.log(error.status)
+      console.log(error)
+      throw error; // Re-throw the error to propagate it further
     }
   }
 }
