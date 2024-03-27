@@ -206,7 +206,7 @@ services:
       rabbit_port: 5672
       a_queue_name: Notification
       auction_url: http://auction:5001/auction 
-      bids_url: http://bids:5002/bids 
+      bids_url: http://bids:5002/bid
       PYTHONUNBUFFERED: 1
     ports:
       - "5006:5006"
@@ -230,12 +230,20 @@ services:
       rabbit_port: 5672
       a_queue_name: Notification
       auction_url: http://auction:5001/auction 
-      bids_url: http://bids:5002/bids 
+      bids_url: http://bids:5002/bid
       PYTHONUNBUFFERED: 1
     ports:
       - "5005:5005"
 
-
+  # viteDocker:
+  #   build:
+  #     context: watch_auction_frontend/timely-watches
+  #     dockerfile: vite.dockerfile
+  #   entrypoint: ["npm", "run", "dev"]
+  #   restart: always
+  #   image: ethantfw/vitefrontend:esd
+  #   ports:
+  #     - 3000:3000
 
 
 
