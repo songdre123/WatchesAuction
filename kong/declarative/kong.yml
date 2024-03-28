@@ -238,3 +238,13 @@ services:
           - POST
         strip_path: true
 
+###################################### Plugins ######################################
+plugins:
+- name: prometheus
+  enabled: true
+  config:
+    bandwidth_metrics: true
+    latency_metrics: true
+    per_consumer: true
+    status_code_metrics: true
+    upstream_health_metrics: true

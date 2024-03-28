@@ -3,7 +3,9 @@ version: "3.8"
 volumes:
   rabbitmq_data:
   pgdata: 
-
+  prometheusdata:
+  grafanadata:
+  
 networks:
   kong-net:
     driver: bridge
@@ -70,7 +72,7 @@ services:
     image: ethantfw/notification:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Notification
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Notification
       PYTHONUNBUFFERED: 1
     ports:
       - "5004:5004"
@@ -104,7 +106,7 @@ services:
     image: ethantfw/user:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Users
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Users
       PYTHONUNBUFFERED: 1
     ports:
       - "5000:5000"
@@ -122,7 +124,7 @@ services:
     image: ethantfw/auction:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Auction
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Auction
       PYTHONUNBUFFERED: 1
     ports:
       - "5001:5001"
@@ -139,7 +141,7 @@ services:
     image: ethantfw/bid:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/bids
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/bids
       PYTHONUNBUFFERED: 1
     ports:
       - "5002:5002"
@@ -156,7 +158,7 @@ services:
     image: ethantfw/schedule:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Schedule
+      dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Schedule
       PYTHONUNBUFFERED: 1
     ports:
       - "5003:5003"
@@ -371,3 +373,29 @@ services:
   #     PYTHONUNBUFFERED: 1
   #   ports:
   #     - "5000:5000"
+
+  #######################################
+  # Prometheus
+  #######################################
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    restart: always
+    networks:
+      - kong-net
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheusdata:/etc/prometheus
+  
+  #######################################
+  # Grafana Open Source
+  #######################################
+  grafana:
+    image: grafana/grafana-oss:10.2.3
+    restart: always
+    networks:
+      - kong-net
+    ports:
+      - "13000:3000"
+    volumes:
+      - grafanadata:/var/lib/grafana
