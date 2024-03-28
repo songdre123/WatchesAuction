@@ -255,6 +255,23 @@ def authenticate_bid():
 
 @app.route("/getAllAuctionAndUserhighestBidByUser/<int:user_id>")
 def getAllAuctionAndUserhighestBidByUser(user_id):
+    """
+    Get an array of auctions that user bidded for,  with user id, user's highest bid for that auction and the bid id that belong to the specific user ID
+    ---
+    parameters:
+        - name: user_id
+          in: path
+          description: ID of the user to get all auction with the his highest bids
+          required: true
+          schema:
+              type: integer
+    responses:
+        200:
+            description: successfully get array of auctions that user bidded for,  with user id, user's highest bid for that auction and the bid id that belong to the specific user ID
+        404:
+            No bids found for the specified user ID
+
+    """
     #checking for bids from the user
     user_id=int(user_id)
     getBid = requests.get(f"{bids_url}/GethighestBidsByUserId/{user_id}")

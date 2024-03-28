@@ -491,6 +491,24 @@ def get_all_bids_by_user(user_id):
 
 @app.route("/bid/GethighestBidsByUserId/<int:user_id>")
 def GethighestBidsByUserId(user_id):
+    """
+    Get all highest bids for each auction that belong to the specific user ID
+    ---
+    parameters:
+        - name: user_id
+          in: path
+          description: ID of the user to get all bids from
+          required: true
+          schema:
+              type: integer
+    responses:
+        200:
+            description: all highest bids found for each auction that belong to the specific user ID
+
+        404:
+            description: No bids placed for the specified user ID
+
+    """
     subquery = (
         db.session.query(Bids.auction_id, func.max(Bids.bid_amount))
         .filter(Bids.user_id == 1)
@@ -510,6 +528,7 @@ def GethighestBidsByUserId(user_id):
     if not query:  # Check if the list is empty
         return jsonify({"code": 404, "message": "No bids found for the specified user ID", "data":[]}),404
     return jsonify({"code": 200,"message": "highest Bids get successfully for each auction","data": [eachbid.json() for eachbid in query]}),200    
+
 
 if __name__ == "__main__":
     print("This is flask for " + os.path.basename(__file__) + ": manage orders ...")
