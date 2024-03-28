@@ -14,7 +14,7 @@ CORS(app)
 # path = "schedule"
 # set_database_uri(app, path)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = environ.get("dbURL") or "mysql+mysqlconnector://root:password@localhost:3306/Schedule"
+app.config["SQLALCHEMY_DATABASE_URI"] = environ.get("dbURL") or "mysql+mysqlconnector://root:root@localhost:3306/Schedule"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SWAGGER"] = {
     "title": "Schedule microservice API",
@@ -41,7 +41,7 @@ USE Schedule;
 CREATE TABLE Schedule (
     auction_id INT PRIMARY KEY,
     user_id INT,
-    collection_date DATE
+    collection_time DATE
 );
 """
 
@@ -50,32 +50,29 @@ db = SQLAlchemy(app)
 
 class Schedule(db.Model):
     __tablename__ = "Schedule"
-    __table_args__ = {"schema": "Schedule"}
+    
 
     auction_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
-    collection_date = db.Column(db.TIMESTAMP)
+    user_id = db.Column(db.Integer, nullable=False)
+    collection_time = db.Column(db.TIMESTAMP)
 
-    def __init__(self, auction_id, user_id, collection_date=None):
+    def __init__(self, auction_id, user_id, collection_time=None):
         self.auction_id = auction_id
         self.user_id = user_id
-        self.collection_date = collection_date
+        self.collection_time = collection_time
 
     def json(self):
         return {
             "auction_id": self.auction_id,
             "user_id": self.user_id,
-            "collection_date": (
-                self.collection_date.strftime("%Y-%m-%d")
-                if self.collection_date
+            "collection_time": (
+                self.collection_time.strftime("%Y-%m-%d")
+                if self.collection_time
                 else None
             ),
         }
 
 
-# Create tables (including the 'Schedule' table in the 'Schedule' schema)
-with app.app_context():
-    db.create_all()
 
 
 # Get all schedules
@@ -130,7 +127,7 @@ def create_schedule(auction_id):
             400,
         )
 
-    new_schedule = Schedule(auction_id=auction_id, user_id=None, collection_date=None)
+    new_schedule = Schedule(auction_id=auction_id, user_id=None, collection_time=None)
 
     db.session.add(new_schedule)
 
@@ -182,7 +179,7 @@ def edit_schedule(auction_id):
                 schema:
                     type: object
                     properties:
-                        collection_date:
+                        collection_time:
                             type: string
                             format: date
                             description: The scheduled date for collection (YYYY-MM-DD)
@@ -215,14 +212,14 @@ def edit_schedule(auction_id):
     data = request.get_json()
 
     if data:
-        collection_date_str = data.get("collection_date")
+        collection_time_str = data.get("collection_time")
 
-        if collection_date_str:
+        if collection_time_str:
             try:
-                collection_date = datetime.strptime(
-                    collection_date_str, "%Y-%m-%d"
+                collection_time = datetime.strptime(
+                    collection_time_str, "%Y-%m-%d"
                 ).date()
-                schedule.collection_date = collection_date
+                schedule.collection_time = collection_time
             except ValueError:
                 return (
                     jsonify(
@@ -460,7 +457,7 @@ def get_schedules_within_date_range():
     schedules = (
         db.session.query(Schedule)
         .filter(
-            Schedule.collection_date >= start_date, Schedule.collection_date <= end_date
+            Schedule.collection_time >= start_date, Schedule.collection_time <= end_date
         )
         .all()
     )

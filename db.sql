@@ -136,3 +136,30 @@ VALUES
     (1, 1001, '2024-03-25 10:00:00'),
     (2, 1002, '2024-03-26 11:30:00'),
     (3, 1003, '2024-03-27 12:45:00');
+    
+    
+use Users;
+DELIMITER //
+
+CREATE TRIGGER before_insert_user
+BEFORE INSERT ON Users
+FOR EACH ROW
+BEGIN
+    SET NEW.registration_date = CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+08:00');
+END;
+
+//
+DELIMITER ;
+
+use Notification;
+DELIMITER //
+
+CREATE TRIGGER before_insert_Notification
+BEFORE INSERT ON Notification
+FOR EACH ROW
+BEGIN
+    SET NEW.time_sent = CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+08:00');
+END;
+
+//
+DELIMITER ;
