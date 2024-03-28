@@ -259,8 +259,6 @@ def create_auction():
                     type: integer
                 watch_ref:
                     type: string
-                watch_ref:
-                    type: integer
                 watch_condition:
                     type: string
                 watch_brand:
