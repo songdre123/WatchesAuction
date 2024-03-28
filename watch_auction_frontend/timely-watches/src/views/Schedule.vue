@@ -1,7 +1,10 @@
-<template>
+ <template>
     <div class="container">
         <h1>Schedule Collection</h1>
         <p>Please select a date for collection of your watch.</p>
+    </br>
+        <p>Collection is available from 9am to 5pm. Please note that
+            collection date once selected can only be changed by contacting us.</p>
     </div>
     <form>
     <div class="wrapper">
@@ -16,6 +19,8 @@
         <p>Your collection date has been placed successfully.</p>
     </br>
         <p>your collection date is on {{date}}</p>
+</br>
+        <p>Thank you for choosing Timely Watches.</p>
 </br>
         <router-link to="/auctions" class="btn btn-primary">Back to Auctions</router-link>
 
@@ -41,8 +46,20 @@ export default{
         date: new Date(),
         submitted: false,
         tooearly: false,
-        id: ''
+        id: '',
+        winner: '',
+        async beforeenter(to, from, next){
+        await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
+        this.winner = response.data.data.auction_winner_id;
+        if(this.winner !== userid){
+            next('/home');
+        }
+        else
+            next();
+        }
     }
+
+    
 },
 components: {
     'ejs-calendar': CalendarComponent

@@ -32,6 +32,10 @@
 
 <script>
 import axios from 'axios';
+import { useUserStore } from '@/store/userStore';
+const userStore = useUserStore();
+const userid = userStore.userID;
+
 export default {
   data() {
     return {
@@ -43,6 +47,16 @@ export default {
       watchref: null,
       watchprice: null,
       auctiontime: null,
+      winner: '',
+      async beforeenter(to, from, next){
+        await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
+        this.winner = response.data.data.auction_winner_id;
+        if(this.winner !== userid){
+            next('/home');
+        }
+        else  
+            next();
+        }
     };
   },
   methods: {
