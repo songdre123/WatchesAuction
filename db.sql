@@ -52,10 +52,10 @@ CREATE TABLE Auction (
     watch_brand VARCHAR(255) NOT NULL,
     watch_box_present BOOLEAN NOT NULL,
     watch_papers_present BOOLEAN NOT NULL,
-    watch_image1 VARCHAR(255) NOT NULL,
-    watch_image2 VARCHAR(255) NOT NULL,
-    watch_image3 VARCHAR(255) NOT NULL,
-    stripe_product_id VARCHAR(255) DEFAULT NULL
+    watch_image1 VARCHAR(500) NOT NULL,
+    watch_image2 VARCHAR(500) NOT NULL,
+    watch_image3 VARCHAR(500) NOT NULL,
+    stripe_product_id VARCHAR(500) DEFAULT NULL
 );
 
 INSERT INTO Auction (auction_item, start_time, end_time, start_price, manufacture_year, current_price, auction_winner_id, auction_status, watch_ref, watch_condition, watch_brand, watch_box_present, watch_papers_present, watch_image1, watch_image2, watch_image3, stripe_product_id) 
@@ -136,3 +136,30 @@ VALUES
     (1, 1001, '2024-03-25 10:00:00'),
     (2, 1002, '2024-03-26 11:30:00'),
     (3, 1003, '2024-03-27 12:45:00');
+    
+    
+use Users;
+DELIMITER //
+
+CREATE TRIGGER before_insert_user
+BEFORE INSERT ON Users
+FOR EACH ROW
+BEGIN
+    SET NEW.registration_date = CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+08:00');
+END;
+
+//
+DELIMITER ;
+
+use Notification;
+DELIMITER //
+
+CREATE TRIGGER before_insert_Notification
+BEFORE INSERT ON Notification
+FOR EACH ROW
+BEGIN
+    SET NEW.time_sent = CONVERT_TZ(CURRENT_TIMESTAMP, '+00:00', '+08:00');
+END;
+
+//
+DELIMITER ;

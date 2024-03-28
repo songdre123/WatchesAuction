@@ -69,7 +69,7 @@ services:
     build:
       context: ./Notification
       dockerfile: notification.dockerfile
-    image: ethantfw/notification:esd
+    image: wangkaijie2001/notification:esd
     restart: always
     environment:
       dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Notification
@@ -103,7 +103,7 @@ services:
     build:
       context: ./Users
       dockerfile: user.dockerfile
-    image: ethantfw/user:esd
+    image: wangkaijie2001/user:esd
     restart: always
     environment:
       dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Users
@@ -121,7 +121,7 @@ services:
     build:
       context: ./Auction
       dockerfile: auction.dockerfile
-    image: ethantfw/auction:esd
+    image: wangkaijie2001/auction:esd
     restart: always
     environment:
       dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Auction
@@ -138,7 +138,7 @@ services:
     build:
       context: ./Bids
       dockerfile: bids.dockerfile
-    image: ethantfw/bid:esd
+    image: wangkaijie2001/bid:esd
     restart: always
     environment:
       dbURL: mysql+mysqlconnector://@host.docker.internal:3306/bids
@@ -155,7 +155,7 @@ services:
     build:
       context: ./Schedule
       dockerfile: schedule.dockerfile
-    image: ethantfw/schedule:esd
+    image: wangkaijie2001/schedule:esd
     restart: always
     environment:
       dbURL: mysql+mysqlconnector://@host.docker.internal:3306/Schedule
@@ -173,7 +173,7 @@ services:
     build:
       context: ./PricePredictor
       dockerfile: pricePredictor.dockerfile
-    image: ethantfw/pricepredictor:esd
+    image: wangkaijie2001/pricepredictor:esd
     restart: always
     environment:      
       PYTHONUNBUFFERED: 1
@@ -182,9 +182,6 @@ services:
     networks:
       - kong-net
 
-
-
-
   #################################################
   # createNotification: The createNotification microservice (complex)
   #################################################
@@ -192,7 +189,7 @@ services:
     build:
       context: ./createNotification
       dockerfile: createNotification.dockerfile
-    image: ethantfw/createnotification:esd
+    image: wangkaijie2001/createnotification:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -220,7 +217,7 @@ services:
     build:
       context: ./
       dockerfile: test.dockerfile
-    image: ethantfw/test:esd
+    image: wangkaijie2001/test:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -249,7 +246,7 @@ services:
     build:
       context: ./CreateAuction
       dockerfile: createAuction.dockerfile
-    image: ethantfw/createauction:esd
+    image: wangkaijie2001/createauction:esd
     restart: always
     depends_on:
       - auction
@@ -273,7 +270,7 @@ services:
     build:
       context: ./ProcessBid
       dockerfile: ProcessBid.dockerfile
-    image: ethantfw/processbid:esd
+    image: wangkaijie2001/processbid:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -299,7 +296,7 @@ services:
     build:
       context: ./ProcessWinner
       dockerfile: processWinner.dockerfile
-    image: ethantfw/processwinner:esd
+    image: wangkaijie2001/processwinner:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -327,7 +324,7 @@ services:
   #     dockerfile: vite.dockerfile
   #   entrypoint: ["npm", "run", "dev"]
   #   restart: always
-  #   image: ethantfw/vitefrontend:esd
+  #   image: wangkaijie2001/vitefrontend:esd
   #   ports:
   #     - 3000:3000
 
@@ -369,7 +366,7 @@ services:
   #   image: wangkaijie2001/book:esd
   #   restart: always
   #   environment:
-  #     dbURL: mysql+mysqlconnector://@host.docker.internal:3306/book
+  #     dbURL: mysql+mysqlconnector://@35.197.155.219:3306/book
   #     PYTHONUNBUFFERED: 1
   #   ports:
   #     - "5000:5000"
