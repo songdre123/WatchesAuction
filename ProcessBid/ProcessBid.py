@@ -147,7 +147,7 @@ def authenticate_bid():
     user_id = data.get("user_id")
     bid_amount = data.get("bid_amount")
 
-    bids_response = requests.get(f"{bids_url}/all/{auction_id}")
+    bids_response = requests.get(f"{bids_url}/auction/{auction_id}")
     # Proceed to process bids if there are existing bids
     if bids_response.status_code == 200:
         highest_bid_response = requests.get(f"{bids_url}/highest/{auction_id}")

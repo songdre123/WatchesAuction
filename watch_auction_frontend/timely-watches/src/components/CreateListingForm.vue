@@ -162,7 +162,7 @@
 import AWS from 'aws-sdk';
 import axios from 'axios';
 
-import { ref } from 'vue';
+// import { ref } from 'vue';
 import flatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
 
@@ -171,7 +171,7 @@ components: {
     flatPickr,
 },
 setup(){
-    const date = ref(null);
+    // const date = ref(null);
 },
   data() {
     return {

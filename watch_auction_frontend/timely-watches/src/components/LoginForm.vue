@@ -39,30 +39,41 @@ export default {
     }
   },
   methods: {
-     login() {
+     async login() {
       const data = {
         password: this.password,
       };
 
       axios.post(`http://127.0.0.1:5000/user/login/${this.email}`, data)
         .then(response => {
-          // Handle the response data
           console.log(response.data);
-          const userData = response.data.data;
-          userStore.setUser(userData)
-
-          if (userData.account_type == 'Buyer') {
-            this.$router.push({path: '/home'})
-          }
-          else {
-            this.$router.push({path: '/admin'})
-          }
-
         })
         .catch(error => {
           // Handle errors
           console.error("There was a problem with the request:", error);
         });
+
+        try {
+          const userResponse = await axios.get(`http://127.0.0.1:5000/user/${this.email}`)
+          const userData = userResponse.data.data
+          const userID = userData.id
+          userStore.setUserId(userID)
+          userStore.setUser(userData)
+
+            if (userData.account_type == 'Buyer') {
+              this.$router.push({path: '/home'})
+            }
+            else {
+              this.$router.push({path: '/admin'})
+            }
+          
+          console.log(userID)
+
+        } catch (error) {
+        console.error('Error getting user:', error.message);
+        throw error; // Re-throw the error to propagate it further
+        }
+      
     },
 }
 }

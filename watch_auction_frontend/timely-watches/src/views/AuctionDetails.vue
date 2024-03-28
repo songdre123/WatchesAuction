@@ -128,6 +128,7 @@ export default {
             }
             try {
                 await axios.post(`http://127.0.0.1:5006/authbid`, bidParams);
+                console.log(userId.value)
                 isActive.value = false;
             }
             catch (error) {

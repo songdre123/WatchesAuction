@@ -9,6 +9,7 @@ from flask_cors import CORS
 from sqlalchemy.exc import IntegrityError
 
 app = Flask(__name__)
+CORS(app)
 
 # path = "Bids"
 # set_database_uri(app, path)
@@ -28,11 +29,12 @@ swagger = Swagger(app)
 """
 API Endpoints:
 1. GET /bid - Get all bids
-2. GET /bid/all/<int:auction_id> - Get all bids from a specific auction
+2. GET /bid/auction/<int:auction_id> - Get all bids from a specific auction
 3. GET /bid/highest/<int:auction_id> - Get highest bid from a specific auction
-4. POST /bid/<int:bid_id> - Create a bid
-5. PUT /bid/<int:bid_id> - Edit a bid
-6. DELETE /bid/<int:bid_id> - Delete a user
+4. GET /bid/user/<int:user_id> - Get all bids from a specific user
+5. POST /bid/<int:bid_id> - Create a bid
+6. PUT /bid/<int:bid_id> - Edit a bid
+7. DELETE /bid/<int:bid_id> - Delete a user
 
 PORT: 5002
 DATABASE: bids
@@ -393,7 +395,7 @@ def get_highest_bid(auction_id):
         )
 
 
-@app.route("/bid/all/<int:auction_id>")
+@app.route("/bid/auction/<int:auction_id>")
 def get_all_bids_from_auction(auction_id):
     """
     Get all bids from a specific auction ID
@@ -440,7 +442,7 @@ def get_all_bids_from_auction(auction_id):
             404,
         )
 
-@app.route("/bid/all/<int:user_id>")
+@app.route("/bid/user/<int:user_id>")
 def get_all_bids_by_user(user_id):
     """
     Get all bids from a specific user ID

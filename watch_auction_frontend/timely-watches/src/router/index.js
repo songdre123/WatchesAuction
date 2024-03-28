@@ -45,6 +45,11 @@ const routes = [
           import(/* webpackChunkName: "home" */ "@/views/AuctionHome.vue"),
       },
       {
+        path:"bids",
+        name: "Bids",
+        component: () => import("@/views/BidsView.vue"),
+      },
+      {
         path: ":id",
         name: "AuctionDetails",
         component: () => import("@/views/AuctionDetails.vue"),
