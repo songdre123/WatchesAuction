@@ -60,6 +60,7 @@
     return {
       search: '',
       items: [],
+      headers: []
     };
   },
   methods: {
