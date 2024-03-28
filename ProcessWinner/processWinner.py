@@ -42,7 +42,6 @@ def check_auctions():
         update_status = invoke_http(uri, "PUT", json=auction_copy)
 
         # error handling for the put request
-        print(update_status['code'])
         if update_status['code'] != 200:
           print("Auction", auction_id, "has failed to update status from 0 to 1")
           # email_seller("auctionstartfail", auction)
@@ -59,36 +58,37 @@ def check_auctions():
       if auction['auction_status'] == 1:
         print("Auction", auction_id ,"ended at: ", datetime.now())
         # process the top bidder of the auctionl
-        process(auction)
-        auction['auction_status'] = 2
-        uri = auction_url + "/" + str(auction_id) 
-        auction_copy = auction.copy()
-        del auction_copy['auction_id']
-        update_status = invoke_http(uri, "PUT", json=auction_copy)
-
-        #? error handling for the put request
-        if update_status['code'] != 200:
-          # email_seller("auctionendfail", auction)
-          print("Auction", auction_id, "has failed to update status from 1 to 2")
+        winner_exist = process(auction)
+        if winner_exist:
+          auction['auction_status'] = 2
+          uri = auction_url + "/" + str(auction_id) 
+          auction_copy = auction.copy()
+          del auction_copy['auction_id']
+          update_status = invoke_http(uri, "PUT", json=auction_copy)
+          if update_status['code'] != 200:
+            print("Auction", auction_id, "has failed to update status from 1 to 2")
+            pass
+          else:
+            print("Auction", auction_id, "has had its status updated from 1 to 2")
+            pass #! maybe can send the seller a list of all the bids that was received for this auction?
+        else: 
           pass
-        else:
-          # email_seller("auctionended", auction) 
-          print("Auction", auction_id, "has had its status updated from 1 to 2")
-          pass #! maybe can send the seller a list of all the bids that was received for this auction?
-        #   pass
     if auction['auction_status'] >= 2:
       hours_passed = (datetime.now() - end_time).total_seconds() // 3600
       if hours_passed > (auction['auction_status'] - 2):
         print("Auction", auction_id ,"has been ended for", hours_passed, "hours")
+        new_winner = rollback(auction)
         # Update auction status to reflect the number of hours that have passed
         auction['auction_status'] = hours_passed + 2 #! consider chaning the auction status one at a time??
         uri = auction_url + "/" + str(auction_id)
         auction_copy = auction.copy()
         auction_copy['auction_status'] = hours_passed + 2
+        auction_copy["auction_winner_id"] = new_winner
+        if new_winner == None:
+          auction_copy["auction_status"] = -1
         del auction_copy['auction_id']
         update_status = invoke_http(uri, "PUT", json=auction_copy)
 
-        rollback(auction)
 
         # error handling for the put request
         if update_status['code'] != 200:
@@ -118,6 +118,7 @@ def process(auction):
     }
     message = json.dumps(message)
     #?channel.basic_publish(exchange=exchangename, body=message, properties=pika.BasicProperties(delivery_mode = 2),routing_key="Notification")
+    return True
   else:
     print(auction['auction_id'], "has no winner")
     # call AMQP to send a message to the seller
@@ -128,6 +129,7 @@ def process(auction):
     del auction_copy['auction_id']
     update_status = invoke_http(uri, "PUT", json=auction_copy)
     # email_seller("nowinner", auction)
+    return False
 
 
 def rollback(auction):
@@ -143,6 +145,7 @@ def rollback(auction):
   if bids['code'] == 200:
     # sort the bids in descending order
     sorted_bids = sorted(bids['data'], key=lambda k: k['bid_amount'], reverse=True)
+    print(n_highiest_bidder)
     # get the next highest bidder
 
     # check if there is a next highest bidder
@@ -157,7 +160,7 @@ def rollback(auction):
       update_status = invoke_http(uri, "PUT", json=auction_copy)
 
       # email_seller("nowinner", auction)
-      return
+      return None
     else: 
       next_highest_bidder = sorted_bids[n_highiest_bidder]
       print("Winner for", auction['auction_id'], "has been rolled back to the", (n_highiest_bidder + 1) , "highest bidder, which is user id", next_highest_bidder['user_id'])
@@ -169,10 +172,12 @@ def rollback(auction):
       }
       message = json.dumps(message)
       #?channel.basic_publish(exchange=exchangename, body=message, properties=pika.BasicProperties(delivery_mode = 2),routing_key="Notification")
+      return next_highest_bidder["user_id"]
   else:
     #inform seller via email that the next highest bidder could not be found due to an error in Bids microservice
     print("Error in Bids microservice when trying to find the next highest bidder for auction", auction['auction_id'])
     # email_seller("rollbackfail", auction)
+    return None
 
 
 def email_seller(notification_type, auction):

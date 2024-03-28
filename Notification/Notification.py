@@ -112,13 +112,13 @@ briefMessage={
 }
 
 notification_body={
-    "outbid":"The item that you have recently bidded for has been outbidded by an annoymous bidder. Do log into our Watch Auction Online Platform to place a higher bid.", 
+    "outbid":"The item that you have recently bidded for has been outbidded by an annoymous bidder. Do log into Timely Watches to place a higher bid.", 
 
-    "winandpayremind":"Congratulation on winning the bid! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.",
+    "winandpayremind":"Congratulation on winning the bid! Do log into Timely Watches and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.",
 
-    "paysucess":"We have sucessfully receive your payment for the item. Do log into our Watch Auction Online Platform to schedule a timing for the collection of the watch! ",
+    "paysucess":"We have sucessfully receive your payment for the item. Do log into Timely Watches to schedule a timing for the collection of the watch! ",
 
-    "rollbackandpayremind":"Congratulation on winning the bid! As the highest bidder has given up the offer, the item will be offered to you! Do log into our Watch Auction Online platform and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.",
+    "rollbackandpayremind":"Congratulation on winning the bid! As the highest bidder has given up the offer, the item will be offered to you! Do log into Timely Watches and pay for the item within 1 hour. Or else, you may lose your item and the item will be offered to the second highest bidder.",
 
     "schedulesuccess":"Do take note of the allocated time that you have indicated for the item collection. Vist our website to check the collection point with the seller!",
 
