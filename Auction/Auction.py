@@ -21,7 +21,7 @@ CORS(app)
 
 # path = "Auction"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/Auction'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:root@localhost:3306/Auction'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # config = ConfigParser()
 # config.read('config.ini')
@@ -222,7 +222,7 @@ def find_by_auction_id(auction_id):
         db.select(Auction).filter_by(auction_id=auction_id).limit(1)
     ).first()
     if auction:
-        return jsonify({"code": 200, "data": auction.json()})
+        return jsonify({"code": 200, "data": auction.json()}),200
     return jsonify({"code": 404, "message": "Auction does not exist."}), 404
 
 
@@ -239,42 +239,42 @@ def create_auction():
           schema:
             type: object
             properties:
-              auction_item:
-                type: string
-              start_time:
-                type: string
-              end_time:
-                type: string
-            manufacture_year:
-                type: integer
-            stripe_product_id:
-                type: string
-              start_price:
-                type: number
-            manufacture_year:
-                type: integer
-              current_price:
-                type: number
-              auction_winner_id:
-                type: integer
-              watch_ref:
-                type: string
-              watch_ref:
-                type: integer
-              watch_condition:
-                type: string
-              watch_brand:
-                type: string
-              watch_box_present:
-                type: boolean
-              watch_papers_present:
-                type: boolean
-              watch_image1:
-                type: string
-              watch_image2:
-                type: string
-              watch_image3:
-                type: string
+                auction_item:
+                    type: string
+                start_time:
+                    type: string
+                end_time:
+                    type: string
+                manufacture_year:
+                    type: integer
+                stripe_product_id:
+                    type: string
+                start_price:
+                    type: number
+                manufacture_year:
+                    type: integer
+                current_price:
+                    type: number
+                auction_winner_id:
+                    type: integer
+                watch_ref:
+                    type: string
+                watch_ref:
+                    type: integer
+                watch_condition:
+                    type: string
+                watch_brand:
+                    type: string
+                watch_box_present:
+                    type: boolean
+                watch_papers_present:
+                    type: boolean
+                watch_image1:
+                    type: string
+                watch_image2:
+                    type: string
+                watch_image3:
+                    type: string
     responses:
       201:
         description: Auction created

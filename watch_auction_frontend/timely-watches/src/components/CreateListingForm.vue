@@ -337,6 +337,8 @@ setup(){
                 .then((response) => {
                     console.log(response);
                     alert('Listing created successfully.');
+                    this.$router.push({ path: '/admin' });
+
                 })
                 .catch((error) => {
                     console.log(error);

@@ -36,6 +36,12 @@ const routes = [
         component: () => import("@/views/seller/Listing.vue"),
         meta: { requiresAuth: true },
       },
+      {
+        path: "auctionlist",
+        name: "AuctionList",
+        component: () => import("@/views/seller/ListOfAuctions.vue"),
+        meta: { requiresAuth: true },
+      },
     ],
     meta: { requiresAuth: true },
   },
