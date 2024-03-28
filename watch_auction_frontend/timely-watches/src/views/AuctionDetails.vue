@@ -68,9 +68,13 @@
 
 <script>
 import { useWatchStore } from '@/store/watchStore'
-import { watch, ref, computed } from 'vue'
+import { watch, ref, computed, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/store/userStore'
+        watch(() => watchStore.getCurrentPrice, (newPrice) => {
+            // Update the watch value with the new current price
+            Watch.value.CurrentPrice = newPrice
+        })
 import axios from 'axios'
 const watchStore = useWatchStore()
 const userStore = useUserStore()
@@ -86,6 +90,17 @@ export default {
 
         const route = useRoute()
         const id = computed(() => route.params.id)
+
+        const intervalId = setInterval(() => {
+      // Update the watch value with the new current price
+        Watch.value.CurrentPrice = watchStore.getCurrentPrice();
+        }, 500);
+
+        onUnmounted(() => {
+            clearInterval(intervalId)
+        });
+
+        
 
         const isBidEnabled = computed(() => {
             const watchStartDate = new Date(Watch.value.StartDate)
