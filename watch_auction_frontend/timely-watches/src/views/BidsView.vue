@@ -75,7 +75,7 @@ export default {
                         delete bid.auction_id; // Remove old key
                         bid.title = auctionData.auction_item;
                         bid.imageURL = auctionData.watch_image1;
-                        bid.ref_number = auctionData.watch_ref
+                        bid.ref_number = auctionData.watch_ref;
                         bid.watch_brand = auctionData.watch_brand;
                         bid.manufactureYear = auctionData.manufacture_year;
                         bid.StartDate = auctionData.start_time;

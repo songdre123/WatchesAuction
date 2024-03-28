@@ -25,9 +25,8 @@
 </template>
 
 <script>
-import axios from 'axios'
 import { useUserStore } from '@/store/userStore'
-const userStore = useUserStore()
+
 
 export default {
   data() {
@@ -44,36 +43,25 @@ export default {
         password: this.password,
       };
 
-      axios.post(`http://127.0.0.1:5000/user/login/${this.email}`, data)
-        .then(response => {
-          console.log(response.data);
-        })
-        .catch(error => {
-          // Handle errors
-          console.error("There was a problem with the request:", error);
-        });
+      const userStore = useUserStore()
 
-        try {
-          const userResponse = await axios.get(`http://127.0.0.1:5000/user/${this.email}`)
-          const userData = userResponse.data.data
-          const userID = userData.id
-          userStore.setUserId(userID)
-          userStore.setUser(userData)
+      try {
+        await userStore.loginAuth(this.email, data);
 
-            if (userData.account_type == 'Buyer') {
-              this.$router.push({path: '/home'})
-            }
-            else {
-              this.$router.push({path: '/admin'})
-            }
-          
-          console.log(userID)
+        // Now, check the isLoggedIn status after the login process is completed
+        console.log(userStore.isLoggedIn);
 
-        } catch (error) {
-        console.error('Error getting user:', error.message);
-        throw error; // Re-throw the error to propagate it further
+        if (userStore.isLoggedIn) {
+          console.log(userStore.user.account_type);
+          if (userStore.user.account_type === 'Buyer') {
+            this.$router.push({ path: '/home' });
+          } else {
+            this.$router.push({ path: '/admin' });
+          }
         }
-      
+      } catch (error) {
+        console.error(error, error.message);
+      }
     },
 }
 }
@@ -174,3 +162,34 @@ input[type="checkbox"] {
 }
 
 </style>
+
+<!-- // axios.post(`http://127.0.0.1:5000/user/login/${this.email}`, data)
+      //   .then(response => {
+      //     console.log(response.data);
+      //   })
+      //   .catch(error => {
+      //     // Handle errors
+      //     console.error("There was a problem with the request:", error);
+      //   });
+
+      //   try {
+      //     const userResponse = await axios.get(`http://127.0.0.1:5000/user/${this.email}`)
+      //     const userData = userResponse.data.data
+      //     const userID = userData.id
+      //     userStore.setUserId(userID)
+      //     userStore.setUser(userData)
+
+      //       if (userData.account_type == 'Buyer') {
+      //         this.$router.push({path: '/home'})
+      //       }
+      //       else {
+      //         this.$router.push({path: '/admin'})
+      //       }
+          
+      //     console.log(userID)
+
+      //   } catch (error) {
+      //   console.error('Error getting user:', error.message);
+      //   throw error; // Re-throw the error to propagate it further
+      //   }
+       -->

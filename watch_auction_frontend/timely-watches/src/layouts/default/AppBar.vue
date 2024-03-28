@@ -99,7 +99,8 @@ export default {
   },
   methods: {
     removeUserStore() {
-      userStore.removeUser
+      userStore.removeUser()
+      userStore.logout()
     }
   },
   async mounted() {
