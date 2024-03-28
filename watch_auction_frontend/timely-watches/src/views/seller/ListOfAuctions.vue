@@ -40,7 +40,7 @@
     <v-img v-if="item.watch_image1" :src="item.watch_image1" height="64" cover></v-img>
   </template>
 
-  <template v-slot:item.watch_image2="{ item }">
+  <template v-slot:item.watch_image2="{ item }" >
     <v-img v-if="item.watch_image2" :src="item.watch_image2" height="64" cover></v-img>
   </template>
 

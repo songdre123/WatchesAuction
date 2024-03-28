@@ -251,6 +251,8 @@ def create_auction():
                     type: number
                 manufacture_year:
                     type: integer
+                auction_status:
+                    type: integer
                 current_price:
                     type: number
                 auction_winner_id:
