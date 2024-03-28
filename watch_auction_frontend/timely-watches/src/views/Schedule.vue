@@ -48,15 +48,7 @@ export default{
         tooearly: false,
         id: '',
         winner: '',
-        async beforeenter(to, from, next){
-        await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
-        this.winner = response.data.data.auction_winner_id;
-        if(this.winner !== userid){
-            next('/home');
-        }
-        else
-            next();
-        }
+       
     }
 
     
@@ -68,6 +60,15 @@ methods: {
     change: function(args){
         this.date = args.value;
     },
+    async beforeenter(to, from, next){
+        await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
+        this.winner = response.data.data.auction_winner_id;
+        if(this.winner !== userid){
+            next('/home');
+        }
+        else
+            next();
+        },
     async submitschedule(){
         try{
             // Convert this.date to a string in the "yyyy-mm-dd" format
@@ -101,8 +102,10 @@ methods: {
     },
     async update_status(){
         try{
-            const response = await axios.put(`/auction/${this.$route.params.id}`, {
-                status: -2
+            console.log(this.$route.params.id);
+
+            const response = await axios.put(`http://127.0.0.1:5001/auction/${this.$route.params.id}`, {
+                auction_status: -2
             });
             console.log(response);
         }
@@ -113,6 +116,7 @@ methods: {
 },
 
 created(){
+    this.beforeenter();
     this.update_status();
 }
 }

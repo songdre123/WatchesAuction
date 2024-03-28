@@ -48,7 +48,11 @@ export default {
       watchprice: null,
       auctiontime: null,
       winner: '',
-      async beforeenter(to, from, next){
+
+    };
+  },
+  methods: {
+          async beforeenter(to, from, next){
         await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
         this.winner = response.data.data.auction_winner_id;
         if(this.winner !== userid){
@@ -56,10 +60,7 @@ export default {
         }
         else  
             next();
-        }
-    };
-  },
-  methods: {
+        },
     redirectToCheckout() {
       if (this.checkoutUrl) {
         window.location.href = this.checkoutUrl;
@@ -84,6 +85,9 @@ export default {
         console.log(error);
         next(false);
       });
+  },
+  created() {
+    this.beforeenter();
   },
 };
 </script>

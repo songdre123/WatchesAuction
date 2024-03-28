@@ -70,7 +70,7 @@ services:
     image: ethantfw/notification:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Notification
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/Notification
       PYTHONUNBUFFERED: 1
     ports:
       - "5004:5004"
@@ -104,7 +104,7 @@ services:
     image: ethantfw/user:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Users
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/Users
       PYTHONUNBUFFERED: 1
     ports:
       - "5000:5000"
@@ -122,7 +122,7 @@ services:
     image: ethantfw/auction:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Auction
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/Auction
       PYTHONUNBUFFERED: 1
     ports:
       - "5001:5001"
@@ -139,7 +139,7 @@ services:
     image: ethantfw/bid:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/bids
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/bids
       PYTHONUNBUFFERED: 1
     ports:
       - "5002:5002"
@@ -156,7 +156,7 @@ services:
     image: ethantfw/schedule:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Schedule
+      dbURL: mysql+mysqlconnector://root@host.docker.internal:3306/Schedule
       PYTHONUNBUFFERED: 1
     ports:
       - "5003:5003"
