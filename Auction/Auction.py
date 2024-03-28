@@ -21,7 +21,7 @@ CORS(app)
 
 # path = "Auction"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/Auction'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:root@localhost:3306/Auction'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # config = ConfigParser()
 # config.read('config.ini')
@@ -222,7 +222,7 @@ def find_by_auction_id(auction_id):
         db.select(Auction).filter_by(auction_id=auction_id).limit(1)
     ).first()
     if auction:
-        return jsonify({"code": 200, "data": auction.json()})
+        return jsonify({"code": 200, "data": auction.json()}),200
     return jsonify({"code": 404, "message": "Auction does not exist."}), 404
 
 

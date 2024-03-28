@@ -7,13 +7,14 @@ from flasgger import Swagger
 from flask_cors import CORS
 # from db_config import set_database_uri
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func,and_,tuple_
 
 app = Flask(__name__)
 CORS(app)
 
 # path = "Bids"
 # set_database_uri(app, path)
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:password@localhost:3306/bids'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('dbURL') or 'mysql+mysqlconnector://root:root@localhost:3306/bids'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config["SWAGGER"] = {
@@ -465,6 +466,7 @@ def get_all_bids_by_user(user_id):
     """
 
     bids_by_user = Bids.query.filter_by(user_id=user_id).all()
+    print(bids_by_user)
 
     if bids_by_user:
         bids_data = [
@@ -487,6 +489,27 @@ def get_all_bids_by_user(user_id):
             404,
         )
 
+@app.route("/bid/GethighestBidsByUserId/<int:user_id>")
+def GethighestBidsByUserId(user_id):
+    subquery = (
+        db.session.query(Bids.auction_id, func.max(Bids.bid_amount))
+        .filter(Bids.user_id == 1)
+        .group_by(Bids.auction_id)
+        .subquery()
+    )
+    query = (
+        db.session.query(Bids)
+        .filter(
+            and_(
+                Bids.user_id == user_id,
+                tuple_(Bids.auction_id, Bids.bid_amount).in_(subquery)
+            )
+        )
+        .all()
+    )
+    if not query:  # Check if the list is empty
+        return jsonify({"code": 404, "message": "No bids found for the specified user ID", "data":[]}),404
+    return jsonify({"code": 200,"message": "highest Bids get successfully for each auction","data": [eachbid.json() for eachbid in query]}),200    
 
 if __name__ == "__main__":
     print("This is flask for " + os.path.basename(__file__) + ": manage orders ...")
