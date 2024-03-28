@@ -23,85 +23,93 @@ def check_auctions():
   auctions = invoke_http(auction_url, "get") 
   five_seconds_ago = datetime.now() - timedelta(seconds=5)
 
-  for auction in auctions['data']['auctions']:
-    auction_id = auction['auction_id']
+  # check if auctions status code is 200
+  if auctions['code'] != 200:
+    print("Error in auction microserivce, unable to retrieve auction data")
+    # return status code 401
+    return "Error in auction microserivce, unable to retrieve auction data" ,401
+  
+  else:
 
-    #convert time into readable format
-    end_time = datetime.strptime(auction['end_time'], '%Y-%m-%d %H:%M:%S')
-    start_time = datetime.strptime(auction['start_time'], '%Y-%m-%d %H:%M:%S')
+    for auction in auctions['data']['auctions']:
+      auction_id = auction['auction_id']
 
-    # if auction started then change status from 0 to 1
-    if start_time >= five_seconds_ago and start_time <= datetime.now():
-      # send put request to change status of auction from 0 to 1 to show that auction has started
-      if auction['auction_status'] == 0:
-        print("Auction", auction_id ,"started at: ", datetime.now())
-        auction['auction_status'] = 1
-        uri = auction_url + "/" + str(auction_id)
-        auction_copy = auction.copy()
-        del auction_copy['auction_id']
-        update_status = invoke_http(uri, "PUT", json=auction_copy)
+      #convert time into readable format
+      end_time = datetime.strptime(auction['end_time'], '%Y-%m-%d %H:%M:%S')
+      start_time = datetime.strptime(auction['start_time'], '%Y-%m-%d %H:%M:%S')
 
-        # error handling for the put request
-        if update_status['code'] != 200:
-          print("Auction", auction_id, "has failed to update status from 0 to 1")
-          # email_seller("auctionstartfail", auction)
-          pass
-        else:
-          print("Auction", auction_id, "has had its status updated from 0 to 1")
-          # email_seller("auctionstarted", auction)
-          pass
-
-    # if auction ended then change status from 1 to 2 and process the top bidder (switch the if statements)
-    # elif end_time <= datetime.now(): #? for testing purposes can use this if statement instead
-    elif end_time <= five_seconds_ago and datetime.now() >= end_time: 
-      # send put request to change status of auction from 1 to 2 to show that auction has ended
-      if auction['auction_status'] == 1:
-        print("Auction", auction_id ,"ended at: ", datetime.now())
-        # process the top bidder of the auctionl
-        winner_exist = process(auction)
-        if winner_exist:
-          auction['auction_status'] = 2
-          uri = auction_url + "/" + str(auction_id) 
+      # if auction started then change status from 0 to 1
+      if start_time >= five_seconds_ago and start_time <= datetime.now():
+        # send put request to change status of auction from 0 to 1 to show that auction has started
+        if auction['auction_status'] == 0:
+          print("Auction", auction_id ,"started at: ", datetime.now())
+          auction['auction_status'] = 1
+          uri = auction_url + "/" + str(auction_id)
           auction_copy = auction.copy()
           del auction_copy['auction_id']
           update_status = invoke_http(uri, "PUT", json=auction_copy)
+
+          # error handling for the put request
           if update_status['code'] != 200:
-            print("Auction", auction_id, "has failed to update status from 1 to 2")
+            print("Auction", auction_id, "has failed to update status from 0 to 1")
+            # email_seller("auctionstartfail", auction)
             pass
           else:
-            print("Auction", auction_id, "has had its status updated from 1 to 2")
-            pass #! maybe can send the seller a list of all the bids that was received for this auction?
-        else: 
+            print("Auction", auction_id, "has had its status updated from 0 to 1")
+            # email_seller("auctionstarted", auction)
+            pass
+
+      # if auction ended then change status from 1 to 2 and process the top bidder (switch the if statements)
+      # elif end_time <= datetime.now(): #? for testing purposes can use this if statement instead
+      elif end_time <= five_seconds_ago and datetime.now() >= end_time: 
+        # send put request to change status of auction from 1 to 2 to show that auction has ended
+        if auction['auction_status'] == 1:
+          print("Auction", auction_id ,"ended at: ", datetime.now())
+          # process the top bidder of the auctionl
+          winner_exist = process(auction)
+          if winner_exist:
+            auction['auction_status'] = 2
+            uri = auction_url + "/" + str(auction_id) 
+            auction_copy = auction.copy()
+            del auction_copy['auction_id']
+            update_status = invoke_http(uri, "PUT", json=auction_copy)
+            if update_status['code'] != 200:
+              print("Auction", auction_id, "has failed to update status from 1 to 2")
+              pass
+            else:
+              print("Auction", auction_id, "has had its status updated from 1 to 2")
+              pass #! maybe can send the seller a list of all the bids that was received for this auction?
+          else: 
+            pass
+      if auction['auction_status'] >= 2:
+        hours_passed = (datetime.now() - end_time).total_seconds() // 3600
+        if hours_passed > (auction['auction_status'] - 2):
+          print("Auction", auction_id ,"has been ended for", hours_passed, "hours")
+          new_winner = rollback(auction)
+          # Update auction status to reflect the number of hours that have passed
+          auction['auction_status'] = hours_passed + 2 #! consider chaning the auction status one at a time??
+          uri = auction_url + "/" + str(auction_id)
+          auction_copy = auction.copy()
+          auction_copy['auction_status'] = hours_passed + 2
+          auction_copy["auction_winner_id"] = new_winner
+          if new_winner == None:
+            auction_copy["auction_status"] = -1
+          del auction_copy['auction_id']
+          update_status = invoke_http(uri, "PUT", json=auction_copy)
+
+
+          # error handling for the put request
+          if update_status['code'] != 200:
+            print("Auction", auction_id, "has failed to update status to reflect the number of hours that have passed")
+            pass
+          else:
+            print("Auction", auction_id, "has had its status updated to reflect the number of hours that have passed")
+          # Perform the desired action for the multiple of hours
           pass
-    if auction['auction_status'] >= 2:
-      hours_passed = (datetime.now() - end_time).total_seconds() // 3600
-      if hours_passed > (auction['auction_status'] - 2):
-        print("Auction", auction_id ,"has been ended for", hours_passed, "hours")
-        new_winner = rollback(auction)
-        # Update auction status to reflect the number of hours that have passed
-        auction['auction_status'] = hours_passed + 2 #! consider chaning the auction status one at a time??
-        uri = auction_url + "/" + str(auction_id)
-        auction_copy = auction.copy()
-        auction_copy['auction_status'] = hours_passed + 2
-        auction_copy["auction_winner_id"] = new_winner
-        if new_winner == None:
-          auction_copy["auction_status"] = -1
-        del auction_copy['auction_id']
-        update_status = invoke_http(uri, "PUT", json=auction_copy)
 
-
-        # error handling for the put request
-        if update_status['code'] != 200:
-          print("Auction", auction_id, "has failed to update status to reflect the number of hours that have passed")
-          pass
-        else:
-          print("Auction", auction_id, "has had its status updated to reflect the number of hours that have passed")
-        # Perform the desired action for the multiple of hours
-        pass
-
-      # case where auction is still ongoing
-      pass 
-  #Handle rollback
+        # case where auction is still ongoing
+        pass 
+    #Handle rollback
 
 
 def process(auction):
