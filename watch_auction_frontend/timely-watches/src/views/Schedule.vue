@@ -61,14 +61,12 @@ methods: {
         this.date = args.value;
     },
     async beforeenter(next){
-        await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
+        const response = await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
         this.winner = response.data.data.auction_winner_id;
         if(this.winner !== userid){
-            console.log("You can be here!")
             next('/home');
         }
         else
-            console.log("You can be here!")
             next();
         },
     async submitschedule(){

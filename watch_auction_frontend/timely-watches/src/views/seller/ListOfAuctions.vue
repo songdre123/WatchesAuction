@@ -20,7 +20,7 @@
   
       <v-divider></v-divider>
 
-      <v-data-table v-model:search="search" :items="items">
+      <v-data-table v-model:search="search" :items="items" :headers="headers" item-key="auction_id">
         <template v-slot:item.auction_id="{ item }">
     {{ item.auction_id }}
         </template>
@@ -60,7 +60,15 @@
     return {
       search: '',
       items: [],
-      headers: []
+      headers: [
+        { text: 'Auction ID', value: 'auction_id' },
+        { text: 'Auction Item', value: 'auction_item' },
+        { text: 'Start Time', value: 'start_time' },
+        { text: 'End Time', value: 'end_time' },
+        { text: 'Image 1', value: 'watch_image1' },
+        { text: 'Image 2', value: 'watch_image2' },
+        { text: 'Image 3', value: 'watch_image3' },
+        ],
     };
   },
   methods: {

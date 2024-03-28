@@ -52,8 +52,8 @@ export default {
     };
   },
   methods: {
-          async beforeenter(to, from, next){
-        await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
+        async beforeenter(to, from, next){
+        const response = await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
         this.winner = response.data.data.auction_winner_id;
         if(this.winner !== userid){
             next('/home');

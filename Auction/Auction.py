@@ -247,8 +247,6 @@ def create_auction():
                     type: string
                 manufacture_year:
                     type: integer
-                stripe_product_id:
-                    type: string
                 start_price:
                     type: number
                 manufacture_year:
