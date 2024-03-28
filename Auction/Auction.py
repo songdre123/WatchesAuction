@@ -241,38 +241,52 @@ def create_auction():
             properties:
                 auction_item:
                     type: string
+                    default: "Rolex Submariner"
                 start_time:
                     type: string
+                    default: "2025-06-01 12:00"
                 end_time:
                     type: string
-                manufacture_year:
-                    type: integer
+                    default: "2025-06-01 13:00"
                 start_price:
                     type: number
+                    default: 1000.0
                 manufacture_year:
                     type: integer
+                    default: 2020
                 auction_status:
                     type: integer
+                    default: 0
                 current_price:
                     type: number
+                    default: 1000.0
                 auction_winner_id:
                     type: integer
+                    default: null
                 watch_ref:
                     type: string
+                    default: "126610LN"
                 watch_condition:
                     type: string
+                    default: "New"
                 watch_brand:
                     type: string
+                    default: "Rolex"
                 watch_box_present:
                     type: boolean
+                    default: true
                 watch_papers_present:
                     type: boolean
+                    default: true
                 watch_image1:
                     type: string
+                    default: "https://watchauctionimages.s3.ap-southeast-1.amazonaws.com/file-2-rolex_submariner_126610ln_with_1711040550_8ecb6f62_progressive.jpg"
                 watch_image2:
                     type: string
+                    default: "https://watchauctionimages.s3.ap-southeast-1.amazonaws.com/file-0-124060_rolex_submariner_no_dat_1711089521_d363e777_progressive.jpg"
                 watch_image3:
                     type: string
+                    default: "https://watchauctionimages.s3.ap-southeast-1.amazonaws.com/file-1-brand_new_1223_rolex_submarine_1706369198_b65a415f_progressive.jpg"
     responses:
       201:
         description: Auction created

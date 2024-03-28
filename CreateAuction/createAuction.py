@@ -34,8 +34,8 @@ def createAuction():
           type: object
           properties:
               auction_item:
-                    type: string
-                    description: The item being auctioned.
+                  type: string
+                  description: The item being auctioned.
               start_time:
                 type: string
                 format: date-time
