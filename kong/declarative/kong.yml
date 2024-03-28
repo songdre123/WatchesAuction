@@ -166,6 +166,12 @@ services:
         methods:
           - GET
         strip_path: true
+      - name: GethighestBidsByUserId ##
+        paths:
+          - /bid/GethighestBidsByUserId/<int:user_id>
+        methods:
+          - GET
+        strip_path: true
 
 
 ###################################### ScheduleAPI ######################################
@@ -236,5 +242,11 @@ services:
           - /authbid
         methods:
           - POST
+        strip_path: true
+      - name: GetAllAuctionAndUserhighestBidByUser ##
+        paths:
+          - /getAllAuctionAndUserhighestBidByUser/<int:user_id>
+        methods:
+          - GET
         strip_path: true
 
