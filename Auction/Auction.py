@@ -239,42 +239,42 @@ def create_auction():
           schema:
             type: object
             properties:
-              auction_item:
-                type: string
-              start_time:
-                type: string
-              end_time:
-                type: string
-            manufacture_year:
-                type: integer
-            stripe_product_id:
-                type: string
-              start_price:
-                type: number
-            manufacture_year:
-                type: integer
-              current_price:
-                type: number
-              auction_winner_id:
-                type: integer
-              watch_ref:
-                type: string
-              watch_ref:
-                type: integer
-              watch_condition:
-                type: string
-              watch_brand:
-                type: string
-              watch_box_present:
-                type: boolean
-              watch_papers_present:
-                type: boolean
-              watch_image1:
-                type: string
-              watch_image2:
-                type: string
-              watch_image3:
-                type: string
+                auction_item:
+                    type: string
+                start_time:
+                    type: string
+                end_time:
+                    type: string
+                manufacture_year:
+                    type: integer
+                stripe_product_id:
+                    type: string
+                start_price:
+                    type: number
+                manufacture_year:
+                    type: integer
+                current_price:
+                    type: number
+                auction_winner_id:
+                    type: integer
+                watch_ref:
+                    type: string
+                watch_ref:
+                    type: integer
+                watch_condition:
+                    type: string
+                watch_brand:
+                    type: string
+                watch_box_present:
+                    type: boolean
+                watch_papers_present:
+                    type: boolean
+                watch_image1:
+                    type: string
+                watch_image2:
+                    type: string
+                watch_image3:
+                    type: string
     responses:
       201:
         description: Auction created
