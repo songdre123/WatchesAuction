@@ -1,7 +1,10 @@
-<template>
+ <template>
     <div class="container">
         <h1>Schedule Collection</h1>
         <p>Please select a date for collection of your watch.</p>
+    </br>
+        <p>Collection is available from 9am to 5pm. Please note that
+            collection date once selected can only be changed by contacting us.</p>
     </div>
     <form>
     <div class="wrapper">
@@ -17,6 +20,8 @@
     </br>
         <p>your collection date is on {{date}}</p>
 </br>
+        <p>Thank you for choosing Timely Watches.</p>
+</br>
         <router-link to="/auctions" class="btn btn-primary">Back to Auctions</router-link>
 
     </div>
@@ -31,6 +36,9 @@
 <script>
 import axios from 'axios';
 import { CalendarComponent } from '@syncfusion/ej2-vue-calendars';
+import { useUserStore } from '@/store/userStore';
+const userStore = useUserStore();
+const userid = userStore.userID;
 export default{
     name: 'Schedule',
     data(){
@@ -38,8 +46,20 @@ export default{
         date: new Date(),
         submitted: false,
         tooearly: false,
-        id: ''
+        id: '',
+        winner: '',
+        async beforeenter(to, from, next){
+        await axios.get(`http://127.0.0.1:5001/auction/${this.$route.params.id}`)
+        this.winner = response.data.data.auction_winner_id;
+        if(this.winner !== userid){
+            next('/home');
+        }
+        else
+            next();
+        }
     }
+
+    
 },
 components: {
     'ejs-calendar': CalendarComponent
@@ -50,18 +70,23 @@ methods: {
     },
     async submitschedule(){
         try{
-            console.log(this.date);
+            // Convert this.date to a string in the "yyyy-mm-dd" format
+            const formattedDate = this.date.toISOString().slice(0, 10);
+            console.log(formattedDate);
             console.log(this.$route.params.id);
             this.id = this.$route.params.id;
 
             const today = new Date();
             today.setDate(today.getDate() + 1);
+            console.log(this.id);
             if(this.date < today){
                 this.tooearly = true;
             }
             else{
-                const response = await axios.put(`/schedule/edit/${this.id}`, {
-                    collection_date: this.date
+                const response = await axios.put(`http://127.0.0.1:5003/schedule/edit/${this.id}`, {
+                    collection_date: formattedDate,
+                    user_id: userid
+                    // for ethan to settle session variable <3
                 });
 
                 if(response.status === 200){

@@ -83,7 +83,7 @@ export default {
     removeUserStore() {
       userStore.removeUser
     }
-  }
+  },
 }
 </script>
 

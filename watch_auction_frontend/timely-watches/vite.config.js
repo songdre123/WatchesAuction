@@ -44,13 +44,7 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    host: true,
     cors: true,
-    // proxy: {
-    //   "/admin/create": {
-    //     target: "http://localhost:5001", // Your backend API server address
-    //     changeOrigin: true,
-    //     rewrite: (path) => path.replace(/^\/auction/, ""), // Remove the '/auction' prefix
-    //   },
-    // },
   },
 });

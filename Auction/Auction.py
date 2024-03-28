@@ -320,7 +320,12 @@ def create_auction():
             ),
             400,
         )
+    # Add the auction to the session and commit it to the database
+    db.session.add(auction)
+    db.session.commit()
+
     try:
+        # Create a Stripe product
         product = stripe.Product.create(
             name=auction.auction_item,
             type="good",
@@ -351,18 +356,16 @@ def create_auction():
                 },
             ],
             mode='payment',
-            success_url= 'http://localhost:3000/schedule/' + str(auction.auction_id),
-            cancel_url= 'http://localhost:3000/cancel'
+            success_url='http://localhost:3000/schedule/' + str(auction.auction_id),
+            cancel_url='http://localhost:3000/cancel'
         )
 
-
-    # Store the checkout session URL in stripe_product_id
+        # Store the checkout session URL in stripe_product_id
         print("Checkout link:", checkout_session.url)
         auction.stripe_product_id = checkout_session.url
 
-        db.session.add(auction)
+        # Commit the changes to the database
         db.session.commit()
-
     except stripe.error.StripeError as e:
         print("Stripe error:", str(e))
         return jsonify({"error": str(e)}), 400

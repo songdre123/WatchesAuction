@@ -1,0 +1,240 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+###################################### UserAPI ######################################
+  - name: UserAPI
+    url: http://user:5000/user
+    routes:
+      - name: GetAllUsers ##
+        paths:
+          - /user
+        methods:
+          - GET
+        strip_path: true
+      - name: GetSpecificUserByEmail ##
+        paths:
+          - /user/<string:email>
+        methods:
+          - GET
+        strip_path: true
+      - name: GetSpecificUserById ##
+        paths:
+          - /user/<int:user_id>
+        methods:
+          - GET
+        strip_path: true
+      - name: CheckUserCredential ##
+        paths:
+          - /user/login/<string:email>
+        methods:
+          - POST
+        strip_path: true
+      - name: CreateUser ##
+        paths:
+          - /user/<string:email>
+        methods:
+          - POST
+        strip_path: true
+      - name: EditUserData ##
+        paths:
+          - /user/<string:email>
+        methods:
+          - PUT
+        strip_path: true
+      - name: DeleteUser ##
+        paths:
+          - /user/<string:email>
+        methods:
+          - DELETE
+        strip_path: true
+
+###################################### NotificationAPI ######################################
+        
+  - name: NotificationAPI
+    url: http://notification:5004/notification
+    routes:
+      - name: GetUserNotifications ##
+        paths:
+          - /notification/<int:user_id>
+        methods:
+          - GET
+        strip_path: true
+      - name: CreateNotificationInDB ##
+        paths:
+          - /notification/createNotification
+        methods:
+          - POST
+        strip_path: true
+      - name: SendEmail ##
+        paths:
+          - /notification/sendEmail
+        methods:
+          - POST
+        strip_path: true
+
+###################################### AuctionAPI ######################################
+  - name: AuctionAPI
+    url: http://auction:5001/auction
+    routes:
+      - name: GetAllAuctions ##
+        paths:
+          - /auction
+        methods:
+          - GET
+        strip_path: true
+      - name: GetSpecificAuctions ##
+        paths:
+          - /auction/<int:auction_id>
+        methods:
+          - GET
+        strip_path: true
+      - name: CreateAuctionInDB ##
+        paths:
+          - /auction
+        methods:
+          - POST
+        strip_path: true
+      - name: EditAuction ##
+        paths:
+          - /auction/<int:auction_id>
+        methods:
+          - PUT
+        strip_path: true
+      - name: DeleteAuction ##
+        paths:
+          - /auction/<int:auction_id>
+        methods:
+          - DELETE
+        strip_path: true
+      - name: GetOpenAuctions ##
+        paths:
+          - /open_auctions
+        methods:
+          - GET
+        strip_path: true
+      - name: GetClosedAuctions ##
+        paths:
+          - /closed_auctions
+        methods:
+          - GET
+        strip_path: true
+
+###################################### BidAPI ######################################
+  - name: BidAPI
+    url: http://bid:5002/bid
+    routes:
+      - name: GetAllBids ##
+        paths:
+          - /bid
+        methods:
+          - GET
+        strip_path: true
+      - name: CreateBid ##
+        paths:
+          - /bid
+        methods:
+          - POST
+        strip_path: true
+      - name: EditBid ##
+        paths:
+          - /bid/<int:bid_id>
+        methods:
+          - PUT
+        strip_path: true
+      - name: DeleteBid ##
+        paths:
+          - /bid/<int:bid_id>
+        methods:
+          - DELETE
+        strip_path: true
+      - name: GetHighestBidByAuctionId ##
+        paths:
+          - /bid/highest/<int:auction_id>
+        methods:
+          - GET
+        strip_path: true
+      - name: GetBidsByAuctionId ##
+        paths:
+          - /bid/auction/<int:auction_id>
+        methods:
+          - GET
+        strip_path: true
+      - name: GetBidsByUserId ##
+        paths:
+          - /bid/user/<int:user_id>
+        methods:
+          - GET
+        strip_path: true
+
+
+###################################### ScheduleAPI ######################################
+  - name: ScheduleAPI
+    url: http://schedule:5003/schedule
+    routes:
+      - name: GetAllSchedules ##
+        paths:
+          - /schedule
+        methods:
+          - GET
+        strip_path: true
+      - name: CreateSchedule ##
+        paths:
+          - /schedule/create/<int:auction_id>
+        methods:
+          - POST
+        strip_path: true
+      - name: EditScheduleByAuctionId ##
+        paths:
+          - /schedule/edit/<int:auction_id>
+        methods:
+          - PUT
+        strip_path: true
+      - name: GetScheduleByAuctionId ##
+        paths:
+          - /schedule/<int:auction_id>
+        methods:
+          - GET
+        strip_path: true
+      - name: DeleteScheduleByAuctionId ##
+        paths:
+          - /schedule/delete/<int:auction_id>
+        methods:
+          - DELETE
+        strip_path: true
+      - name: GetSchedulesByUserId ##
+        paths:
+          - /schedule/user/<int:user_id>
+        methods:
+          - GET
+        strip_path: true
+      - name: GetAllSchedulesInTimeRange ##
+        paths:
+          - /schedule/date
+        methods:
+          - GET
+        strip_path: true
+
+###################################### CreateAuctionAPI ######################################
+  - name: CreateAuctionAPI
+    url: http://createAuction:5010/createAuction
+    routes:
+      - name: CreateAuction ##
+        paths:
+          - /createAuction
+        methods:
+          - POST
+        strip_path: true
+
+
+###################################### ProcessBidAPI ######################################
+  - name: ProcessBidAPI
+    url: http://processBid:5006/processBid
+    routes:
+      - name: ProcessBid ##
+        paths:
+          - /authbid
+        methods:
+          - POST
+        strip_path: true
+

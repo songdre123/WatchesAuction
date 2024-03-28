@@ -162,7 +162,7 @@
 import AWS from 'aws-sdk';
 import axios from 'axios';
 
-import { ref } from 'vue';
+// import { ref } from 'vue';
 import flatPickr from 'vue-flatpickr-component';
 import 'flatpickr/dist/flatpickr.css';
 
@@ -171,7 +171,7 @@ components: {
     flatPickr,
 },
 setup(){
-    const date = ref(null);
+    // const date = ref(null);
 },
   data() {
     return {
@@ -316,7 +316,7 @@ setup(){
         else{
             console.log(this.Start_date);
             console.log(this.End_date);
-            axios.post('http://127.0.0.1:5001/auction', {
+            axios.post('http://127.0.0.1:5010/createAuction', {
                 auction_item: this.Watch_name,
                 watch_ref: parseInt(this.reference_number),
                 watch_brand: this.brand,
@@ -337,6 +337,8 @@ setup(){
                 .then((response) => {
                     console.log(response);
                     alert('Listing created successfully.');
+                    this.$router.push({ path: '/admin' });
+
                 })
                 .catch((error) => {
                     console.log(error);

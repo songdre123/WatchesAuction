@@ -18,9 +18,9 @@ CREATE TABLE Auction (
     watch_brand VARCHAR(255) NOT NULL,
     watch_box_present BOOLEAN NOT NULL,
     watch_papers_present BOOLEAN NOT NULL,
-    watch_image1 VARCHAR(255) NOT NULL,
-    watch_image2 VARCHAR(255) NOT NULL,
-    watch_image3 VARCHAR(255) NOT NULL,
+    watch_image1 VARCHAR(500) NOT NULL,
+    watch_image2 VARCHAR(500) NOT NULL,
+    watch_image3 VARCHAR(500) NOT NULL,
     stripe_product_id VARCHAR(500) DEFAULT NULL
 );
 
