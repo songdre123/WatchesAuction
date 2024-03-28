@@ -67,10 +67,10 @@ services:
     build:
       context: ./Notification
       dockerfile: notification.dockerfile
-    image: wangkaijie2001/notification:esd
+    image: ethantfw/notification:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/Notification
+      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Notification
       PYTHONUNBUFFERED: 1
     ports:
       - "5004:5004"
@@ -101,10 +101,10 @@ services:
     build:
       context: ./Users
       dockerfile: user.dockerfile
-    image: wangkaijie2001/user:esd
+    image: ethantfw/user:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/Users
+      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Users
       PYTHONUNBUFFERED: 1
     ports:
       - "5000:5000"
@@ -119,10 +119,10 @@ services:
     build:
       context: ./Auction
       dockerfile: auction.dockerfile
-    image: wangkaijie2001/auction:esd
+    image: ethantfw/auction:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/Auction
+      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Auction
       PYTHONUNBUFFERED: 1
     ports:
       - "5001:5001"
@@ -136,10 +136,10 @@ services:
     build:
       context: ./Bids
       dockerfile: bids.dockerfile
-    image: wangkaijie2001/bid:esd
+    image: ethantfw/bid:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/bids
+      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/bids
       PYTHONUNBUFFERED: 1
     ports:
       - "5002:5002"
@@ -153,10 +153,10 @@ services:
     build:
       context: ./Schedule
       dockerfile: schedule.dockerfile
-    image: wangkaijie2001/schedule:esd
+    image: ethantfw/schedule:esd
     restart: always
     environment:
-      dbURL: mysql+mysqlconnector://is213@host.docker.internal:3306/Schedule
+      dbURL: mysql+mysqlconnector://root:password@host.docker.internal:3306/Schedule
       PYTHONUNBUFFERED: 1
     ports:
       - "5003:5003"
@@ -171,7 +171,7 @@ services:
     build:
       context: ./PricePredictor
       dockerfile: pricePredictor.dockerfile
-    image: wangkaijie2001/pricepredictor:esd
+    image: ethantfw/pricepredictor:esd
     restart: always
     environment:      
       PYTHONUNBUFFERED: 1
@@ -190,7 +190,7 @@ services:
     build:
       context: ./createNotification
       dockerfile: createNotification.dockerfile
-    image: wangkaijie2001/createnotification:esd
+    image: ethantfw/createnotification:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -218,7 +218,7 @@ services:
     build:
       context: ./
       dockerfile: test.dockerfile
-    image: wangkaijie2001/test:esd
+    image: ethantfw/test:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -247,7 +247,7 @@ services:
     build:
       context: ./CreateAuction
       dockerfile: createAuction.dockerfile
-    image: wangkaijie2001/createauction:esd
+    image: ethantfw/createauction:esd
     restart: always
     depends_on:
       - auction
@@ -271,7 +271,7 @@ services:
     build:
       context: ./ProcessBid
       dockerfile: ProcessBid.dockerfile
-    image: wangkaijie2001/processbid:esd
+    image: ethantfw/processbid:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -282,7 +282,7 @@ services:
       rabbit_port: 5672
       a_queue_name: Notification
       auction_url: http://auction:5001/auction 
-      bids_url: http://bids:5002/bid
+      bids_url: http://bid:5002/bid
       PYTHONUNBUFFERED: 1
     ports:
       - "5006:5006"
@@ -297,7 +297,7 @@ services:
     build:
       context: ./ProcessWinner
       dockerfile: processWinner.dockerfile
-    image: wangkaijie2001/processwinner:esd
+    image: ethantfw/processwinner:esd
     restart: always
     depends_on:
       - rabbitmq
@@ -308,12 +308,16 @@ services:
       rabbit_port: 5672
       a_queue_name: Notification
       auction_url: http://auction:5001/auction 
-      bids_url: http://bids:5002/bid
+      bids_url: http://bid:5002/bid
       PYTHONUNBUFFERED: 1
     ports:
       - "5005:5005"
     networks:
       - kong-net
+
+  #################################################
+  # ViteDocker: Front End Project Docker
+  #################################################
 
   # viteDocker:
   #   build:

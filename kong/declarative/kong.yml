@@ -156,13 +156,13 @@ services:
         strip_path: true
       - name: GetBidsByAuctionId ##
         paths:
-          - /bid/all/<int:auction_id>
+          - /bid/auction/<int:auction_id>
         methods:
           - GET
         strip_path: true
       - name: GetBidsByUserId ##
         paths:
-          - /bid/all/<int:user_id>
+          - /bid/user/<int:user_id>
         methods:
           - GET
         strip_path: true
