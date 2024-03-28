@@ -14,6 +14,7 @@ from flasgger import Swagger
 # from db_config import set_database_uri
 from datetime import datetime
 from flask_cors import CORS
+from sqlalchemy import func
 
 '''
 API Endpoints:
@@ -141,7 +142,7 @@ class Notification(db.Model):
     recipient_id = db.Column(db.Integer, nullable=False)
     auction_id = db.Column(db.Integer)
     notification_type = db.Column(db.String(255), nullable=False)
-    time_sent = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp())
+    time_sent = db.Column(db.TIMESTAMP, server_default=func.timezone('Asia/Singapore', func.current_timestamp()))
     is_unread = db.Column(db.Integer, default=1)
 
     def __init__(self, recipient_id,notification_type, auction_id=None,is_unread=1):
@@ -244,7 +245,7 @@ def create_notification():
 
     
     #initialise new notification
-    new_notification = Notification(recipient_id=new_notif["recipient_id"], notification_type="outbid", auction_id=new_notif["auction_id"])
+    new_notification = Notification(recipient_id=new_notif["recipient_id"], notification_type=new_notif["notification_type"], auction_id=new_notif["auction_id"])
     try:
         db.session.add(new_notification)
         db.session.commit()
