@@ -253,5 +253,30 @@ def authenticate_bid():
     return create_bid_response, create_bid_status_code
 
 
+@app.route("/getAllAuctionAndUserhighestBidByUser/<int:user_id>")
+def getAllAuctionAndUserhighestBidByUser(user_id):
+    #checking for bids from the user
+    user_id=int(user_id)
+    getBid = requests.get(f"{bids_url}/GethighestBidsByUserId/{user_id}")
+    if getBid.status_code not in range (200,300):
+        return jsonify({"code": 404, "message": "No bids found for the specified user ID", "data":[]}),404
+    print(getBid.json())
+    allAuction=[]
+    for bid in getBid.json()["data"]:
+        auction_id=int(bid["auction_id"])
+        auction = requests.get(f"{auction_url}/{auction_id}")
+        if auction.status_code not in range(200,300) or auction.json()["data"]["auction_status"]!=1:
+            continue
+        auction=auction.json()["data"]
+        auction["user_id"]=user_id
+        auction["bid_amount"]=bid["bid_amount"]
+        auction["bid_id"]=bid["bid_id"]
+        allAuction.append(auction)
+    print(allAuction)
+    return jsonify({"code": 200, "message": "Get auction with user highest bids successfully", "data":allAuction}),200
+
+        
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5006, debug=True)
